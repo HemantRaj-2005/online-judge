@@ -1,3 +1,81 @@
 from django.shortcuts import render
-
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from .serializers import UserRegistrationSerializer, LoginSerializer
+from rest_framework.permissions import IsAuthenticated
+from django.contrib.auth.tokens import default_token_generator
+from django.utils.http import urlsafe_base64_decode, force_str
+from django.db.models import Q
+from .models import CustomUser
+from django.core.mail import send_mail
+from django.utils.encoding import force_bytes, urlsafe_base64_encode
+from .utils import send_verification_email
+from django.contrib.auth import logout
 # Create your views here.
+
+
+class RegisterAPIView(APIView):
+    """
+    View for user registration.
+    Handles POST requests to register a new user.
+    """
+    def post(self, request):
+        serializer = UserRegistrationSerializer(data=request.data)
+        if serializer.is_valid():
+            user = serializer.save()
+            send_verification_email(user,request)
+            return Response({
+                "message": "Check email for verification link.",
+                "user_id": user.id
+            }, status=201)
+        return Response(serializer.errors, status=400)
+    
+
+class VerifyEmailAPIView(APIView):
+    """
+    View for email verification.
+    
+    """
+    def get(self,request, uidb64, token):
+        """
+        Verify the user's email using the provided uidb64 and token.
+        """
+        # Logic for verifying the email goes here
+        try:
+            uid = force_str(urlsafe_base64_decode(uidb64))
+            user = CustomUser.objects.get(pk=uid)
+
+        except (TypeError, ValueError, OverflowError, CustomUser.DoesNotExist):
+            user = None
+        
+        if user and default_token_generator.check_token(user, token):
+            user.is_verified = True
+            user.is_active = True
+            user.save()
+            return Response({"message": "Email verified successfully."}, status=200)
+        # This is a placeholder implementation
+        return Response({"message": "Verification Link Expired."}, status=400)
+    
+class LoginAPIView(APIView):
+    def post(self, request):
+        serializer = LoginSerializer(data=request.data)
+        if serializer.is_valid():
+            user = serializer.validated_data['user']
+            return Response({"message": "Login successful."}, status=200)
+        return Response(serializer.errors, status=400)
+    
+
+class LogoutAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+    def post(self, request):
+        logout(request)
+        return Response({"message": "Logout successful."}, status=200)
+
+    
+
+class DashboardView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        return Response({"message": f"Welcome {request.user.username}!"})
+
