@@ -12,6 +12,7 @@ class CustomUser(AbstractUser):
     institution = models.CharField(max_length=200, blank=True)
     bio = models.TextField(blank=True)
     is_verified = models.BooleanField(default=False)
+    last_verification_email_sent = models.DateTimeField(null=True, blank=True)
 
     def __str__(self):
         return self.username

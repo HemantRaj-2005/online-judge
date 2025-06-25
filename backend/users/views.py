@@ -73,9 +73,33 @@ class LogoutAPIView(APIView):
 
     
 
-class DashboardView(APIView):
+#For the update and delete user
+class ProfileAPIView(APIView):
     permission_classes = [IsAuthenticated]
 
-    def get(self, request):
-        return Response({"message": f"Welcome {request.user.username}!"})
-
+    def get(self, request, username):
+        user = CustomUser.objects.get(username=username)
+        return Response(user.get_user_info())
+    
+    def put(self, request, username):
+        username = CustomUser.objects.get(username=username)
+        serializer = UserRegistrationSerializer(username, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response({"message: Profile updated successfully."})
+        return Response(serializer.errors, status=400)
+    
+    def delete(self, request, username):
+        user = CustomUser.objects.get(username=username)
+        user.delete()
+        return Response({"message": "Profile deleted successfully."})
+    
+# if user still not verified
+class ResendVerificationView(APIView):
+    def post(self, request):
+        email = request.data.get('email')
+        user = CustomUser.objects.get(email=email)
+        if not user.is_verified:
+            send_verification_email(user, request)
+            return Response({"message":"Verification Email Send"})
+        return Response({"message": "User already verified"}, status=400)

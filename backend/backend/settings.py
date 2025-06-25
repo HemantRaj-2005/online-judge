@@ -137,4 +137,5 @@ EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587                             
 EMAIL_USE_TLS = True                         
 EMAIL_HOST_USER = 'hemantraj2214@gmail.com'    
-EMAIL_HOST_PASSWORD = 'eert yjbd ukuf pxuh'   
+EMAIL_HOST_PASSWORD = 'eert yjbd ukuf pxuh'  
+SITE_NAME = "online-judge.com" #will change later 
