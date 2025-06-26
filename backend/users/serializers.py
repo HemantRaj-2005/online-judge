@@ -12,7 +12,17 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         model = CustomUser
         fields = ['username', 'email', 'password', 'first_name', 'last_name', 'institution', 'bio']
         extra_kwargs = {
-            'password': {'write_only': True}
+            'password': {'write_only': True},
+            'username': {
+                'error_messages': {
+                    'unique': 'Username already exists.'
+                }
+            },
+            'email': {
+                'error_messages': {
+                    'unique': 'Email already exists.'
+                }
+            }
         }
 
     def create(self, validated_data):
