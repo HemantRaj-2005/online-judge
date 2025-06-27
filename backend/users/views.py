@@ -61,7 +61,11 @@ class LoginAPIView(APIView):
         serializer = LoginSerializer(data=request.data)
         if serializer.is_valid():
             user = serializer.validated_data['user']
-            return Response({"message": "Login successful."}, status=200)
+            return Response({
+                "message": "Login successful.",
+                "is_verified": user.is_verified,  # Add verification status
+                "email": user.email  # For resend verification
+            }, status=200)
         return Response(serializer.errors, status=400)
     
 

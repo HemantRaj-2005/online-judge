@@ -4,6 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useState } from "react"
+import { useNavigate } from "react-router-dom";
 import { toast, Toaster } from "sonner";
 
 export default function SignUp() {
@@ -15,6 +16,8 @@ export default function SignUp() {
         institution: "",
         bio: "",
     });
+
+    const navigate = useNavigate();
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const {name, value} = e.target;
@@ -36,6 +39,12 @@ export default function SignUp() {
                 toast.success("Registration Successfull",{
                     description: data.message || "Account created successfully, check mail for verification",
                 });
+
+                setTimeout(() => {
+                    navigate(`/dashboard/${formData.username}`)
+                }, 2000)
+
+
             } else {
                 const errorMessage = Object.values(data).flat().join(" ") || "Failed to create account.";
                 toast.error("Registration failed", {

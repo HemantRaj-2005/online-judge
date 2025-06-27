@@ -70,11 +70,5 @@ class LoginSerializer(serializers.Serializer):
         if not authenticated_user:
             raise serializers.ValidationError("Incorrect password.")
         
-        if not user.is_verified:
-            raise serializers.ValidationError("User account is not verified.")
-        
-        if not user.is_active:
-            raise serializers.ValidationError("Account is inactive.")
-        
         data['user'] = user
         return data
