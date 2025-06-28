@@ -1,20 +1,24 @@
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import Home from "./pages/Home/Home";
 import SignUp from "./pages/Auth/SignUp";
-import { SidebarProvider, SidebarTrigger } from "./components/ui/sidebar";
-import { AppSidebar } from "./components/shared/app-sidebar";
-
+import AuthLayout from "./layout/AuthLayout";
+import AppLayout from "./layout/AppLayout";
+import SignIn from "./pages/Auth/SignIn";
+import ResendVerification from "./pages/Auth/ResendVerification";
 export default function App() {
   return (
     <BrowserRouter>
-      <SidebarProvider >
-        <AppSidebar />
-          <SidebarTrigger />
-        <Routes>
-          <Route path="/" element={<Home />} />
+      <Routes>
+        <Route element={<AuthLayout />}>
           <Route path="/sign-up" element={<SignUp />} />
-        </Routes>
-      </SidebarProvider>
+          <Route path="/sign-in" element={<SignIn />} />
+        </Route>
+        <Route element={<AppLayout />}>
+          <Route path="/" element={<Home />} />
+          <Route path="/resend-verification" element={<ResendVerification />} />
+
+        </Route>
+      </Routes>
     </BrowserRouter>
   );
 }

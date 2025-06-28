@@ -21,6 +21,7 @@ import { navItems, type NavItem } from "./NavItems";
 import UserDropdown from "./UserDropdown";
 import { useState } from "react";
 import { ChevronDown, ChevronUp } from "lucide-react";
+import { ModeToggle } from "../mode-toggle";
 
 export function AppSidebar() {
   const location = useLocation();
@@ -97,6 +98,7 @@ export function AppSidebar() {
         </SidebarGroup>
       </SidebarContent>
       <SidebarFooter>
+        <ModeToggle />
         <UserDropdown />
       </SidebarFooter>
     </Sidebar>

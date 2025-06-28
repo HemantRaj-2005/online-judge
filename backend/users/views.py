@@ -26,7 +26,8 @@ class RegisterAPIView(APIView):
             send_verification_email(user,request)
             return Response({
                 "message": "Check email for verification link.",
-                "user_id": user.id
+                "user_id": user.id,
+                "email": user.email
             }, status=201)
         return Response(serializer.errors, status=400)
     

@@ -143,7 +143,11 @@ EMAIL_HOST_USER = 'hemantraj2214@gmail.com'
 EMAIL_HOST_PASSWORD = 'eert yjbd ukuf pxuh'  
 SITE_NAME = "online-judge.com" #will change later 
 
-CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOW_ALL_ORIGINS = False
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:5173",
+    "http://127.0.0.1:3000",
+]
 
 # Allowed methods
 CORS_ALLOW_METHODS = [
