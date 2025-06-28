@@ -2,17 +2,22 @@ import { api } from "./api";
 
 
 export const authService = {
-    login: async (credentials: { email: string; password: string}) => {
-        return api.post<{
-            message: string;
-            is_verified: boolean;
-            email: string;
-            access_token: string;
-            refresh_token: string;
-            username: string;
-        }>('/api/users/login/', credentials);
+    login: async (credentials: { email: string; password: string }) => {
+        try {
+            const response = await api.post<{
+                message: string;
+                is_verified: boolean;
+                email: string;
+                access_token: string;
+                refresh_token: string;
+                username: string;
+            }>('/api/users/login/', credentials);
+            return response;
+        } catch (error: any) {
+            // The error.message now contains the proper string
+            throw new Error(error.message);
+        }
     },
-
     register: async (userData:{
         username: string;
         email: string;

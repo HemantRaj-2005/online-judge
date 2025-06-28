@@ -41,32 +41,77 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         return user
 
 
+# class LoginSerializer(serializers.Serializer):
+#     """
+#     Serializer for user login.
+#     Validates the email and password for user authentication.
+#     """
+#     email = serializers.EmailField()
+#     password = serializers.CharField(write_only=True)
+
+#     def validate(self, data):
+#         email = data.get('email')
+#         password = data.get('password')
+        
+#         if not email or not password:
+#             raise serializers.ValidationError("Email and password are required.")
+        
+#         # Get user by email only
+#         user = CustomUser.objects.filter(email=email).first()
+        
+#         if not user:
+#             raise serializers.ValidationError("User with this email does not exist.")
+        
+#         # Authenticate the user
+#         authenticated_user = authenticate(username=user.username, password=password)
+        
+#         if not authenticated_user:
+#             raise serializers.ValidationError("Incorrect password.")
+        
+#         data['user'] = user
+#         return data
+
 class LoginSerializer(serializers.Serializer):
     """
     Serializer for user login.
     Validates the email and password for user authentication.
     """
-    email = serializers.EmailField()
-    password = serializers.CharField(write_only=True)
+    class Meta:
+        error_messages = {
+            'email': {
+                'required': 'Email is required.',
+                'invalid': 'Enter a valid email address.'
+            },
+            'password': {
+                'required': 'Password is required.'
+            }
+        }
+
+    email = serializers.EmailField(
+        error_messages=Meta.error_messages['email']
+    )
+    password = serializers.CharField(
+        write_only=True,
+        error_messages=Meta.error_messages['password']
+    )
 
     def validate(self, data):
         email = data.get('email')
         password = data.get('password')
         
-        if not email or not password:
-            raise serializers.ValidationError("Email and password are required.")
-        
-        # Get user by email only
         user = CustomUser.objects.filter(email=email).first()
         
         if not user:
-            raise serializers.ValidationError("User with this email does not exist.")
+            raise serializers.ValidationError({
+                'email': ['User with this email does not exist.']
+            })
         
-        # Authenticate the user
         authenticated_user = authenticate(username=user.username, password=password)
         
         if not authenticated_user:
-            raise serializers.ValidationError("Incorrect password.")
+            raise serializers.ValidationError({
+                'password': ['Incorrect password.']
+            })
         
         data['user'] = user
         return data
