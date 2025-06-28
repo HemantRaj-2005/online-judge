@@ -33,13 +33,13 @@ export default function UserDropdown() {
                 src="https://github.com/shadcn.png"
                 alt={user.username}
               />
-              <AvatarFallback>{user.username.charAt(0)}</AvatarFallback>
+              <AvatarFallback>{user?.username}</AvatarFallback>
             </Avatar>
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent className="w-56" align="end" forceMount>
           <DropdownMenuItem asChild>
-            <Link to="/profile">Profile</Link>
+            <Link to={`/dashboard/${user.username}`}>Profile</Link>
           </DropdownMenuItem>
           <DropdownMenuItem asChild>
             <Link to="/settings">Settings</Link>

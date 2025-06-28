@@ -19,7 +19,7 @@ import { Button } from "@/components/ui/button";
 
 export default function SignIn() {
   const [formData, setFormData] = useState({
-    username_or_email: "",
+    email: "",
     password: "",
   });
 
@@ -32,8 +32,8 @@ export default function SignIn() {
   };
 
  const handleLogin = async () => {
-  if (!formData.username_or_email.trim()) {
-    toast.error("Validation Error", { description: "Username or email is required" });
+  if (!formData.email.trim()) {
+    toast.error("Validation Error", { description: "Email is required" });
     return;
   }
   if (!formData.password.trim()) {
@@ -48,7 +48,7 @@ export default function SignIn() {
     // Save to redux
     dispatch(
       setUser({
-        username: formData.username_or_email,
+        username: res.username,
         email: res.email,
         isVerified: res.is_verified,
         accessToken: res.access_token,
@@ -99,12 +99,12 @@ export default function SignIn() {
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="username_or_email">Username or Email</Label>
+            <Label htmlFor="email">Email</Label>
             <Input
-              id="username_or_email"
-              name="username_or_email"
-              placeholder="Enter your username or email"
-              value={formData.username_or_email}
+              id="email"
+              name="email"
+              placeholder="Enter your email"
+              value={formData.email}
               onChange={handleChange}
               required
             />

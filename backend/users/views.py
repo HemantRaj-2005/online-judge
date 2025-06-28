@@ -11,6 +11,7 @@ from django.core.mail import send_mail
 from django.utils.encoding import force_bytes, force_str
 from .utils import send_verification_email
 from django.contrib.auth import logout
+from rest_framework_simplejwt.tokens import RefreshToken
 # Create your views here.
 
 
@@ -62,10 +63,15 @@ class LoginAPIView(APIView):
         serializer = LoginSerializer(data=request.data)
         if serializer.is_valid():
             user = serializer.validated_data['user']
+            # Generate JWT tokens
+            refresh = RefreshToken.for_user(user)
             return Response({
                 "message": "Login successful.",
-                "is_verified": user.is_verified,  # Add verification status
-                "email": user.email  # For resend verification
+                "is_verified": user.is_verified,
+                "email": user.email,
+                "username": user.username,
+                "access_token": str(refresh.access_token),
+                "refresh_token": str(refresh),
             }, status=200)
         return Response(serializer.errors, status=400)
     

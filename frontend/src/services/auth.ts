@@ -2,13 +2,14 @@ import { api } from "./api";
 
 
 export const authService = {
-    login: async (credentials: { username_or_email: string; password: string}) => {
+    login: async (credentials: { email: string; password: string}) => {
         return api.post<{
             message: string;
             is_verified: boolean;
             email: string;
             access_token: string;
             refresh_token: string;
+            username: string;
         }>('/api/users/login/', credentials);
     },
 
