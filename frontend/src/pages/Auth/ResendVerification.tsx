@@ -5,9 +5,11 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { toast, Toaster } from "sonner";
 import { authService } from "@/services/auth";
+import { useAppSelector } from "@/redux/hook";
 
 export default function ResendVerification() {
-  const [email, setEmail] = useState("");
+  const { user } = useAppSelector((state) => state.auth);
+  const [email, setEmail] = useState(user?.email || "");
   const [loading, setLoading] = useState(false);
 
   const handleResend = async () => {
@@ -39,7 +41,7 @@ export default function ResendVerification() {
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
+            <Label htmlFor="email">{user?.email}</Label>
             <Input
               id="email"
               type="email"
@@ -47,6 +49,7 @@ export default function ResendVerification() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
+              readOnly
             />
           </div>
         </CardContent>

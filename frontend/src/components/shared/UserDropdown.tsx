@@ -1,6 +1,6 @@
 import { useAppSelector } from "@/redux/hook";
 import { Button } from "../ui/button";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -14,6 +14,7 @@ import { useDispatch } from "react-redux";
 export default function UserDropdown() {
   const { user } = useAppSelector((state) => state.auth);
   const dispatch = useDispatch();
+  const navigate = useNavigate();
 
   if (!user)
     return (
@@ -47,6 +48,7 @@ export default function UserDropdown() {
           <DropdownMenuItem
             onClick={() => {
               dispatch(logout());
+              navigate("/");
             }}
           >
             Log out

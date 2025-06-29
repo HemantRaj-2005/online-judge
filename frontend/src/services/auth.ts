@@ -29,11 +29,11 @@ export const authService = {
     },
 
     verifyEmail: async (uidb64: string, token: string) => {
-        return api.get(`/api/users/email-verify/${uidb64}/${token}`);
+        return api.get(`/api/users/email-verify/${uidb64}/${token}/`);
     },
 
     resendVerification: async (email: string) => {
-        return api.post('api/users/resend-verify', {email});
+        return api.post('/api/users/resend-verify/', {email});
     },
 
     logout: async() => {
