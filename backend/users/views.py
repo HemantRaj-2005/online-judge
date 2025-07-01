@@ -68,6 +68,7 @@ class LoginAPIView(APIView):
             return Response({
                 "message": "Login successful.",
                 "is_verified": user.is_verified,
+                "is_author": user.is_author,
                 "email": user.email,
                 "username": user.username,
                 "access_token": str(refresh.access_token),
@@ -90,7 +91,9 @@ class ProfileAPIView(APIView):
 
     def get(self, request, username):
         user = CustomUser.objects.get(username=username)
-        return Response(user.get_user_info())
+        user_info = user.get_user_info()
+        user_info["is_author"] = user.is_author
+        return Response(user_info)
     
     def put(self, request, username):
         username = CustomUser.objects.get(username=username)

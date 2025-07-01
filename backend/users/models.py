@@ -12,6 +12,7 @@ class CustomUser(AbstractUser):
     institution = models.CharField(max_length=200, blank=True)
     bio = models.TextField(blank=True)
     is_verified = models.BooleanField(default=False)
+    is_author = models.BooleanField(default=False)
     last_verification_email_sent = models.DateTimeField(null=True, blank=True)
 
     def __str__(self):
@@ -39,7 +40,8 @@ class CustomUser(AbstractUser):
             "email": self.email,
             "institution": self.get_institution(),
             "bio": self.get_bio(),
-            "is_verified": self.is_verified_user()
+            "is_verified": self.is_verified_user(),
+            "is_author": self.is_author
         }
 
  

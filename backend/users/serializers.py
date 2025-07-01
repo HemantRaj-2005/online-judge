@@ -10,7 +10,7 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
     """
     class Meta:
         model = CustomUser
-        fields = ['username', 'email', 'password', 'first_name', 'last_name', 'institution', 'bio']
+        fields = ['username', 'email', 'password', 'first_name', 'last_name', 'institution', 'bio', 'is_author']
         extra_kwargs = {
             'password': {'write_only': True},
             'username': {
@@ -32,7 +32,8 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
             first_name=validated_data.get('first_name', ''),
             last_name=validated_data.get('last_name', ''),
             institution=validated_data.get('institution', ''),
-            bio=validated_data.get('bio', '')
+            bio=validated_data.get('bio', ''),
+            is_author=validated_data.get('is_author', False)
         )
         user.set_password(validated_data['password'])
         user.is_verified = False

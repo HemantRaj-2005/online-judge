@@ -7,6 +7,7 @@ export const authService = {
             const response = await api.post<{
                 message: string;
                 is_verified: boolean;
+                is_author: boolean;
                 email: string;
                 access_token: string;
                 refresh_token: string;

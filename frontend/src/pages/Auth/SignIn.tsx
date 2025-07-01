@@ -51,6 +51,7 @@ export default function SignIn() {
         username: res.username,
         email: res.email,
         isVerified: res.is_verified,
+        isAuthor: res.is_author,
         accessToken: res.access_token,
       })
     );

@@ -5,6 +5,7 @@ interface AuthState {
     email: string;
     username: string;
     isVerified: boolean;
+    isAuthor: boolean;
     accessToken: string;
   };
 }
