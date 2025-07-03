@@ -59,6 +59,8 @@ export const api = {
         fetcher<T>(endpoint, { method: 'POST', body: JSON.stringify(body), token }),
     put: <T>(endpoint: string, body: unknown, token?: string)=> 
         fetcher<T>(endpoint, { method: 'PUT', body: JSON.stringify(body), token }),
+    patch: <T>(endpoint: string, body: unknown, token?: string) => 
+        fetcher<T>(endpoint, { method: 'PATCH', body: JSON.stringify(body), token }),
     delete: <T>(endpoint: string, token?: string)=> 
         fetcher<T>(endpoint, { method: 'DELETE', token }),
 };

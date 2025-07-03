@@ -4,6 +4,7 @@ from django.core.exceptions import ValidationError
 import os
 from users.models import CustomUser
 from django.utils.text import slugify
+from django.utils import timezone
 
 def validate_txt_file(file):
     ext = os.path.splitext(file.name)[1]
@@ -22,6 +23,7 @@ class Problem(models.Model):
         ('veryhard', 'Very Hard')
     ]
     
+    author = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='authored_problems')
     title = models.CharField(max_length=255)
     description = models.TextField()
     difficulty = models.CharField(max_length=30, choices=DIFFICULTY_CHOICES, default='easy')
@@ -103,3 +105,19 @@ class Submission(models.Model):
 
     def __str__(self):
         return f"Submission {self.problem.title} by {self.user.username}"
+    
+    class Meta:
+        ordering = ['-submitted_at']
+        indexes = [
+            models.Index(fields=['user', 'problem']),
+            models.Index(fields=['status']),
+        ]
+    
+    def save(self, *args, **kwargs):
+        if not self.pk:  # Only on creation
+            self.status = 'pending'
+        super().save(*args, **kwargs)
+
+    def set_evaluated_now(self):
+        self.evaluated_at = timezone.now()
+        self.save(update_fields=['evaluated_at'])

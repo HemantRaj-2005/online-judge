@@ -7,22 +7,31 @@ class TopicSerializer(serializers.ModelSerializer):
         model = Topic
         fields = ['id', 'name']
         
-class ProblemSerializer(serializers.ModelSerailizer):
+class ProblemSerializer(serializers.ModelSerializer):
     topics = TopicSerializer(many = True, read_only = True)
-    topic_ids = serializers.PrimaryKeyRelatedFields(
+    topic_ids = serializers.PrimaryKeyRelatedField(
         queryset = Topic.objects.all(),
         many = True,
         write_only = True,
         source = 'topics'
     )
+    author = serializers.StringRelatedField(read_only=True)
+
     class Meta:
         model = Problem
         fields = [
             'id','title', 'description', 'difficulty',
             'topics','topic_ids',
             'time_limit','memory_limit',
-            'created_at','updated_at'
+            'created_at','updated_at',
+            'author',
         ]
+
+    def create(self, validated_data):
+        request = self.context.get('request')
+        if request and hasattr(request, 'user'):
+            validated_data['author'] = request.user
+        return super().create(validated_data)
         
 class TestCaseSerializer(serializers.ModelSerializer):
     class Meta:
