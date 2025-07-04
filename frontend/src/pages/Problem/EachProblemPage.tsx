@@ -1,7 +1,9 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import { problemService, type Problem } from "@/services/problemService";
+import { problemService, type Problem, type Topic } from "@/services/problemService";
 import { useAppSelector } from "@/redux/hook";
+import CodeEditor from "./CodeEditor";
+import SubmissionHistory from "./SubmissionHistory";
 
 export default function EachProblemPage() {
   const { slug } = useParams<{ slug: string }>();
@@ -9,6 +11,8 @@ export default function EachProblemPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const token = useAppSelector((state) => state.auth.user?.accessToken);
+  const isAuthenticated = !!token;
+  const username = useAppSelector((state) => state.auth.user?.username);
 
   useEffect(() => {
     const fetchProblem = async () => {
@@ -44,7 +48,7 @@ export default function EachProblemPage() {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <div className="bg-white rounded-lg shadow-md p-6">
+      <div className="bg-white rounded-lg shadow-md p-6 mb-6">
         <div className="flex justify-between items-center mb-4">
           <h1 className="text-3xl font-bold">{problem.title}</h1>
           <span
@@ -83,9 +87,19 @@ export default function EachProblemPage() {
           <h2 className="text-xl font-semibold mb-2">Problem Description</h2>
           <div dangerouslySetInnerHTML={{ __html: problem.description }} />
         </div>
-        
-        {/* You can add code editor and submission components here */}
       </div>
+      
+      {/* Code Editor Component */}
+      {slug && isAuthenticated ? (
+        <div>
+          <CodeEditor problemSlug={slug} />
+          <SubmissionHistory problemSlug={slug} username={username} />
+        </div>
+      ) : (
+        <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 text-center">
+          <p className="text-yellow-700">Please sign in to submit your solution.</p>
+        </div>
+      )}
     </div>
   );
 }

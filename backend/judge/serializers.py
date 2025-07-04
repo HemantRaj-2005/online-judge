@@ -59,6 +59,7 @@ class SubmissionSerializer(serializers.ModelSerializer):
 
 class SubmissionCreateSerializer(serializers.ModelSerializer):
     language = serializers.ChoiceField(choices=LanguageChoices.choices)
+    problem = serializers.PrimaryKeyRelatedField(read_only=True)
 
     class Meta:
         model = Submission

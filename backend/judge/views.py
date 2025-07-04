@@ -7,8 +7,9 @@ from .serializers import ProblemSerializer, SubmissionCreateSerializer, Submissi
 from .docker_executor import DockerExecutor
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
-from .tasks import execute_submission_task
+# from .tasks import execute_submission_task
 import threading
+from django.contrib.auth import get_user_model
 
 class IsStaffOrAuthorOrReadOnly(BasePermission):
     def has_object_permission(self, request, view, obj):
@@ -43,7 +44,7 @@ class ProblemBySlugView(generics.RetrieveAPIView):
         return super().get(request, *args, **kwargs)
 
 class SubmitToProblemView(generics.CreateAPIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [AllowAny]
     serializer_class = SubmissionCreateSerializer
 
     def create(self, request, slug):
@@ -55,11 +56,21 @@ class SubmitToProblemView(generics.CreateAPIView):
                 status=status.HTTP_404_NOT_FOUND
             )
 
+        username = request.data.get('username')
+        if not username:
+            return Response({'error': 'Username is required.'}, status=status.HTTP_400_BAD_REQUEST)
+        from django.contrib.auth import get_user_model
+        User = get_user_model()
+        try:
+            user = User.objects.get(username=username)
+        except User.DoesNotExist:
+            return Response({'error': 'User not found.'}, status=status.HTTP_404_NOT_FOUND)
+
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         
         submission = serializer.save(
-            user=request.user,
+            user=user,
             problem=problem,
             status='pending'
         )
@@ -69,15 +80,15 @@ class SubmitToProblemView(generics.CreateAPIView):
 
         return Response(
             {
-                'submission_id': submission.id,
+                'id': submission.id,
                 'status': submission.status
             },
             status=status.HTTP_201_CREATED
         )
 
     def _execute_submission(self, submission_id):
-        execute_submission_task.delay(submission_id)
-        
+        # Remove Celery task call that's causing the error
+        # execute_submission_task.delay(submission_id)
         
         def execute():
             submission = Submission.objects.get(id=submission_id)
@@ -87,12 +98,10 @@ class SubmitToProblemView(generics.CreateAPIView):
         thread = threading.Thread(target=execute)
         thread.start()
 
-class SubmissionStatusView(generics.RetrieveAPIView):
+class SubmissionDetailView(generics.RetrieveAPIView):
     permission_classes = [IsAuthenticated]
     queryset = Submission.objects.all()
     serializer_class = SubmissionSerializer
-    lookup_field = 'id'
-    lookup_field = 'id'
 
 class ProblemListView(generics.ListAPIView):
     queryset = Problem.objects.all()
@@ -106,4 +115,18 @@ class UserProblemSubmissionsView(generics.ListAPIView):
     def get_queryset(self):
         problem_slug = self.kwargs['slug']
         user = self.request.user
+        return Submission.objects.filter(problem__slug=problem_slug, user=user)
+
+class ProblemUserSubmissionsByUsernameView(generics.ListAPIView):
+    serializer_class = SubmissionSerializer
+    permission_classes = [AllowAny]
+
+    def get_queryset(self):
+        problem_slug = self.kwargs['slug']
+        username = self.kwargs['username']
+        User = get_user_model()
+        try:
+            user = User.objects.get(username=username)
+        except User.DoesNotExist:
+            return Submission.objects.none()
         return Submission.objects.filter(problem__slug=problem_slug, user=user)
