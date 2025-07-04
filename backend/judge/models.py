@@ -23,7 +23,7 @@ class Problem(models.Model):
         ('veryhard', 'Very Hard')
     ]
     
-    author = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='authored_problems')
+    author = models.ForeignKey(CustomUser,default=None, null=True, blank=True, on_delete=models.CASCADE, related_name='authored_problems')
     title = models.CharField(max_length=255)
     description = models.TextField()
     difficulty = models.CharField(max_length=30, choices=DIFFICULTY_CHOICES, default='easy')

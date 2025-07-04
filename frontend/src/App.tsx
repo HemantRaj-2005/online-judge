@@ -5,6 +5,8 @@ import AuthLayout from "./layout/AuthLayout";
 import AppLayout from "./layout/AppLayout";
 import SignIn from "./pages/Auth/SignIn";
 import ResendVerification from "./pages/Auth/ResendVerification";
+import AllProblemPage from "./pages/Problem/AllProblemPage";
+import EachProblemPage from "./pages/Problem/EachProblemPage";
 export default function App() {
   return (
     <BrowserRouter>
@@ -16,7 +18,8 @@ export default function App() {
         <Route element={<AppLayout />}>
           <Route path="/" element={<Home />} />
           <Route path="/resend-verification" element={<ResendVerification />} />
-
+          <Route path="/problems" element={<AllProblemPage />} />
+          <Route path="/problems/:slug" element={<EachProblemPage />} />
         </Route>
       </Routes>
     </BrowserRouter>

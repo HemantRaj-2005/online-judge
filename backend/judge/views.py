@@ -1,7 +1,7 @@
 # backend/judge/views.py
 from rest_framework import generics, status
 from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated, IsAdminUser, BasePermission
+from rest_framework.permissions import IsAuthenticated, IsAdminUser, BasePermission, AllowAny
 from .models import Problem, Submission
 from .serializers import ProblemSerializer, SubmissionCreateSerializer, SubmissionSerializer
 from .docker_executor import DockerExecutor
@@ -97,6 +97,7 @@ class SubmissionStatusView(generics.RetrieveAPIView):
 class ProblemListView(generics.ListAPIView):
     queryset = Problem.objects.all()
     serializer_class = ProblemSerializer
+    permission_classes = [AllowAny]
 
 class UserProblemSubmissionsView(generics.ListAPIView):
     serializer_class = SubmissionSerializer

@@ -15,12 +15,12 @@ class ProblemSerializer(serializers.ModelSerializer):
         write_only = True,
         source = 'topics'
     )
-    author = serializers.StringRelatedField(read_only=True)
+    author = serializers.CharField(source='author.username', read_only=True)
 
     class Meta:
         model = Problem
         fields = [
-            'id','title', 'description', 'difficulty',
+            'id','slug','title', 'description', 'difficulty',
             'topics','topic_ids',
             'time_limit','memory_limit',
             'created_at','updated_at',
