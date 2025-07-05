@@ -44,6 +44,8 @@ export default function SignIn() {
   setLoading(true);
   try {
     const res = await authService.login(formData);
+
+    localStorage.setItem('authToken', res.access_token);
     
     // Save to redux
     dispatch(

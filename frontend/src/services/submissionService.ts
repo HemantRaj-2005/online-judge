@@ -1,7 +1,8 @@
 // frontend/src/services/submissionService.ts
 
-// You can use an environment variable, or hardcode for local dev:
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
+import { api } from './api';
+
+
 
 export interface Submission {
   id: number;
@@ -26,55 +27,19 @@ export const submissionService = {
     language: string,
     username: string
   ) => {
-    const response = await fetch(
-      `${API_URL}/api/problems/${problemSlug}/submit/`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ code, language, username }),
-      }
-    );
-    const data = await response.json().catch(() => ({}));
-    if (!response.ok) {
-      throw new Error(data.error || "Request failed");
-    }
-    return data;
+    const token = localStorage.getItem('authToken');
+    return api.post(`/api/problems/${problemSlug}/submit/`, { code, language, username }, token || undefined);
   },
 
   // Get the status of a submission by ID (optionally by username)
   getSubmissionStatus: async (submissionId: number, username?: string) => {
-    // If your backend requires username, add it as a query param or in the body as needed
-    const token = localStorage.getItem('authToken'); // Adjust based on your auth setup
-    const response = await fetch(
-      `${API_URL}/api/submissions/${submissionId}/`,
-      {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: token ? `Bearer ${token}` : '', // Add token if available
-        },
-      }
-    );
-    const data = await response.json().catch(() => ({}));
-    if (!response.ok) {
-      throw new Error(data.error || "Request failed");
-    }
-    return data;
+    const token = localStorage.getItem('authToken');
+    return api.get(`/api/submissions/${submissionId}/`, token || undefined);
   },
 
   // Get all submissions for a problem by a given username
   getUserSubmissionsByUsername: async (problemSlug: string, username: string) => {
-    const response = await fetch(
-      `${API_URL}/api/problems/${problemSlug}/submissions/${username}/`,
-      {
-        method: "GET",
-        headers: { "Content-Type": "application/json" },
-      }
-    );
-    const data = await response.json().catch(() => ({}));
-    if (!response.ok) {
-      throw new Error(data.error || "Failed to fetch submissions");
-    }
-    return data;
+    const token = localStorage.getItem('authToken');
+    return api.get(`/api/problems/${problemSlug}/submissions/${username}/`, token || undefined);
   },
 };

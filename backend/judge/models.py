@@ -61,14 +61,15 @@ def get_output_upload_path(instance, filename):
 
 class TestCase(models.Model):
     problem = models.ForeignKey(Problem, on_delete=models.CASCADE, related_name='test_cases')
-    input_file = models.FileField(upload_to=get_input_upload_path,validators=[validate_txt_file])
-    output_file = models.FileField(upload_to=get_output_upload_path,validators=[validate_txt_file])
+    name = models.CharField(max_length=255, unique=True)  # e.g. slug_input_0001
+    input_text = models.TextField()
+    output_text = models.TextField()
     is_sample = models.BooleanField(default=False)
     is_hidden = models.BooleanField(default=False)
     explanation = models.TextField(blank=True, null=True)
 
     def __str__(self):
-        return f"Testcase for {self.problem.title}"
+        return f"Testcase {self.name} for {self.problem.title}"
 
 class LanguageChoices(models.TextChoices):
     PYTHON = 'python', 'Python'
