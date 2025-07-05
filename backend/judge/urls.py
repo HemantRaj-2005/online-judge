@@ -9,5 +9,4 @@ urlpatterns = [
     path('problems/<slug:slug>/edit/', views.ProblemUpdateView.as_view(), name='problem-edit'),
     path('problems/create/', views.ProblemCreateView.as_view(), name='problem-create'),
     path('submissions/<int:pk>/', views.SubmissionDetailView.as_view(), name='submission-detail'),
-    path('problems/<slug:slug>/submissions/<str:username>/', views.ProblemUserSubmissionsByUsernameView.as_view(), name='problem-user-submissions-by-username'),
 ]

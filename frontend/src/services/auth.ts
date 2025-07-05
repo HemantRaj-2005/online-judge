@@ -38,6 +38,6 @@ export const authService = {
     },
 
     logout: async() => {
-        return api.post('/api/users/logout/', {});
+        return api.post('api/users/logout', {});
     }
 };

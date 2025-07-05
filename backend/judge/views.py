@@ -7,9 +7,8 @@ from .serializers import ProblemSerializer, SubmissionCreateSerializer, Submissi
 from .docker_executor import LocalExecutor
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
-# from .tasks import execute_submission_task
-import threading
-from django.contrib.auth import get_user_model
+from .tasks import execute_submission_task
+
 
 class IsStaffOrAuthorOrReadOnly(BasePermission):
     def has_object_permission(self, request, view, obj):
@@ -50,15 +49,20 @@ class SubmitToProblemView(generics.CreateAPIView):
     serializer_class = SubmissionCreateSerializer
 
     def create(self, request, slug):
-        # Remove all checks, just run code
-        problem = Problem.objects.first()  # Just get any problem (for demo, not safe for prod)
-        user = None
+        user = request.user
+        if not user.is_authenticated:
+            return Response(
+                {'detail': 'Authentication credentials were not provided.'},
+                status=status.HTTP_401_UNAUTHORIZED
+            )
+        
         try:
-            from django.contrib.auth import get_user_model
-            User = get_user_model()
-            user = User.objects.first()  # Just get any user (for demo, not safe for prod)
-        except Exception:
-            pass
+            problem = Problem.objects.get(slug=slug)
+        except Problem.DoesNotExist:
+            return Response(
+                {'detail': 'Problem not found.'},
+                status=status.HTTP_404_NOT_FOUND
+            )
 
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -69,7 +73,8 @@ class SubmitToProblemView(generics.CreateAPIView):
             status='pending'
         )
 
-        self._execute_submission(submission.id)
+        # Call the Celery task instead of executing synchronously
+        execute_submission_task.delay(submission.id)
 
         return Response(
             {
@@ -104,16 +109,18 @@ class UserProblemSubmissionsView(generics.ListAPIView):
         user = self.request.user
         return Submission.objects.filter(problem__slug=problem_slug, user=user)
 
-class ProblemUserSubmissionsByUsernameView(generics.ListAPIView):
     serializer_class = SubmissionSerializer
     permission_classes = [AllowAny]
 
     def get_queryset(self):
+        from django.contrib.auth import get_user_model
+        User = get_user_model()
         problem_slug = self.kwargs['slug']
         username = self.kwargs['username']
-        User = get_user_model()
         try:
             user = User.objects.get(username=username)
+            # You can use user.get_user_info() here if you want to return user info
+            # info = user.get_user_info()
         except User.DoesNotExist:
             return Submission.objects.none()
         return Submission.objects.filter(problem__slug=problem_slug, user=user)

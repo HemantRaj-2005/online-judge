@@ -125,3 +125,21 @@ class LocalExecutor:
             submission.verdict = 'Error during judging.'
         submission.evaluated_at = timezone.now()
         submission.save()
+
+
+class DockerExecutor(LocalExecutor):
+    """Docker-based executor for running code submissions in isolated containers.
+    Currently, this is just a wrapper around LocalExecutor for compatibility with tasks.py.
+    In a production environment, this would use Docker to isolate code execution.
+    """
+    
+    def __init__(self):
+        super().__init__()
+        # In a real implementation, this would initialize Docker client
+        # and set up container configurations
+        
+    def execute_submission(self, submission: Submission):
+        # For now, just use the LocalExecutor implementation
+        # In a real implementation, this would create Docker containers
+        # for secure code execution
+        super().execute_submission(submission)

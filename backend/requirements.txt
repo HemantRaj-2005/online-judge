@@ -7,3 +7,4 @@ djangorestframework-simplejwt
 django-cors-headers
 celery
 docker
+redis

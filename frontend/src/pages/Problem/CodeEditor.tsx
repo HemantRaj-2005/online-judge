@@ -38,11 +38,13 @@ export default function CodeEditor({ problemSlug }: CodeEditorProps) {
         problemSlug,
         code,
         language,
-        username
+        username || ""
       );
       
-      setSubmissionId(response.id);
-      setSubmissionStatus(response.status);
+      // Type assertion for response
+      const { id, status } = response as { id: number; status: string };
+      setSubmissionId(id);
+      setSubmissionStatus(status);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to submit code');
       console.error('Error submitting code:', err);
@@ -59,8 +61,9 @@ export default function CodeEditor({ problemSlug }: CodeEditorProps) {
     const intervalId = setInterval(async () => {
       try {
         const response = await submissionService.getSubmissionStatus(submissionId, username);
-        setSubmissionStatus(response.status);
-        if (response.status !== 'pending' && response.status !== 'running') {
+        const { status } = response as { status: string };
+        setSubmissionStatus(status);
+        if (status !== 'pending' && status !== 'running') {
           clearInterval(intervalId);
         }
       } catch (err) {
