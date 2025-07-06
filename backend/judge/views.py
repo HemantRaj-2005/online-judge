@@ -49,7 +49,6 @@ class SubmitToProblemView(generics.CreateAPIView):
     serializer_class = SubmissionCreateSerializer
 
     def create(self, request, slug):
-        print("SubmitToProblemView initialized")
         
         user = request.user
         print(user)
@@ -61,7 +60,6 @@ class SubmitToProblemView(generics.CreateAPIView):
         
         try:
             problem = Problem.objects.get(slug=slug)
-            print(f"Submission created with ID: {submission.id} for problem: {problem.slug}")
         except Problem.DoesNotExist:
             return Response(
                 {'detail': 'Problem not found.'},
@@ -76,7 +74,7 @@ class SubmitToProblemView(generics.CreateAPIView):
             problem=problem,
             status='pending'
         )
-        print(f"Submission created with ID: {submission.id} for problem: {problem.slug}")
+       
 
         self._execute_submission(submission.id)
 

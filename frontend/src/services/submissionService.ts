@@ -38,7 +38,7 @@ export const submissionService = {
   },
 
   // Get all submissions for a problem by a given username
-  getUserSubmissionsByUsername: async (problemSlug: string, username: string) => {
+  getUserSubmissionsByUsername: async (problemSlug: string, username?: string) => {
     const token = localStorage.getItem('authToken');
     return api.get(`/api/problems/${problemSlug}/submissions/${username}/`, token || undefined);
   },
