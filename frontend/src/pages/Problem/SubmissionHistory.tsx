@@ -1,6 +1,19 @@
 import { useState, useEffect } from 'react';
 import { submissionService, type Submission } from '@/services/submissionService';
 import { useAppSelector } from '@/redux/hook';
+import {
+  Table,
+  TableBody,
+  TableCaption,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table"
+import { Badge } from "@/components/ui/badge"
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
+import { Skeleton } from "@/components/ui/skeleton"
+import { Alert, AlertDescription } from "@/components/ui/alert"
 
 interface SubmissionHistoryProps {
   problemSlug: string;
@@ -37,55 +50,89 @@ export default function SubmissionHistory({ problemSlug, username }: SubmissionH
   }, [problemSlug, username]);
 
   if (loading) {
-    return <div>Loading submission history...</div>;
+    return (
+      <Card className="mt-8">
+        <CardHeader>
+          <CardTitle>Your Submissions</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            {[...Array(3)].map((_, i) => (
+              <Skeleton key={i} className="h-12 w-full" />
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+    );
   }
 
   if (error) {
-    return <div className="text-red-500">{error}</div>;
+    return (
+      <Alert variant="destructive" className="mt-8">
+        <AlertDescription>{error}</AlertDescription>
+      </Alert>
+    );
   }
 
   if (submissions.length === 0) {
-    return <div className="text-gray-500">No submissions yet</div>;
+    return (
+      <Card className="mt-8">
+        <CardHeader>
+          <CardTitle>Your Submissions</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="text-muted-foreground">No submissions yet</p>
+        </CardContent>
+      </Card>
+    );
   }
 
   return (
-    <div className="mt-8">
-      <h2 className="text-xl font-semibold mb-4">Your Submissions</h2>
-      <div className="overflow-x-auto">
-        <table className="min-w-full bg-white border rounded-lg">
-          <thead className="bg-gray-50">
-            <tr>
-              <th className="py-2 px-4 border-b text-left">ID</th>
-              <th className="py-2 px-4 border-b text-left">Status</th>
-              <th className="py-2 px-4 border-b text-left">Language</th>
-              <th className="py-2 px-4 border-b text-left">Time</th>
-              <th className="py-2 px-4 border-b text-left">Memory</th>
-              <th className="py-2 px-4 border-b text-left">Submitted At</th>
-            </tr>
-          </thead>
-          <tbody>
+    <Card className="mt-8">
+      <CardHeader>
+        <CardTitle>Your Submissions</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>ID</TableHead>
+              <TableHead>Status</TableHead>
+              <TableHead>Language</TableHead>
+              <TableHead>Time</TableHead>
+              <TableHead>Memory</TableHead>
+              <TableHead>Submitted At</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
             {submissions.map((submission) => (
-              <tr key={submission.id} className="hover:bg-gray-50">
-                <td className="py-2 px-4 border-b">{submission.id}</td>
-                <td className={`py-2 px-4 border-b ${getStatusColor(submission.status)}`}>
-                  {formatStatus(submission.status)}
-                </td>
-                <td className="py-2 px-4 border-b">{formatLanguage(submission.language)}</td>
-                <td className="py-2 px-4 border-b">
+              <TableRow key={submission.id}>
+                <TableCell className="font-medium">{submission.id}</TableCell>
+                <TableCell>
+                  <Badge variant={getStatusVariant(submission.status)}>
+                    {formatStatus(submission.status)}
+                  </Badge>
+                </TableCell>
+                <TableCell>
+                  <Badge variant="outline">
+                    {formatLanguage(submission.language)}
+                  </Badge>
+                </TableCell>
+                <TableCell>
                   {submission.time_taken ? `${submission.time_taken} ms` : 'N/A'}
-                </td>
-                <td className="py-2 px-4 border-b">
+                </TableCell>
+                <TableCell>
                   {submission.memory_used ? `${submission.memory_used} MB` : 'N/A'}
-                </td>
-                <td className="py-2 px-4 border-b">
+                </TableCell>
+                <TableCell>
                   {new Date(submission.submitted_at).toLocaleString()}
-                </td>
-              </tr>
+                </TableCell>
+              </TableRow>
             ))}
-          </tbody>
-        </table>
-      </div>
-    </div>
+          </TableBody>
+        </Table>
+      </CardContent>
+    </Card>
   );
 }
 
@@ -111,22 +158,22 @@ function formatLanguage(language: string): string {
   }
 }
 
-// Helper function to get color based on status
-function getStatusColor(status: string): string {
+// Helper function to get badge variant based on status
+function getStatusVariant(status: string) {
   switch (status) {
     case 'accepted':
-      return 'text-green-600';
+      return 'success';
     case 'wrong_answer':
     case 'compilation_error':
     case 'runtime_error':
-      return 'text-red-600';
+      return 'destructive';
     case 'time_limit_exceeded':
     case 'memory_limit_exceeded':
-      return 'text-orange-600';
+      return 'warning';
     case 'pending':
     case 'running':
-      return 'text-blue-600';
+      return 'secondary';
     default:
-      return 'text-gray-600';
+      return 'outline';
   }
 }

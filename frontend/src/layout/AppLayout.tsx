@@ -1,17 +1,17 @@
+// layouts/app-layout.tsx
+import { AppNavbar } from "@/components/shared/navbar";
 import { Outlet } from "react-router-dom";
-import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
-import { AppSidebar } from "@/components/shared/app-sidebar";
+
 
 export default function AppLayout() {
   return (
-    <SidebarProvider>
-      <div className="flex">
-        <AppSidebar />
-        <SidebarTrigger />
-        <main className="flex-1 p-6">
+    <div className="flex min-h-screen flex-col">
+      <AppNavbar />
+      <main className="flex-1 p-4 md:p-6">
+        <div className="mx-auto w-full max-w-[1800px]">
           <Outlet />
-        </main>
-      </div>
-    </SidebarProvider>
+        </div>
+      </main>
+    </div>
   );
 }

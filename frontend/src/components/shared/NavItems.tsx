@@ -1,4 +1,4 @@
-import { AntennaIcon, ArrowUpLeftFromCircleIcon, BellIcon, CodeIcon, HomeIcon, Projector } from "lucide-react";
+import { AntennaIcon, ArrowUpLeftFromCircleIcon, BellIcon, CodeIcon, HomeIcon, Newspaper, Projector } from "lucide-react";
 
 export interface NavItem {
   title: string;
@@ -38,7 +38,7 @@ export const navItems: NavItem[] = [
   {
     title: "Articles",
     href: "/articles",
-    icon: ArrowUpLeftFromCircleIcon,
+    icon: Newspaper,
     collapsible: [
       { title: "DSA", href: "/articles/dsa" },
       { title: "C++", href: "/articles/cpp" },
