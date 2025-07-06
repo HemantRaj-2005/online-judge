@@ -32,7 +32,7 @@ export const submissionService = {
   },
 
   // Get the status of a submission by ID (optionally by username)
-  getSubmissionStatus: async (submissionId: number, username?: string) => {
+  getSubmissionStatus: async (submissionId: number) => {
     const token = localStorage.getItem('authToken');
     return api.get(`/api/submissions/${submissionId}/`, token || undefined);
   },

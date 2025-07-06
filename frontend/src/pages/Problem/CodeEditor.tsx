@@ -40,6 +40,8 @@ export default function CodeEditor({ problemSlug }: CodeEditorProps) {
         language,
         username || ""
       );
+
+      console.log(response)
       
       // Type assertion for response
       const { id, status } = response as { id: number; status: string };

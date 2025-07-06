@@ -4,10 +4,10 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, IsAdminUser, BasePermission, AllowAny
 from .models import Problem, Submission
 from .serializers import ProblemSerializer, SubmissionCreateSerializer, SubmissionSerializer
-from .docker_executor import LocalExecutor
+from .simple_executor import SimpleExecutor
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
-from .tasks import execute_submission_task
+
 
 
 class IsStaffOrAuthorOrReadOnly(BasePermission):
@@ -49,7 +49,10 @@ class SubmitToProblemView(generics.CreateAPIView):
     serializer_class = SubmissionCreateSerializer
 
     def create(self, request, slug):
+        print("SubmitToProblemView initialized")
+        
         user = request.user
+        print(user)
         if not user.is_authenticated:
             return Response(
                 {'detail': 'Authentication credentials were not provided.'},
@@ -58,6 +61,7 @@ class SubmitToProblemView(generics.CreateAPIView):
         
         try:
             problem = Problem.objects.get(slug=slug)
+            print(f"Submission created with ID: {submission.id} for problem: {problem.slug}")
         except Problem.DoesNotExist:
             return Response(
                 {'detail': 'Problem not found.'},
@@ -72,14 +76,17 @@ class SubmitToProblemView(generics.CreateAPIView):
             problem=problem,
             status='pending'
         )
+        print(f"Submission created with ID: {submission.id} for problem: {problem.slug}")
 
-        # Call the Celery task instead of executing synchronously
-        execute_submission_task.delay(submission.id)
+        self._execute_submission(submission.id)
+
+        submission.refresh_from_db()
 
         return Response(
-            {
-                'id': submission.id,
-                'status': submission.status
+        {
+            'id': submission.id,
+                'status': submission.status,
+                'output': submission.output
             },
             status=status.HTTP_201_CREATED
         )
@@ -87,7 +94,7 @@ class SubmitToProblemView(generics.CreateAPIView):
     def _execute_submission(self, submission_id):
         # Synchronous execution for reliability in dev/debug
         submission = Submission.objects.get(id=submission_id)
-        executor = LocalExecutor()
+        executor = SimpleExecutor()
         executor.execute_submission(submission)
 
 class SubmissionDetailView(generics.RetrieveAPIView):

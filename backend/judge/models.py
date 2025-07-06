@@ -98,6 +98,7 @@ class Submission(models.Model):
         ('cpp', 'C++')
     ])
     status = models.CharField(max_length=30, choices=STATUS_CHOICES, default='pending')
+    output = models.TextField(blank=True, null=True)
     verdict = models.TextField(blank=True, null=True)
     time_taken = models.PositiveIntegerField(null=True, blank=True)
     memory_used = models.PositiveIntegerField(null=True, blank=True)
