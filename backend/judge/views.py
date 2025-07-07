@@ -1,4 +1,8 @@
-# backend/judge/views.py
+from .models import Topic
+from .serializers import TopicSerializer
+
+# List all topics
+from rest_framework.views import APIView
 from rest_framework import generics, status
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, IsAdminUser, BasePermission, AllowAny
@@ -22,6 +26,14 @@ class IsStaffOrAuthorOrReadOnly(BasePermission):
             return request.user and request.user.is_authenticated
         return True
 
+class TopicListView(APIView):
+    permission_classes = [AllowAny]
+    def get(self, request):
+        topics = Topic.objects.all()
+        serializer = TopicSerializer(topics, many=True)
+        return Response(serializer.data)
+    
+    
 class ProblemUpdateView(generics.RetrieveUpdateAPIView):
     queryset = Problem.objects.all()
     serializer_class = ProblemSerializer
@@ -31,7 +43,7 @@ class ProblemUpdateView(generics.RetrieveUpdateAPIView):
 class ProblemCreateView(generics.CreateAPIView):
     queryset = Problem.objects.all()
     serializer_class = ProblemSerializer
-    permission_classes = [AllowAny]
+    permission_classes = [IsAuthenticated]
 
 class ProblemBySlugView(generics.RetrieveAPIView):
     queryset = Problem.objects.all()

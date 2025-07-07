@@ -8,12 +8,12 @@ class TopicSerializer(serializers.ModelSerializer):
         fields = ['id', 'name']
         
 class ProblemSerializer(serializers.ModelSerializer):
-    topics = TopicSerializer(many = True, read_only = True)
-    topic_ids = serializers.PrimaryKeyRelatedField(
-        queryset = Topic.objects.all(),
-        many = True,
-        write_only = True,
-        source = 'topics'
+    topics = TopicSerializer(many=True, read_only=True)
+    topic_names = serializers.ListField(
+        child=serializers.CharField(),
+        write_only=True,
+        required=False,
+        help_text="List of topic names (strings) to assign to the problem. Will be created if not exist."
     )
     author = serializers.CharField(source='author.username', read_only=True)
 
@@ -21,17 +21,23 @@ class ProblemSerializer(serializers.ModelSerializer):
         model = Problem
         fields = [
             'id','slug','title', 'description', 'difficulty',
-            'topics','topic_ids',
+            'topics','topic_names',
             'time_limit','memory_limit',
             'created_at','updated_at',
             'author',
         ]
 
     def create(self, validated_data):
+        topic_names = validated_data.pop('topic_names', [])
         request = self.context.get('request')
         if request and hasattr(request, 'user'):
             validated_data['author'] = request.user
-        return super().create(validated_data)
+        problem = super().create(validated_data)
+        # Assign topics by name (create if not exist)
+        for name in topic_names:
+            topic, _ = Topic.objects.get_or_create(name=name)
+            problem.topics.add(topic)
+        return problem
         
 class TestCaseSerializer(serializers.ModelSerializer):
     class Meta:

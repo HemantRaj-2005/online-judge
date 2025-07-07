@@ -2,8 +2,7 @@ import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import {
   problemService,
-  type Problem,
-  type Topic,
+  type Problem
 } from "@/services/problemService";
 import { useAppSelector } from "@/redux/hook";
 import CodeEditor from "./CodeEditor";

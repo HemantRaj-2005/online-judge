@@ -4,11 +4,11 @@ from .models import CustomUser
 
 class CustomUserAdmin(UserAdmin):
     # Fields to display in the admin list view
-    list_display = ('username', 'email', 'institution', 'is_verified', 'is_staff')
+    list_display = ('username', 'email', 'institution', 'is_verified', 'is_staff', 'is_author')
     
     # Fields to include in the edit/add forms
     fieldsets = UserAdmin.fieldsets + (
-        ('Custom Fields', {'fields': ('institution', 'bio', 'is_verified')}),
+        ('Custom Fields', {'fields': ('institution', 'bio', 'is_verified','is_author')}),
     )
 
 admin.site.register(CustomUser, CustomUserAdmin)

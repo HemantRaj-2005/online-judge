@@ -1,3 +1,4 @@
+
 from django.urls import path
 from . import views
 
@@ -9,4 +10,5 @@ urlpatterns = [
     path('problems/<slug:slug>/edit/', views.ProblemUpdateView.as_view(), name='problem-edit'),
     path('problems/create/', views.ProblemCreateView.as_view(), name='problem-create'),
     path('submissions/<int:pk>/', views.SubmissionDetailView.as_view(), name='submission-detail'),
+    path('topics/', views.TopicListView.as_view(), name='topic-list'),
 ]

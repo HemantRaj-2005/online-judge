@@ -7,6 +7,7 @@ import SignIn from "./pages/Auth/SignIn";
 import ResendVerification from "./pages/Auth/ResendVerification";
 import AllProblemPage from "./pages/Problem/AllProblemPage";
 import EachProblemPage from "./pages/Problem/EachProblemPage";
+import ProblemCreate from "./pages/Problem/ProblemCreate";
 export default function App() {
   return (
     <BrowserRouter>
@@ -20,6 +21,7 @@ export default function App() {
           <Route path="/resend-verification" element={<ResendVerification />} />
           <Route path="/problems" element={<AllProblemPage />} />
           <Route path="/problems/:slug" element={<EachProblemPage />} />
+          <Route path="/create-problem" element={<ProblemCreate />}/>
         </Route>
       </Routes>
     </BrowserRouter>
