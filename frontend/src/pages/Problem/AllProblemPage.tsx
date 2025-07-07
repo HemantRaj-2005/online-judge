@@ -16,12 +16,13 @@ import {
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 
 export default function AllProblemPage() {
   const [problems, setProblems] = useState<Problem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const token = useAppSelector((state) => state.auth.user?.accessToken);
+  const { user } = useAppSelector((state) => state.auth);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -39,7 +40,7 @@ export default function AllProblemPage() {
       }
     };
     fetchProblems();
-  }, [token]);
+  }, [user?.accessToken]);
 
   const getTopicName = (topic: string | Topic): string => {
     return typeof topic === "string" ? topic : topic.name;
@@ -79,6 +80,9 @@ export default function AllProblemPage() {
               <TableHead className="w-[12rem]">Difficulty</TableHead>
               <TableHead className="w-[20rem]">Topics</TableHead>
               <TableHead className="w-[18rem]">Author</TableHead>
+              {user?.isAuthor ? (
+                <TableHead className="w-[12rem]">Actions</TableHead>
+              ) : null}
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -93,10 +97,19 @@ export default function AllProblemPage() {
                 <TableRow
                   key={problem.id}
                   className="cursor-pointer hover:bg-muted/50"
-                  onClick={() => navigate(`/problems/${problem.slug}`)}
                 >
-                  <TableCell className="font-medium">{problem.id}</TableCell>
-                  <TableCell className="font-medium">{problem.title}</TableCell>
+                  <TableCell
+                    className="font-medium"
+                    onClick={() => navigate(`/problems/${problem.slug}`)}
+                  >
+                    {problem.id}
+                  </TableCell>
+                  <TableCell
+                    className="font-medium"
+                    onClick={() => navigate(`/problems/${problem.slug}`)}
+                  >
+                    {problem.title}
+                  </TableCell>
                   <TableCell>
                     <Badge
                       className={cn(
@@ -127,6 +140,18 @@ export default function AllProblemPage() {
                   <TableCell className="text-muted-foreground">
                     {problem.author}
                   </TableCell>
+                  {user?.isAuthor ? (
+                    <TableCell className="w-[12rem]">
+                      <Button
+                        variant="link"
+                        onClick={() =>
+                          navigate(`/problems/${problem.slug}/edit-problem`)
+                        }
+                      >
+                        Edit
+                      </Button>
+                    </TableCell>
+                  ) : null}
                 </TableRow>
               ))
             )}

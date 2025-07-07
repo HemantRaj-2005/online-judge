@@ -38,6 +38,20 @@ class ProblemSerializer(serializers.ModelSerializer):
             topic, _ = Topic.objects.get_or_create(name=name)
             problem.topics.add(topic)
         return problem
+
+    def update(self, instance, validated_data):
+        topic_names = validated_data.pop('topic_names', None)
+        # Update other fields
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+        instance.save()
+        # Update topics if provided
+        if topic_names is not None:
+            instance.topics.clear()
+            for name in topic_names:
+                topic, _ = Topic.objects.get_or_create(name=name)
+                instance.topics.add(topic)
+        return instance
         
 class TestCaseSerializer(serializers.ModelSerializer):
     class Meta:

@@ -110,6 +110,82 @@
   --sidebar-ring: oklch(0.556 0 0);
 }
 
+@layer components {
+  .markdown {
+    @apply max-w-full space-y-4 leading-relaxed;
+
+    /* Headings */
+    & h1 {
+      @apply text-3xl font-bold text-foreground dark:text-foreground mt-8 mb-4;
+    }
+    & h2 {
+      @apply text-2xl font-semibold text-foreground dark:text-foreground mt-6 mb-3;
+    }
+    & h3 {
+      @apply text-xl font-medium text-foreground/90 dark:text-foreground/90 mt-4 mb-2;
+    }
+
+    /* Text elements */
+    & p {
+      @apply text-foreground/80 dark:text-foreground/80 my-3;
+    }
+    & strong {
+      @apply font-semibold text-foreground dark:text-foreground;
+    }
+    & em {
+      @apply italic;
+    }
+
+    /* Lists */
+    & ul,
+    & ol {
+      @apply my-3 pl-6;
+    }
+    & ul {
+      @apply list-disc;
+    }
+    & ol {
+      @apply list-decimal;
+    }
+    & li {
+      @apply my-1 text-foreground/80 dark:text-foreground/80;
+    }
+
+    /* Code blocks */
+    & pre {
+      @apply bg-muted dark:bg-muted/50 dark:text-amber-50 p-4 rounded-lg overflow-x-auto my-4;
+    }
+    & code {
+      @apply bg-muted/50 dark:bg-muted dark:text-black px-1 py-0.5 rounded text-sm font-mono;
+    }
+
+    /* Tables */
+    & table {
+      @apply w-full my-4 border-collapse;
+    }
+    & th {
+      @apply bg-muted/50 dark:bg-muted/70 px-4 py-2 text-left border border-border;
+    }
+    & td {
+      @apply px-4 py-2 border border-border;
+    }
+
+    /* Horizontal rules */
+    & hr {
+      @apply my-6 border-t border-border;
+    }
+
+    /* Links */
+    & a {
+      @apply text-primary hover:underline underline-offset-4;
+    }
+
+    /* Blockquotes */
+    & blockquote {
+      @apply border-l-4 border-primary pl-4 py-1 my-3 text-foreground/70 dark:text-foreground/70;
+    }
+  }
+}
 
 @layer base {
   * {

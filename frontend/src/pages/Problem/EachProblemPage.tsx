@@ -1,9 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import {
-  problemService,
-  type Problem
-} from "@/services/problemService";
+import { problemService, type Problem } from "@/services/problemService";
 import { useAppSelector } from "@/redux/hook";
 import CodeEditor from "./CodeEditor";
 import SubmissionHistory from "./SubmissionHistory";
@@ -19,6 +16,13 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { cn } from "@/lib/utils";
+import DOMPurify from "dompurify";
+import rehypeHighlight from "rehype-highlight";
+import remarkMath from "remark-math";
+import rehypeKatex from "rehype-katex";
+import ReactMarkdown from "react-markdown";
+import "katex/dist/katex.min.css";
+import "highlight.js/styles/github-dark.css";
 
 export default function EachProblemPage() {
   const { slug } = useParams<{ slug: string }>();
@@ -49,6 +53,54 @@ export default function EachProblemPage() {
     fetchProblem();
   }, [slug, token]);
 
+  const formatDifficulty = (difficulty: string) => {
+    const map: Record<string, string> = {
+      veryeasy: "Very Easy",
+      easy: "Easy",
+      medium: "Medium",
+      hard: "Hard",
+      veryhard: "Very Hard",
+    };
+    return map[difficulty] || difficulty;
+  };
+
+  const renderMarkdown = (content: string) => {
+    const sanitized = DOMPurify.sanitize(content);
+    return (
+      <ReactMarkdown
+        remarkPlugins={[remarkMath]}
+        rehypePlugins={[rehypeKatex, rehypeHighlight]}
+        components={{
+          code({ node, inline, className, children, ...props }) {
+            const match = /language-(\w+)/.exec(className || "");
+            return !inline && match ? (
+              <div className="bg-gray-900 rounded-md p-4 my-2 overflow-x-auto">
+                <code className={className} {...props}>
+                  {children}
+                </code>
+              </div>
+            ) : (
+              <code className="bg-gray-100 px-1 py-0.5 rounded text-sm">
+                {children}
+              </code>
+            );
+          },
+          table({ children }) {
+            return (
+              <div className="overflow-x-auto">
+                <table className="min-w-full border-collapse">
+                  {children}
+                </table>
+              </div>
+            );
+          },
+        }}
+      >
+        {sanitized}
+      </ReactMarkdown>
+    );
+  };
+
   if (loading) {
     return (
       <div className="flex justify-center items-center h-64">Loading...</div>
@@ -67,11 +119,6 @@ export default function EachProblemPage() {
     );
   }
 
-  const formatDifficulty = (difficulty: string) => {
-    if (difficulty === "veryeasy") return "Very Easy";
-    if (difficulty === "veryhard") return "Very Hard";
-    return difficulty.charAt(0).toUpperCase() + difficulty.slice(1);
-  };
 
   return (
     <div className="h-full p-4">
@@ -129,23 +176,9 @@ export default function EachProblemPage() {
                 <TabsList>
                   <TabsTrigger value="description">Description</TabsTrigger>
                   <TabsTrigger value="examples">Examples</TabsTrigger>
-                  <TabsTrigger value="constraints">Constraints</TabsTrigger>
                 </TabsList>
-                <TabsContent
-                  value="description"
-                  className="prose max-w-none pt-4"
-                >
-                  <div
-                    dangerouslySetInnerHTML={{ __html: problem.description }}
-                  />
-                </TabsContent>
-                <TabsContent value="examples" className="pt-4">
-                  {/* Add your examples content here */}
-                  <p>Examples will be shown here</p>
-                </TabsContent>
-                <TabsContent value="constraints" className="pt-4">
-                  {/* Add your constraints content here */}
-                  <p>Constraints will be shown here</p>
+               <TabsContent value="description" className="markdown max-w-none pt-4 space-y-4">
+                  {renderMarkdown(problem.description)}
                 </TabsContent>
               </Tabs>
             </div>

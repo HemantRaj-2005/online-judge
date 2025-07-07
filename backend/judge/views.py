@@ -1,7 +1,5 @@
 from .models import Topic
 from .serializers import TopicSerializer
-
-# List all topics
 from rest_framework.views import APIView
 from rest_framework import generics, status
 from rest_framework.response import Response
@@ -50,7 +48,7 @@ class ProblemBySlugView(generics.RetrieveAPIView):
     serializer_class = ProblemSerializer
     lookup_field = 'slug'
     
-    @method_decorator(cache_page(60*15))  # Cache for 15 minutes
+    # @method_decorator(cache_page(60*15))  # Cache for 15 minutes
     def get(self, request, *args, **kwargs):
         return super().get(request, *args, **kwargs)
     permission_classes = [AllowAny]
