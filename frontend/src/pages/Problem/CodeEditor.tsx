@@ -296,7 +296,7 @@ export default function CodeEditor({ problemSlug }: CodeEditorProps) {
         <div className="border rounded-md overflow-hidden">
           <CodeMirror
             value={code}
-            height="500px"
+            className="h-max"
             extensions={getExtensions()}
             onChange={(value) => setCode(value)}
             theme={theme} // Explicitly pass the theme prop
@@ -315,12 +315,6 @@ export default function CodeEditor({ problemSlug }: CodeEditorProps) {
               Status: {formatStatus(submissionStatus)}
             </AlertDescription>
           </Alert>
-        )}
-
-        {terminalOutput && (
-          <div className="bg-black text-green-400 p-3 font-mono text-sm overflow-auto h-32 border rounded">
-            <pre>{terminalOutput}</pre>
-          </div>
         )}
       </CardContent>
     </Card>

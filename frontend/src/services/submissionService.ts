@@ -42,4 +42,8 @@ export const submissionService = {
     const token = localStorage.getItem('authToken');
     return api.get(`/api/problems/${problemSlug}/submissions/${username}/`, token || undefined);
   },
+
+  getSubmissionById: async (submissionId: number) =>{
+    return api.get(`/api/submissions/${submissionId}`)
+  }
 };

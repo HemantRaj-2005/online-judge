@@ -14,6 +14,7 @@ import { Badge } from "@/components/ui/badge"
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Alert, AlertDescription } from "@/components/ui/alert"
+import { useNavigate } from 'react-router-dom';
 
 interface SubmissionHistoryProps {
   problemSlug: string;
@@ -24,6 +25,7 @@ export default function SubmissionHistory({ problemSlug, username }: SubmissionH
   const [submissions, setSubmissions] = useState<Submission[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchSubmissions = async () => {
@@ -106,7 +108,7 @@ export default function SubmissionHistory({ problemSlug, username }: SubmissionH
           </TableHeader>
           <TableBody>
             {submissions.map((submission) => (
-              <TableRow key={submission.id}>
+              <TableRow key={submission.id} onClick={() => navigate(`/submissions/${submission.id}`)} className="cursor-pointer hover:bg-muted">
                 <TableCell className="font-medium">{submission.id}</TableCell>
                 <TableCell>
                   <Badge variant={getStatusVariant(submission.status)}>

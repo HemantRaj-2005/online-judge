@@ -50,6 +50,7 @@ INSTALLED_APPS = [
     'corsheaders',
     'users',  # Added users app
     'judge',  # Added judge app
+    'ai_service',
     'rest_framework',
 ]
 
