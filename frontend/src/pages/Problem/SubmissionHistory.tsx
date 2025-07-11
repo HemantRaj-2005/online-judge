@@ -4,7 +4,6 @@ import { useAppSelector } from '@/redux/hook';
 import {
   Table,
   TableBody,
-  TableCaption,
   TableCell,
   TableHead,
   TableHeader,

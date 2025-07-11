@@ -7,7 +7,7 @@ import json
 
 class AIAnalysisService:
     def __init__(self):
-        self.client = genai.Client()
+        self.client = genai.Client(api_key="AIzaSyDTP7T88Xw9rPJWW2gSeTsV8vWnXCCaoDk")
 
     def analyze_complexity(self, code: str, language: str) -> Dict[str, Any]:
         """

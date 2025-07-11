@@ -36,7 +36,7 @@ const STORAGE_KEYS = {
   language: "code_editor_language",
   fontSize: "code_editor_fontSize",
   lineNumbers: "code_editor_lineNumbers",
-  code: "code_editor_code",
+  code: (problemId: number) => `code_editor_code_${problemId}`,
 };
 
 function saveEditorSettings({
@@ -45,28 +45,30 @@ function saveEditorSettings({
   fontSize,
   lineNumbers,
   code,
+  problemId,
 }: {
   theme: string;
   language: string;
   fontSize: number;
   lineNumbers: boolean;
   code: string;
+  problemId: number;
 }) {
   localStorage.setItem(STORAGE_KEYS.theme, theme);
   localStorage.setItem(STORAGE_KEYS.language, language);
   localStorage.setItem(STORAGE_KEYS.fontSize, fontSize.toString());
   localStorage.setItem(STORAGE_KEYS.lineNumbers, lineNumbers ? "1" : "0");
-  localStorage.setItem(STORAGE_KEYS.code, code);
+  localStorage.setItem(STORAGE_KEYS.code(problemId), code);
 }
 
-function loadEditorSettings() {
+function loadEditorSettings(problemId: number) {
   return {
     theme: localStorage.getItem(STORAGE_KEYS.theme) ?? "githubDark",
     language: localStorage.getItem(STORAGE_KEYS.language) ?? "python",
     fontSize: parseInt(localStorage.getItem(STORAGE_KEYS.fontSize) || "14"),
     lineNumbers: localStorage.getItem(STORAGE_KEYS.lineNumbers) === "1",
     code:
-      localStorage.getItem(STORAGE_KEYS.code) ?? getLanguageTemplate("python"),
+      localStorage.getItem(STORAGE_KEYS.code(problemId)) ?? getLanguageTemplate("python"),
   };
 }
 
@@ -86,11 +88,12 @@ const LANGUAGES = [
 
 interface CodeEditorProps {
   problemSlug: string;
+  problemId: number;
 }
 
-export default function CodeEditor({ problemSlug }: CodeEditorProps) {
+export default function CodeEditor({ problemSlug, problemId }: CodeEditorProps) {
   const username = useAppSelector((state) => state.auth.user?.username);
-  const saved = loadEditorSettings();
+  const saved = loadEditorSettings(problemId);
 
   const [theme, setTheme] = useState(
     THEMES.find((t) => t.value === saved.theme)?.extension || githubDark
@@ -104,7 +107,6 @@ export default function CodeEditor({ problemSlug }: CodeEditorProps) {
   const [submissionId, setSubmissionId] = useState<number | null>(null);
   const [submissionStatus, setSubmissionStatus] = useState<string | null>(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
-  const [terminalOutput, setTerminalOutput] = useState("");
 
   useEffect(() => {
     const themeValue =
@@ -115,8 +117,9 @@ export default function CodeEditor({ problemSlug }: CodeEditorProps) {
       fontSize,
       lineNumbers,
       code,
+      problemId,
     });
-  }, [theme, language, fontSize, lineNumbers, code]);
+  }, [theme, language, fontSize, lineNumbers, code, problemId]);
 
   const handleSubmit = async () => {
     if (!code.trim()) {
@@ -132,7 +135,6 @@ export default function CodeEditor({ problemSlug }: CodeEditorProps) {
     try {
       setSubmitting(true);
       setSubmissionStatus("submitting");
-      setTerminalOutput("$ Submitting...");
 
       const response = await submissionService.submitCode(
         problemSlug,
@@ -146,7 +148,6 @@ export default function CodeEditor({ problemSlug }: CodeEditorProps) {
       toast.success("Submitted successfully");
     } catch (err) {
       toast.error("Submission failed :", err || "");
-      setTerminalOutput("$ Submission failed");
     } finally {
       setSubmitting(false);
     }
@@ -158,15 +159,13 @@ export default function CodeEditor({ problemSlug }: CodeEditorProps) {
     const interval = setInterval(async () => {
       const response = await submissionService.getSubmissionStatus(
         submissionId,
-        username
+        username 
       );
-      const { status, output } = response as {
+      const { status } = response as {
         status: string;
-        output?: string;
       };
 
       setSubmissionStatus(status);
-      if (output) setTerminalOutput((prev) => `${prev}\n${output}`);
 
       if (status !== "pending" && status !== "running") {
         clearInterval(interval);
@@ -227,6 +226,7 @@ export default function CodeEditor({ problemSlug }: CodeEditorProps) {
                       fontSize,
                       lineNumbers,
                       code,
+                      problemId,
                     });
                   }}
                 >
@@ -291,6 +291,7 @@ export default function CodeEditor({ problemSlug }: CodeEditorProps) {
               "Submit"
             )}
           </Button>
+
         </div>
 
         <div className="border rounded-md overflow-hidden">

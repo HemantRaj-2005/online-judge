@@ -71,7 +71,8 @@ export default function EachProblemPage() {
         remarkPlugins={[remarkMath]}
         rehypePlugins={[rehypeKatex, rehypeHighlight]}
         components={{
-          code({ node, inline, className, children, ...props }) {
+          code({ node, className, children, ...props }) {
+            const {inline} = props as {inline?: boolean}
             const match = /language-(\w+)/.exec(className || "");
             return !inline && match ? (
               <div className="bg-gray-900 rounded-md p-4 my-2 overflow-x-auto">
@@ -175,7 +176,7 @@ export default function EachProblemPage() {
               <Tabs defaultValue="description" className="w-full">
                 <TabsList>
                   <TabsTrigger value="description">Description</TabsTrigger>
-                  <TabsTrigger value="examples">Examples</TabsTrigger>
+                  <TabsTrigger value="ai-help">AI Help</TabsTrigger>
                 </TabsList>
                <TabsContent value="description" className="markdown max-w-none pt-4 space-y-4">
                   {renderMarkdown(problem.description)}
@@ -196,7 +197,7 @@ export default function EachProblemPage() {
 
             <TabsContent value="editor" className="flex-1 p-4 overflow-auto">
               {slug && isAuthenticated ? (
-                <CodeEditor problemSlug={slug} />
+                <CodeEditor problemSlug={slug} problemId={problem.id} />
               ) : (
                 <Card className="h-full flex items-center justify-center">
                   <CardContent className="text-center p-6">

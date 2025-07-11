@@ -3,13 +3,15 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useAppSelector } from "@/redux/hook";
+import { problemService } from "@/services/problemService";
 import {
   submissionService,
   type Submission,
 } from "@/services/submissionService";
 
-import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { useParams, Link } from "react-router-dom";
+
 
 export default function SubmittedSolutionView() {
   const { submissionId } = useParams<{ submissionId: string }>();
@@ -17,15 +19,26 @@ export default function SubmittedSolutionView() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const { user } = useAppSelector((state) => state.auth);
+  const [problem, setProblem] = useState<{ slug: string; title: string } | null>(null);
 
-  const username = user?.username || "guest"; // Fallback to 'guest' if user is not logged in
+  const username = user?.username || "Guest";
+  const accessToken = user?.accessToken || "";
 
   useEffect(() => {
     const fetchSubmission = async () => {
       try {
         setLoading(true);
-        const data = await submissionService.getSubmissionById(submissionId);
-        setSubmission(data);
+        if (submissionId !== undefined) {
+          const data = (await submissionService.getSubmissionById(
+            Number(submissionId)
+          )) as Submission;
+          setSubmission(data);
+          // Fetch problem details using the problem slug from submission
+          if (data && data.problem) {
+            const problemData = await problemService.getProblemBySlug(data.problem);
+            setProblem({ slug: problemData.slug, title: problemData.title });
+          }
+        }
         setError(null);
       } catch (err) {
         setError("Failed to fetch submission details");
@@ -55,11 +68,24 @@ export default function SubmittedSolutionView() {
     <>
       <Card className="mt-8">
         <CardHeader>
-          <CardTitle>Submitted Solution</CardTitle>
+          <CardTitle>
+            {problem ? (
+              <div className="flex items-center gap-4">
+                <span>{problem.title}</span>
+                <Link to={`/problems/${problem.slug}`}>
+                  <button className="px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600">
+                    Go to Problem
+                  </button>
+                </Link>
+              </div>
+            ) : (
+              "Submitted Solution"
+            )}
+          </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="mb-4 flex flex-wrap gap-2">
-            <Badge variant="outline">{submission.language}</Badge>
+            <Badge variant="outline">{formatLanguage(submission.language)}</Badge>
             <Badge variant={getStatusVariant(submission.status)}>
               {formatStatus(submission.status)}
             </Badge>
@@ -72,6 +98,7 @@ export default function SubmittedSolutionView() {
           <pre className="bg-muted p-4 rounded overflow-x-auto">
             <code>{submission.code}</code>
           </pre>
+
         </CardContent>
       </Card>
     </>
@@ -100,17 +127,18 @@ function formatLanguage(language: string): string {
   }
 }
 
-function getStatusVariant(status: string) {
+function getStatusVariant(
+  status: string
+): "destructive" | "secondary" | "outline" | "default" | null | undefined {
   switch (status) {
     case "accepted":
-      return "success";
+      return "default";
     case "wrong_answer":
     case "compilation_error":
     case "runtime_error":
-      return "destructive";
     case "time_limit_exceeded":
     case "memory_limit_exceeded":
-      return "warning";
+      return "destructive";
     case "pending":
     case "running":
       return "secondary";
