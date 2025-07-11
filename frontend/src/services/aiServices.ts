@@ -4,11 +4,12 @@ export const aiService = {
   analyzeSubmission: (
     problem_id: number,
     submission_id: number,
-    token: string
+    token: string,
+    problemDescription?: string
   ) =>
     api.post(
       `/api/ai/analyze-submission/${problem_id}/`,
-      { submission_id },
+      { submission_id, problem_description: problemDescription },
       token
     ),
 

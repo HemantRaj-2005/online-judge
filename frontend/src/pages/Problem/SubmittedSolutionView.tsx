@@ -17,6 +17,7 @@ export default function SubmittedSolutionView() {
   const { submissionId } = useParams<{ submissionId: string }>();
   const [submission, setSubmission] = useState<Submission | null>(null);
   const [problemSlug, setProblemSlug] = useState<string | null>(null);
+  const [problemDescription, setProblemDescription] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [aiAnalysis, setAiAnalysis] = useState<any | null>(null);
@@ -40,7 +41,12 @@ export default function SubmittedSolutionView() {
           if (data && data.problem) {
             const allProblems = await problemService.getAllProblems();
             const prob = allProblems.find((p) => p.id === Number(data.problem));
-            if (prob) setProblemSlug(prob.slug);
+            if (prob) {
+              setProblemSlug(prob.slug);
+              // Fetch problem description
+              const problemDetails = await problemService.getProblemBySlug(prob.slug);
+              setProblemDescription(problemDetails.description);
+            }
           }
         }
         setError(null);
@@ -63,13 +69,18 @@ export default function SubmittedSolutionView() {
     try {
       setAiLoading(true);
       setAiError(null);
+      setAiAnalysis(null);
+
       const analysis = await aiService.analyzeSubmission(
         Number(submission.problem),
         submission.id,
-        accessToken
+        accessToken,
+        problemDescription || undefined
       );
-      
-      // Parse the JSON response if it's a string
+
+      console.log("Raw AI Analysis Response:", analysis);
+
+      // Handle response (assume it’s an object, not a string)
       const parsedAnalysis = typeof analysis === 'string' ? JSON.parse(analysis) : analysis;
       setAiAnalysis(parsedAnalysis);
     } catch (err: any) {
@@ -86,7 +97,7 @@ export default function SubmittedSolutionView() {
   if (error) {
     return (
       <Alert variant="destructive" className="mt-4">
-        {<AlertDescription>{error}</AlertDescription>}
+        <AlertDescription>{error}</AlertDescription>
       </Alert>
     );
   }
@@ -127,7 +138,7 @@ export default function SubmittedSolutionView() {
               Submitted: {new Date(submission.submitted_at).toLocaleString()}
             </span>
           </div>
-          
+
           <div className="relative">
             <pre className="bg-muted p-4 rounded-md overflow-x-auto text-sm">
               <code>{submission.code}</code>
@@ -138,15 +149,15 @@ export default function SubmittedSolutionView() {
           <div className="mt-6 space-y-4">
             <div className="flex justify-between items-center">
               <h3 className="text-lg font-semibold">AI Analysis</h3>
-              <Button 
-                onClick={handleAnalyzeClick} 
+              <Button
+                onClick={handleAnalyzeClick}
                 disabled={aiLoading}
                 variant="outline"
               >
                 {aiLoading ? "Analyzing..." : "Analyze Code"}
               </Button>
             </div>
-            
+
             {aiError && (
               <Alert variant="destructive">
                 <AlertDescription>{aiError}</AlertDescription>
@@ -169,25 +180,34 @@ export default function SubmittedSolutionView() {
                     <p className="text-sm">{aiAnalysis.time_complexity}</p>
                   </div>
                 )}
-                
                 {aiAnalysis.space_complexity && (
                   <div>
                     <h4 className="font-medium">Space Complexity</h4>
                     <p className="text-sm">{aiAnalysis.space_complexity}</p>
                   </div>
                 )}
-                
                 {aiAnalysis.explanation && (
                   <div>
                     <h4 className="font-medium">Explanation</h4>
                     <p className="text-sm whitespace-pre-wrap">{aiAnalysis.explanation}</p>
                   </div>
                 )}
-                
                 {aiAnalysis.optimization && (
                   <div>
                     <h4 className="font-medium">Optimization Suggestions</h4>
                     <p className="text-sm whitespace-pre-wrap">{aiAnalysis.optimization}</p>
+                  </div>
+                )}
+                {aiAnalysis.feedback && (
+                  <div>
+                    <h4 className="font-medium">Feedback</h4>
+                    <p className="text-sm whitespace-pre-wrap">{aiAnalysis.feedback}</p>
+                  </div>
+                )}
+                {aiAnalysis.errors && (
+                  <div>
+                    <h4 className="font-medium">Errors</h4>
+                    <p className="text-sm whitespace-pre-wrap">{aiAnalysis.errors}</p>
                   </div>
                 )}
 
