@@ -3,11 +3,12 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useAppSelector } from "@/redux/hook";
-import { problemService } from "@/services/problemService";
+import { problemService} from "@/services/problemService";
 import {
   submissionService,
   type Submission,
 } from "@/services/submissionService";
+import { aiService } from "@/services/aiServices";
 
 import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
@@ -16,10 +17,13 @@ import { useParams, Link } from "react-router-dom";
 export default function SubmittedSolutionView() {
   const { submissionId } = useParams<{ submissionId: string }>();
   const [submission, setSubmission] = useState<Submission | null>(null);
+  const [problemSlug, setProblemSlug] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [aiAnalysis, setAiAnalysis] = useState<any | null>(null);
+  const [aiLoading, setAiLoading] = useState(false);
+  const [aiError, setAiError] = useState<string | null>(null);
   const { user } = useAppSelector((state) => state.auth);
-  const [problem, setProblem] = useState<{ slug: string; title: string } | null>(null);
 
   const username = user?.username || "Guest";
   const accessToken = user?.accessToken || "";
@@ -29,14 +33,36 @@ export default function SubmittedSolutionView() {
       try {
         setLoading(true);
         if (submissionId !== undefined) {
-          const data = (await submissionService.getSubmissionById(
+          const data = await submissionService.getSubmissionById(
             Number(submissionId)
-          )) as Submission;
-          setSubmission(data);
-          // Fetch problem details using the problem slug from submission
+          ) as Submission;
+          setSubmission(data as Submission);
+
+          // Fetch problem slug using problem id
           if (data && data.problem) {
-            const problemData = await problemService.getProblemBySlug(data.problem);
-            setProblem({ slug: problemData.slug, title: problemData.title });
+            const allProblems = await problemService.getAllProblems();
+            const prob = allProblems.find((p) => p.id === Number(data.problem));
+            if (prob) setProblemSlug(prob.slug);
+
+            // Fetch AI analysis
+            setAiLoading(true);
+            setAiError(null);
+            try {
+              if (accessToken) {
+                const analysis = await aiService.analyzeSubmission(
+                  Number(data.problem),
+                  data.id,
+                  accessToken
+                );
+                setAiAnalysis(analysis);
+              } else {
+                setAiError("You must be logged in to use AI analysis.");
+              }
+            } catch (err: any) {
+              setAiError(err.message || "Failed to fetch AI analysis");
+            } finally {
+              setAiLoading(false);
+            }
           }
         }
         setError(null);
@@ -69,14 +95,16 @@ export default function SubmittedSolutionView() {
       <Card className="mt-8">
         <CardHeader>
           <CardTitle>
-            {problem ? (
+            {submission?.problem_title ? (
               <div className="flex items-center gap-4">
-                <span>{problem.title}</span>
-                <Link to={`/problems/${problem.slug}`}>
-                  <button className="px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600">
-                    Go to Problem
-                  </button>
-                </Link>
+                <span>{submission.problem_title}</span>
+                {problemSlug && (
+                  <Link to={`/problems/${problemSlug}`}>
+                    <button className="px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600">
+                      Go to Problem
+                    </button>
+                  </Link>
+                )}
               </div>
             ) : (
               "Submitted Solution"
@@ -85,6 +113,7 @@ export default function SubmittedSolutionView() {
         </CardHeader>
         <CardContent>
           <div className="mb-4 flex flex-wrap gap-2">
+            <div>  </div>
             <Badge variant="outline">{formatLanguage(submission.language)}</Badge>
             <Badge variant={getStatusVariant(submission.status)}>
               {formatStatus(submission.status)}
@@ -99,6 +128,32 @@ export default function SubmittedSolutionView() {
             <code>{submission.code}</code>
           </pre>
 
+          {/* AI Analysis Section */}
+          <div className="mt-6">
+            <h3 className="font-semibold mb-2">AI Complexity Analysis</h3>
+            {aiLoading && <Skeleton className="h-24 w-full" />}
+            {aiError && (
+              <Alert variant="destructive" className="mt-2">
+                <AlertDescription>{aiError}</AlertDescription>
+              </Alert>
+            )}
+            {aiAnalysis && !aiError && (
+              <div className="space-y-2">
+                {aiAnalysis.time_complexity && (
+                  <div><b>Time Complexity:</b> {aiAnalysis.time_complexity}</div>
+                )}
+                {aiAnalysis.space_complexity && (
+                  <div><b>Space Complexity:</b> {aiAnalysis.space_complexity}</div>
+                )}
+                {aiAnalysis.explanation && (
+                  <div><b>Explanation:</b> {aiAnalysis.explanation}</div>
+                )}
+                {aiAnalysis.optimization && (
+                  <div><b>Optimization Suggestions:</b> {aiAnalysis.optimization}</div>
+                )}
+              </div>
+            )}
+          </div>
         </CardContent>
       </Card>
     </>

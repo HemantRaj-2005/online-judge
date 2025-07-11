@@ -3,12 +3,7 @@ from . import views
 
 urlpatterns = [
     # Code analysis endpoints
-    path('analyze-complexity/', views.analyze_complexity, name='analyze_complexity'),
-    path('analyze-submission/', views.analyze_submission, name='analyze_submission'),
-    
-    # Debug endpoints
-    path('debug-code/', views.debug_code, name='debug_code'),
-    path('debug-submission/', views.debug_submission, name='debug_submission'),
+    path('analyze-submission/<int:problem_id>/', views.analyze_submission, name='analyze_submission'),
     
     # Problem explanation and hints
     path('explain-problem/<int:problem_id>/', views.explain_problem, name='explain_problem'),

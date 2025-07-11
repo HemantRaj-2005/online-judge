@@ -23,15 +23,48 @@ import rehypeKatex from "rehype-katex";
 import ReactMarkdown from "react-markdown";
 import "katex/dist/katex.min.css";
 import "highlight.js/styles/github-dark.css";
+import { aiService } from "@/services/aiServices";
+import { Button } from "@/components/ui/button";
 
 export default function EachProblemPage() {
   const { slug } = useParams<{ slug: string }>();
   const [problem, setProblem] = useState<Problem | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [aiTab, setAiTab] = useState<string>("explanation");
+  const [aiResponse, setAiResponse] = useState<string>("");
+  const [isAiLoading, setIsAiLoading] = useState<boolean>(false);
+  const [aiError, setAiError] = useState<string | null>(null);
   const token = useAppSelector((state) => state.auth.user?.accessToken);
   const isAuthenticated = !!token;
   const username = useAppSelector((state) => state.auth.user?.username);
+
+  const handleExplainProblem = async () => {
+    if (!problem) return;
+    try {
+      setIsAiLoading(true);
+      setAiError(null);
+      const response = await aiService.explainProblem(problem.id, token);
+      // Log the response to debug structure
+      console.log("AI explainProblem response:", response);
+      // Try to extract explanation safely
+      const explanation =
+        (response as any)?.data?.explanation ||
+        (response as any)?.explanation ||
+        (typeof response === "string" ? response : null);
+      if (explanation) {
+        setAiResponse(explanation);
+      } else {
+        setAiError("No explanation received from AI.");
+      }
+      setAiTab("explanation");
+    } catch (err) {
+      setAiError("Failed to get explanation");
+      console.error(err);
+    } finally {
+      setIsAiLoading(false);
+    }
+  };
 
   useEffect(() => {
     const fetchProblem = async () => {
@@ -72,7 +105,7 @@ export default function EachProblemPage() {
         rehypePlugins={[rehypeKatex, rehypeHighlight]}
         components={{
           code({ node, className, children, ...props }) {
-            const {inline} = props as {inline?: boolean}
+            const { inline } = props as { inline?: boolean };
             const match = /language-(\w+)/.exec(className || "");
             return !inline && match ? (
               <div className="bg-gray-900 rounded-md p-4 my-2 overflow-x-auto">
@@ -89,9 +122,7 @@ export default function EachProblemPage() {
           table({ children }) {
             return (
               <div className="overflow-x-auto">
-                <table className="min-w-full border-collapse">
-                  {children}
-                </table>
+                <table className="min-w-full border-collapse">{children}</table>
               </div>
             );
           },
@@ -119,7 +150,6 @@ export default function EachProblemPage() {
       </div>
     );
   }
-
 
   return (
     <div className="h-full p-4">
@@ -178,8 +208,43 @@ export default function EachProblemPage() {
                   <TabsTrigger value="description">Description</TabsTrigger>
                   <TabsTrigger value="ai-help">AI Help</TabsTrigger>
                 </TabsList>
-               <TabsContent value="description" className="markdown max-w-none pt-4 space-y-4">
+                <TabsContent
+                  value="description"
+                  className="markdown max-w-none pt-4 space-y-4"
+                >
                   {renderMarkdown(problem.description)}
+                </TabsContent>
+                <TabsContent
+                  value="ai-help"
+                  className="markdown max-w-none pt-4 space-y-4"
+                >
+                  <div className="flex gap-2 mb-2">
+                    <Button
+                      variant={aiTab === "explanation" ? "default" : "outline"}
+                      onClick={handleExplainProblem}
+                      disabled={isAiLoading}
+                    >
+                      Explain Problem
+                    </Button>
+                  </div>
+                  {isAiLoading && (
+                    <div className="text-muted-foreground">
+                      Loading AI response...
+                    </div>
+                  )}
+                  {aiError && (
+                    <Alert variant="destructive">
+                      <AlertDescription>{aiError}</AlertDescription>
+                    </Alert>
+                  )}
+                  {aiTab === "explanation" &&
+                    aiResponse &&
+                    !isAiLoading &&
+                    !aiError && (
+                      <div className="prose max-w-none">
+                        {renderMarkdown(aiResponse)}
+                      </div>
+                    )}
                 </TabsContent>
               </Tabs>
             </div>

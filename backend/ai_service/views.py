@@ -30,29 +30,26 @@ def analyze_complexity(request):
         user_code=code,
         programming_language=language,
         analysis_result=result,
-        processing_time=result.get('processing_time', 0),
         user=user
     )
 
     return Response(result)
 
-@api_view(['GET'])
+@api_view(['POST'])
 @permission_classes([IsAuthenticated])
-def analyze_submission(request):
+def analyze_submission(request, problem_id):
     """Analyze complexity for existing submission"""
     submission_id = request.data.get('submission_id')
+    problem = get_object_or_404(Problem, id=problem_id)
     
     if not submission_id:
-        return Response({'error': 'Submission ID is required'}, 
-                       status=status.HTTP_400_BAD_REQUEST)
+        return Response({'error': 'Submission ID is required'}, status=status.HTTP_400_BAD_REQUEST)
     
-    if not request.user.is_authenticated:
-        return Response({'error': 'Authentication required.'}, status=status.HTTP_401_UNAUTHORIZED)
-
     submission = get_object_or_404(Submission, id=submission_id, user_id=request.user.id)
     
     service = AIAnalysisService()
-    result = service.analyze_complexity(submission.code, submission.language)
+    result = service.analyze_complexity(submission.code, submission.language, problem.description)
+    print(result)
     
     user = request.user
     # Save analysis linked to submission
@@ -63,69 +60,13 @@ def analyze_submission(request):
         problem=submission.problem,
         programming_language=submission.language,
         analysis_result=result,
-        processing_time=result.get('processing_time', 0)
     )
     
     return Response(result)
 
 
-@api_view(['POST'])
-@permission_classes([AllowAny])
-def debug_code(request):
-    """Debug User Request"""
-    code = request.data.get('code')
-    language = request.data.get('language')
-    error_message = request.data.get('error_message')
-    problem_id = request.data.get('problem_id')
-
-    service = AIAnalysisService()
-    result = service.debug_code(code,language,error_message)
-
-    user = request.user if request.user.is_authenticated else None
-    AIAnalysis.objects.create(
-        analysis_type = 'debug',
-        problem_id = problem_id,
-        user_code = code,
-        programming_language = language,
-        analysis_result = result,
-        processing_time = result.get('processing_time',0),
-        user=user
-    ) 
-
-    return Response(result)  
 
 @api_view(['POST'])
-@permission_classes([AllowAny])
-def debug_submission(request):
-    """Debug existing submission"""
-    submission_id = request.data.get('submission_id')
-    
-    if not submission_id:
-        return Response({'error': 'Submission ID is required'}, 
-                       status=status.HTTP_400_BAD_REQUEST)
-    
-    if not request.user.is_authenticated:
-        return Response({'error': 'Authentication required.'}, status=status.HTTP_401_UNAUTHORIZED)
-
-    submission = get_object_or_404(Submission, id=submission_id, user_id=request.user.id)
-    
-    service = AIAnalysisService()
-    result = service.debug_code(submission.code, submission.language)
-    
-    user = request.user
-    AIAnalysis.objects.create(
-        analysis_type='debug',
-        user=user,
-        submission=submission,
-        problem=submission.problem,
-        programming_language=submission.language,
-        analysis_result=result,
-        processing_time=result.get('processing_time', 0)
-    )
-    
-    return Response(result)
-
-@api_view(['GET'])
 @permission_classes([AllowAny])
 def explain_problem(request, problem_id):
     """Explain problem statement"""
@@ -140,14 +81,13 @@ def explain_problem(request, problem_id):
         return Response(existing_analysis.analysis_result)
     
     service = AIAnalysisService()
-    result = service.explain_problem(problem.statement)
+    result = service.explain_problem(problem.description)
 
     user = request.user if request.user.is_authenticated else None
     AIAnalysis.objects.create(
         analysis_type='explanation',
         problem=problem,
         analysis_result = result,
-        processing_time=result.get('processing_time', 0),
         user=user
     )
 
@@ -166,7 +106,7 @@ def get_hint(request):
     problem = get_object_or_404(Problem, id=problem_id)
 
     service = AIAnalysisService()
-    result = service.provide_hint(problem.statement, code, language)
+    result = service.provide_hint(problem.description, code, language)
 
     user = request.user if request.user.is_authenticated else None
     AIAnalysis.objects.create(
@@ -175,7 +115,6 @@ def get_hint(request):
         user_code=code,
         programming_language=language,
         analysis_result=result,
-        processing_time=result.get('processing_time', 0),
         user=user
     )
 

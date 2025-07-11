@@ -30,6 +30,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { toast } from "sonner";
 import { useAppSelector } from "@/redux/hook";
 import { submissionService } from "@/services/submissionService";
+import { aiService } from "@/services/aiServices";
 
 const STORAGE_KEYS = {
   theme: "code_editor_theme",
@@ -93,6 +94,7 @@ interface CodeEditorProps {
 
 export default function CodeEditor({ problemSlug, problemId }: CodeEditorProps) {
   const username = useAppSelector((state) => state.auth.user?.username);
+  const token = useAppSelector((state) => state.auth.user?.accessToken);
   const saved = loadEditorSettings(problemId);
 
   const [theme, setTheme] = useState(
@@ -108,6 +110,13 @@ export default function CodeEditor({ problemSlug, problemId }: CodeEditorProps) 
   const [submissionStatus, setSubmissionStatus] = useState<string | null>(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
 
+  // AI states
+  const [aiLoading, setAiLoading] = useState(false);
+  const [aiError, setAiError] = useState<string | null>(null);
+  const [aiHint, setAiHint] = useState<string>("");
+  const [aiDebug, setAiDebug] = useState<string>("");
+  const [aiTab, setAiTab] = useState<"hint" | "debug" | null>(null);
+
   useEffect(() => {
     const themeValue =
       THEMES.find((t) => t.extension === theme)?.value ?? "githubDark";
@@ -120,6 +129,24 @@ export default function CodeEditor({ problemSlug, problemId }: CodeEditorProps) 
       problemId,
     });
   }, [theme, language, fontSize, lineNumbers, code, problemId]);
+
+  // AI Handlers
+  const handleGetHint = async () => {
+    setAiLoading(true);
+    setAiError(null);
+    setAiTab("hint");
+    setAiHint("");
+    try {
+      const response = await aiService.getHint(problemId, code, language, token);
+      setAiHint((response as { data: { hint: string } }).data.hint);
+    } catch (err) {
+      setAiError("Failed to get hint");
+      setAiHint("");
+    } finally {
+      setAiLoading(false);
+    }
+  };
+
 
   const handleSubmit = async () => {
     if (!code.trim()) {
@@ -157,10 +184,7 @@ export default function CodeEditor({ problemSlug, problemId }: CodeEditorProps) 
     if (!submissionId || !username) return;
 
     const interval = setInterval(async () => {
-      const response = await submissionService.getSubmissionStatus(
-        submissionId,
-        username 
-      );
+      const response = await submissionService.getSubmissionStatus(submissionId);
       const { status } = response as {
         status: string;
       };
@@ -181,8 +205,11 @@ export default function CodeEditor({ problemSlug, problemId }: CodeEditorProps) 
   }, [submissionId]);
 
   const getExtensions = () => {
-    const langExt = LANGUAGES.find((l) => l.value === language)?.extension();
-    return [theme, langExt].filter(Boolean); // Use theme directly
+    const langExt = LANGUAGES.find((l) => l.value === language)?.extension;
+    // theme is already an Extension, langExt is a function returning Extension
+    const extArr = [theme];
+    if (langExt) extArr.push(langExt());
+    return extArr;
   };
 
   return (
@@ -264,6 +291,26 @@ export default function CodeEditor({ problemSlug, problemId }: CodeEditorProps) 
       </CardHeader>
 
       <CardContent className="space-y-4">
+        {/* AI Buttons */}
+        <div className="flex gap-2 mb-2">
+          <Button onClick={handleGetHint} disabled={aiLoading || submitting} variant={aiTab === "hint" ? "default" : "outline"}>
+            Get Hint
+          </Button>
+        </div>
+        {/* AI Output */}
+        {aiLoading && (
+          <div className="text-muted-foreground">Loading AI response...</div>
+        )}
+        {aiError && (
+          <Alert variant="destructive">
+            <AlertDescription>{aiError}</AlertDescription>
+          </Alert>
+        )}
+        {aiTab === "hint" && aiHint && !aiLoading && !aiError && (
+          <Alert variant="default">
+            <AlertDescription><b>Hint:</b> {aiHint}</AlertDescription>
+          </Alert>
+        )}
         <div className="flex gap-4">
           <Select
             value={language}
