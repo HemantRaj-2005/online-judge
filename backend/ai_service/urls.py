@@ -8,7 +8,4 @@ urlpatterns = [
     # Problem explanation and hints
     path('explain-problem/<int:problem_id>/', views.explain_problem, name='explain_problem'),
     path('get-hint/', views.get_hint, name='get_hint'),
-    
-    # Analysis history
-    path('analysis-history/', views.get_analysis_history, name='get_analysis_history'),
 ]

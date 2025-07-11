@@ -19,6 +19,12 @@ export const aiService = {
     problem_id: number,
     code: string,
     language: string,
-    token?: string
-  ) => api.post("/api/ai/get-hint/", { problem_id, code, language }, token),
+    token?: string,
+    problemDescription?: string
+  ) =>
+    api.post(
+      "/api/ai/get-hint/",
+      { problem_id, code, language, problem_description: problemDescription },
+      token
+    ),
 };

@@ -7,33 +7,6 @@ from judge.models import Problem, Submission
 from .services import AIAnalysisService
 from .models import AIAnalysis
 
-@api_view(['POST'])
-@permission_classes([AllowAny])
-def analyze_complexity(request):
-    """
-    Analyze the time and space complexity of the given code.
-    """
-    code = request.data.get('code')
-    language = request.data.get('language')
-    problem_id = request.data.get('problem_id')
-
-    if not code or not language or not problem_id:
-        return Response({"error": "Code, language, and problem_id are required."}, status=status.HTTP_400_BAD_REQUEST)
-    
-    service = AIAnalysisService()
-    result = service.analyze_complexity(code, language)
-
-    user = request.user if request.user.is_authenticated else None
-    AIAnalysis.objects.create(
-        analysis_type='complexity',
-        problem_id=problem_id,
-        user_code=code,
-        programming_language=language,
-        analysis_result=result,
-        user=user
-    )
-
-    return Response(result)
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
@@ -120,29 +93,3 @@ def get_hint(request):
 
     return Response(result)
 
-@api_view(['GET'])
-@permission_classes([AllowAny])
-def get_analysis_history(request):
-    """Get analysis history for user"""
-    problem_id = request.GET.get('problem_id')
-    
-    queryset = AIAnalysis.objects.filter(user=request.user)
-    
-    if problem_id:
-        queryset = queryset.filter(problem_id=problem_id)
-    
-    analyses = queryset.order_by('-created_at')[:50]  # Limit to last 50
-    
-    data = []
-    for analysis in analyses:
-        data.append({
-            'id': analysis.id,
-            'analysis_type': analysis.analysis_type,
-            'problem_id': analysis.problem_id,
-            'submission_id': analysis.submission_id,
-            'created_at': analysis.created_at,
-            'analysis_result': analysis.analysis_result,
-            'processing_time': analysis.processing_time
-        })
-    
-    return Response(data)

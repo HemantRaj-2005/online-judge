@@ -1,18 +1,17 @@
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useAppSelector } from "@/redux/hook";
-import { problemService} from "@/services/problemService";
+import { problemService } from "@/services/problemService";
 import {
   submissionService,
   type Submission,
 } from "@/services/submissionService";
 import { aiService } from "@/services/aiServices";
-
 import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
-
 
 export default function SubmittedSolutionView() {
   const { submissionId } = useParams<{ submissionId: string }>();
@@ -33,36 +32,15 @@ export default function SubmittedSolutionView() {
       try {
         setLoading(true);
         if (submissionId !== undefined) {
-          const data = await submissionService.getSubmissionById(
+          const data = (await submissionService.getSubmissionById(
             Number(submissionId)
-          ) as Submission;
+          )) as Submission;
           setSubmission(data as Submission);
 
-          // Fetch problem slug using problem id
           if (data && data.problem) {
             const allProblems = await problemService.getAllProblems();
             const prob = allProblems.find((p) => p.id === Number(data.problem));
             if (prob) setProblemSlug(prob.slug);
-
-            // Fetch AI analysis
-            setAiLoading(true);
-            setAiError(null);
-            try {
-              if (accessToken) {
-                const analysis = await aiService.analyzeSubmission(
-                  Number(data.problem),
-                  data.id,
-                  accessToken
-                );
-                setAiAnalysis(analysis);
-              } else {
-                setAiError("You must be logged in to use AI analysis.");
-              }
-            } catch (err: any) {
-              setAiError(err.message || "Failed to fetch AI analysis");
-            } finally {
-              setAiLoading(false);
-            }
           }
         }
         setError(null);
@@ -75,6 +53,32 @@ export default function SubmittedSolutionView() {
     };
     fetchSubmission();
   }, [submissionId]);
+
+  const handleAnalyzeClick = async () => {
+    if (!submission || !accessToken) {
+      setAiError("You must be logged in to use AI analysis.");
+      return;
+    }
+
+    try {
+      setAiLoading(true);
+      setAiError(null);
+      const analysis = await aiService.analyzeSubmission(
+        Number(submission.problem),
+        submission.id,
+        accessToken
+      );
+      
+      // Parse the JSON response if it's a string
+      const parsedAnalysis = typeof analysis === 'string' ? JSON.parse(analysis) : analysis;
+      setAiAnalysis(parsedAnalysis);
+    } catch (err: any) {
+      setAiError(err.message || "Failed to fetch AI analysis");
+      console.error("AI Analysis Error:", err);
+    } finally {
+      setAiLoading(false);
+    }
+  };
 
   if (loading) {
     return <Skeleton className="h-96 w-full" />;
@@ -91,18 +95,18 @@ export default function SubmittedSolutionView() {
   }
 
   return (
-    <>
+    <div className="container mx-auto px-4 py-8">
       <Card className="mt-8">
         <CardHeader>
           <CardTitle>
             {submission?.problem_title ? (
-              <div className="flex items-center gap-4">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <span>{submission.problem_title}</span>
                 {problemSlug && (
                   <Link to={`/problems/${problemSlug}`}>
-                    <button className="px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600">
+                    <Button variant="default">
                       Go to Problem
-                    </button>
+                    </Button>
                   </Link>
                 )}
               </div>
@@ -112,55 +116,100 @@ export default function SubmittedSolutionView() {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="mb-4 flex flex-wrap gap-2">
-            <div>  </div>
+          <div className="mb-4 flex flex-wrap gap-2 items-center">
             <Badge variant="outline">{formatLanguage(submission.language)}</Badge>
             <Badge variant={getStatusVariant(submission.status)}>
               {formatStatus(submission.status)}
             </Badge>
-            <span>Time: {submission.time_taken ?? "N/A"}</span>
-            <span>Memory: {submission.memory_used ?? "N/A"}</span>
-            <span>
+            <span className="text-sm">Time: {submission.time_taken ?? "N/A"}</span>
+            <span className="text-sm">Memory: {submission.memory_used ?? "N/A"}</span>
+            <span className="text-sm">
               Submitted: {new Date(submission.submitted_at).toLocaleString()}
             </span>
           </div>
-          <pre className="bg-muted p-4 rounded overflow-x-auto">
-            <code>{submission.code}</code>
-          </pre>
+          
+          <div className="relative">
+            <pre className="bg-muted p-4 rounded-md overflow-x-auto text-sm">
+              <code>{submission.code}</code>
+            </pre>
+          </div>
 
           {/* AI Analysis Section */}
-          <div className="mt-6">
-            <h3 className="font-semibold mb-2">AI Complexity Analysis</h3>
-            {aiLoading && <Skeleton className="h-24 w-full" />}
+          <div className="mt-6 space-y-4">
+            <div className="flex justify-between items-center">
+              <h3 className="text-lg font-semibold">AI Analysis</h3>
+              <Button 
+                onClick={handleAnalyzeClick} 
+                disabled={aiLoading}
+                variant="outline"
+              >
+                {aiLoading ? "Analyzing..." : "Analyze Code"}
+              </Button>
+            </div>
+            
             {aiError && (
-              <Alert variant="destructive" className="mt-2">
+              <Alert variant="destructive">
                 <AlertDescription>{aiError}</AlertDescription>
               </Alert>
             )}
-            {aiAnalysis && !aiError && (
+
+            {aiLoading && (
               <div className="space-y-2">
+                <Skeleton className="h-4 w-full" />
+                <Skeleton className="h-4 w-3/4" />
+                <Skeleton className="h-4 w-1/2" />
+              </div>
+            )}
+
+            {aiAnalysis && !aiLoading && (
+              <div className="bg-gray-50 dark:bg-gray-800 p-4 rounded-md space-y-3">
                 {aiAnalysis.time_complexity && (
-                  <div><b>Time Complexity:</b> {aiAnalysis.time_complexity}</div>
+                  <div>
+                    <h4 className="font-medium">Time Complexity</h4>
+                    <p className="text-sm">{aiAnalysis.time_complexity}</p>
+                  </div>
                 )}
+                
                 {aiAnalysis.space_complexity && (
-                  <div><b>Space Complexity:</b> {aiAnalysis.space_complexity}</div>
+                  <div>
+                    <h4 className="font-medium">Space Complexity</h4>
+                    <p className="text-sm">{aiAnalysis.space_complexity}</p>
+                  </div>
                 )}
+                
                 {aiAnalysis.explanation && (
-                  <div><b>Explanation:</b> {aiAnalysis.explanation}</div>
+                  <div>
+                    <h4 className="font-medium">Explanation</h4>
+                    <p className="text-sm whitespace-pre-wrap">{aiAnalysis.explanation}</p>
+                  </div>
                 )}
+                
                 {aiAnalysis.optimization && (
-                  <div><b>Optimization Suggestions:</b> {aiAnalysis.optimization}</div>
+                  <div>
+                    <h4 className="font-medium">Optimization Suggestions</h4>
+                    <p className="text-sm whitespace-pre-wrap">{aiAnalysis.optimization}</p>
+                  </div>
+                )}
+
+                {/* Display raw JSON for debugging */}
+                {process.env.NODE_ENV === 'development' && (
+                  <details className="mt-4 text-xs">
+                    <summary className="cursor-pointer">Raw Analysis</summary>
+                    <pre className="bg-gray-100 dark:bg-gray-700 p-2 rounded mt-2 overflow-x-auto">
+                      {JSON.stringify(aiAnalysis, null, 2)}
+                    </pre>
+                  </details>
                 )}
               </div>
             )}
           </div>
         </CardContent>
       </Card>
-    </>
+    </div>
   );
 }
 
-// Helper function to format status for display
+// Helper functions remain the same
 function formatStatus(status: string): string {
   return status
     .split("_")
@@ -168,7 +217,6 @@ function formatStatus(status: string): string {
     .join(" ");
 }
 
-// Helper function to format language for display
 function formatLanguage(language: string): string {
   switch (language) {
     case "python":

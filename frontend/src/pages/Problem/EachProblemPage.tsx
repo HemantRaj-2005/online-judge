@@ -44,23 +44,61 @@ export default function EachProblemPage() {
     try {
       setIsAiLoading(true);
       setAiError(null);
+      setAiResponse(""); // Reset previous response
+  
       const response = await aiService.explainProblem(problem.id, token);
-      // Log the response to debug structure
       console.log("AI explainProblem response:", response);
-      // Try to extract explanation safely
-      const explanation =
-        (response as any)?.data?.explanation ||
-        (response as any)?.explanation ||
-        (typeof response === "string" ? response : null);
-      if (explanation) {
-        setAiResponse(explanation);
+  
+      // Format the response as a Markdown string
+      const formatResponseAsMarkdown = (response: any): string => {
+        let markdown = "";
+  
+        // Problem Summary
+        if (response.problem_summary) {
+          markdown += `## Problem Summary\n${response.problem_summary}\n\n`;
+        }
+  
+        // Approach
+        if (response.approach) {
+          markdown += `## Approach\n${response.approach}\n\n`;
+        }
+  
+        // Algorithms
+        if (Array.isArray(response.algorithms) && response.algorithms.length > 0) {
+          markdown += `## Algorithm\n`;
+          response.algorithms.forEach((algo: any, index: number) => {
+            markdown += `### ${algo.name}\n\`\`\`\n${algo.pseudocode}\n\`\`\`\n`;
+          });
+          markdown += "\n";
+        }
+  
+        // Example
+        if (response.example) {
+          markdown += `## Example\n`;
+          if (response.example.explanation) {
+            markdown += `${response.example.explanation}\n\n`;
+          }
+          if (response.example.input) {
+            markdown += `**Input**\n\`\`\`\n${response.example.input}\n\`\`\`\n`;
+          }
+          if (response.example.output) {
+            markdown += `**Output**\n\`\`\`\n${response.example.output}\n\`\`\`\n`;
+          }
+        }
+  
+        return markdown.trim();
+      };
+  
+      const formattedResponse = formatResponseAsMarkdown(response);
+      if (formattedResponse) {
+        setAiResponse(formattedResponse);
       } else {
-        setAiError("No explanation received from AI.");
+        setAiError("No valid explanation received from AI.");
       }
       setAiTab("explanation");
     } catch (err) {
       setAiError("Failed to get explanation");
-      console.error(err);
+      console.error("AI Error:", err);
     } finally {
       setIsAiLoading(false);
     }
