@@ -45,52 +45,72 @@ export default function EachProblemPage() {
       setIsAiLoading(true);
       setAiError(null);
       setAiResponse(""); // Reset previous response
-  
+
       const response = await aiService.explainProblem(problem.id, token);
       console.log("AI explainProblem response:", response);
-  
+
       // Format the response as a Markdown string
-      const formatResponseAsMarkdown = (response: any): string => {
+      const formatResponseAsMarkdown = (data: any): string => {
         let markdown = "";
-  
+
         // Problem Summary
-        if (response.problem_summary) {
-          markdown += `## Problem Summary\n${response.problem_summary}\n\n`;
+        if (data?.problem_summary) {
+          markdown += `## Problem Summary\n${data.problem_summary}\n\n`;
+        } else {
+          markdown += `## Problem Summary\nNo summary provided.\n\n`;
         }
-  
+
         // Approach
-        if (response.approach) {
-          markdown += `## Approach\n${response.approach}\n\n`;
+        if (data?.approach) {
+          markdown += `## Approach\n${data.approach}\n\n`;
+        } else {
+          markdown += `## Approach\nNo approach provided.\n\n`;
         }
-  
+
         // Algorithms
-        if (Array.isArray(response.algorithms) && response.algorithms.length > 0) {
+        if (Array.isArray(data?.algorithms) && data.algorithms.length > 0) {
           markdown += `## Algorithm\n`;
-          response.algorithms.forEach((algo: any, index: number) => {
-            markdown += `### ${algo.name}\n\`\`\`\n${algo.pseudocode}\n\`\`\`\n`;
+          data.algorithms.forEach((algo: any, index: number) => {
+            const name = algo.algorithm_name || `Algorithm ${index + 1}`;
+            const pseudocode = Array.isArray(algo.pseudocode)
+              ? algo.pseudocode.join("\n")
+              : algo.pseudocode || "No pseudocode provided";
+            markdown += `### ${name}\n\`\`\`\n${pseudocode}\n\`\`\`\n`;
           });
           markdown += "\n";
+        } else {
+          markdown += `## Algorithm\nNo algorithm provided.\n\n`;
         }
-  
+
         // Example
-        if (response.example) {
+        if (data?.example) {
           markdown += `## Example\n`;
-          if (response.example.explanation) {
-            markdown += `${response.example.explanation}\n\n`;
+          if (data.example.input) {
+            markdown += `**Input**\n\`\`\`json\n${JSON.stringify(data.example.input, null, 2)}\n\`\`\`\n`;
           }
-          if (response.example.input) {
-            markdown += `**Input**\n\`\`\`\n${response.example.input}\n\`\`\`\n`;
+          if (data.example.explanation) {
+            markdown += `**Explanation**\n${data.example.explanation}\n\n`;
           }
-          if (response.example.output) {
-            markdown += `**Output**\n\`\`\`\n${response.example.output}\n\`\`\`\n`;
+          if (data.example.output) {
+            markdown += `**Output**\n\`\`\`\n${data.example.output}\n\`\`\`\n`;
           }
+        } else {
+          markdown += `## Example\nNo example provided.\n`;
         }
-  
+
         return markdown.trim();
       };
-  
-      const formattedResponse = formatResponseAsMarkdown(response);
-      if (formattedResponse) {
+
+      // Handle response.data or response directly
+      const data = response.data || response;
+      console.log("Processed data:", JSON.stringify(data, null, 2));
+
+      const formattedResponse = formatResponseAsMarkdown(data);
+      if (
+        formattedResponse &&
+        formattedResponse !==
+          "## Problem Summary\nNo summary provided.\n\n## Approach\nNo approach provided.\n\n## Algorithm\nNo algorithm provided.\n\n## Example\nNo example provided."
+      ) {
         setAiResponse(formattedResponse);
       } else {
         setAiError("No valid explanation received from AI.");
@@ -300,7 +320,11 @@ export default function EachProblemPage() {
 
             <TabsContent value="editor" className="flex-1 p-4 overflow-auto">
               {slug && isAuthenticated ? (
-                <CodeEditor problemSlug={slug} problemId={problem.id} />
+                <CodeEditor
+                  problemSlug={slug}
+                  problemId={problem.id}
+                  problemDescription={problem.description}
+                />
               ) : (
                 <Card className="h-full flex items-center justify-center">
                   <CardContent className="text-center p-6">
@@ -334,4 +358,15 @@ export default function EachProblemPage() {
       </ResizablePanelGroup>
     </div>
   );
+}
+
+function formatDifficulty(difficulty: string) {
+  const map: Record<string, string> = {
+    veryeasy: "Very Easy",
+    easy: "Easy",
+    medium: "Medium",
+    hard: "Hard",
+    veryhard: "Very Hard",
+  };
+  return map[difficulty] || difficulty;
 }

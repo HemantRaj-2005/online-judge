@@ -65,7 +65,9 @@ class AIAnalysisService:
         Respond with only the JSON object, no markdown or additional text.
         """
         response = self.model.generate_content(prompt)
-        return self._clean_and_parse_response(response.text)
+        output = self._clean_and_parse_response(response.text)
+        print(output)
+        return output
 
     def provide_hint(self, problem_statement: str, user_code: str, language: str) -> Dict[str, Any]:
         """Provide hints for the given problem and user code."""
