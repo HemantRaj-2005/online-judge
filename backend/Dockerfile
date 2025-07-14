@@ -27,3 +27,7 @@ EXPOSE 8000
 
 # Run migrations and start server
 CMD ["sh", "-c", "python manage.py migrate && python manage.py runserver 0.0.0.0:8000"]
+
+# yes sir, 
+# sir code to run docker, please give on chat, yes sir
+# sir that I deleted, it was of another folder

@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
 from pathlib import Path
+from datetime import timedelta
 import os
 
 
@@ -50,7 +51,8 @@ INSTALLED_APPS = [
     'corsheaders',
     'users',  # Added users app
     'judge',  # Added judge app
-    'ai_service',
+    'ai_service', #Added ai_service app
+    'articles',  # Added articles app
     'rest_framework',
 ]
 
@@ -188,4 +190,7 @@ CORS_ALLOW_HEADERS = [
     'x-requested-with',
 ]
 
-
+SIMPLE_JWT = {
+        'ACCESS_TOKEN_LIFETIME': timedelta(minutes=2),
+        'REFRESH_TOKEN_LIFETIME': timedelta(days=30), 
+    }

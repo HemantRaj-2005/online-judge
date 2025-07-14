@@ -47,7 +47,7 @@ class AIAnalysisService:
         """
         response = self.model.generate_content(prompt)
         output = self._clean_and_parse_response(response.text)
-        print(output)
+        # print(output)
         return output
 
     def explain_problem(self, problem_statement: str) -> Dict[str, Any]:
@@ -66,7 +66,7 @@ class AIAnalysisService:
         """
         response = self.model.generate_content(prompt)
         output = self._clean_and_parse_response(response.text)
-        print(output)
+        # print(output)
         return output
 
     def provide_hint(self, problem_statement: str, user_code: str, language: str) -> Dict[str, Any]:
@@ -87,5 +87,5 @@ class AIAnalysisService:
         """
         response = self.model.generate_content(prompt)
         output = self._clean_and_parse_response(response.text)
-        print(output)
+        # print(output)
         return output
