@@ -25,19 +25,9 @@ export default function App() {
           <Route path="/resend-verification" element={<ResendVerification />} />
           <Route path="/problems" element={<AllProblemPage />} />
           <Route path="/problems/:slug" element={<EachProblemPage />} />
-          <AuthorProtectedRoute>
-            <Route path="/create-problem" element={<ProblemCreate />} />
-            <Route
-              path="/problems/:slug/edit-problem"
-              element={<ProblemEdit />}
-            />
-          </AuthorProtectedRoute>
-          <ProtectedRoute>
-            <Route
-              path="/submissions/:submissionId"
-              element={<SubmittedSolutionView />}
-            />
-          </ProtectedRoute>
+          <Route path="/create-problem" element={<AuthorProtectedRoute><ProblemCreate /></AuthorProtectedRoute>} />
+          <Route path="/problems/:slug/edit-problem" element={<AuthorProtectedRoute><ProblemEdit /></AuthorProtectedRoute>} />
+          <Route path="/submissions/:submissionId" element={<ProtectedRoute><SubmittedSolutionView /></ProtectedRoute>} />
         </Route>
       </Routes>
     </BrowserRouter>

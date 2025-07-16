@@ -38,7 +38,7 @@ export function AppNavbar() {
         {/* Left Section - Logo and Desktop Nav */}
         <div className="flex items-center gap-6">
           <Link to="/" className="flex items-center gap-2 font-bold">
-            CodeJudge
+            तपस्Code
           </Link>
 
           {/* Desktop Nav - Hidden on mobile */}
