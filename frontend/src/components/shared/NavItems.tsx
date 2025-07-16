@@ -1,4 +1,4 @@
-import { AntennaIcon, ArrowUpLeftFromCircleIcon, BellIcon, CodeIcon, HomeIcon, Newspaper, Projector } from "lucide-react";
+import { AntennaIcon, BellIcon, CodeIcon, HomeIcon, Newspaper, Projector } from "lucide-react";
 
 export interface NavItem {
   title: string;
@@ -10,6 +10,8 @@ export interface NavItem {
   }[];
  
 }
+
+
 
 
 export const navItems: NavItem[] = [

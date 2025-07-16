@@ -46,6 +46,7 @@ export default function SignIn() {
     const res = await authService.login(formData);
 
     localStorage.setItem('authToken', res.access_token);
+    localStorage.setItem('refresh_token', res.refresh_token);
     
     // Save to redux
     dispatch(

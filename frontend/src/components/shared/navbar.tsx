@@ -3,7 +3,7 @@ import { Link, useLocation } from "react-router-dom";
 import { navItems, type NavItem } from "./NavItems";
 import UserDropdown from "./UserDropdown";
 import { useState } from "react";
-import { ChevronDown, ChevronUp } from "lucide-react";
+import { ChevronDown, ChevronUp, Menu, X } from "lucide-react";
 import { ModeToggle } from "../mode-toggle";
 import {
   Collapsible,
@@ -17,8 +17,7 @@ import {
   NavigationMenuList,
 } from "../ui/navigation-menu";
 import { cn } from "@/lib/utils";
-
-import { Menu, X } from "lucide-react";
+import { Button } from "../ui/button";
 
 export function AppNavbar() {
   const location = useLocation();
@@ -29,16 +28,20 @@ export function AppNavbar() {
     setOpenItems((prev) => ({ ...prev, [title]: !prev[title] }));
   };
 
+  const closeMobileMenu = () => {
+    setMobileMenuOpen(false);
+  };
+
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-14 items-center justify-between px-4">
-        {/* Left Section */}
+        {/* Left Section - Logo and Desktop Nav */}
         <div className="flex items-center gap-6">
           <Link to="/" className="flex items-center gap-2 font-bold">
             CodeJudge
           </Link>
 
-          {/* Desktop Nav */}
+          {/* Desktop Nav - Hidden on mobile */}
           <NavigationMenu className="hidden md:flex">
             <NavigationMenuList className="flex items-center gap-1">
               {navItems.map((item: NavItem) => (
@@ -98,72 +101,84 @@ export function AppNavbar() {
           </NavigationMenu>
         </div>
 
-        {/* Right Section */}
+        {/* Right Section - User controls */}
         <div className="flex items-center gap-2">
-          <ModeToggle />
+          <div className="hidden md:block">
+            <ModeToggle />
+          </div>
           <UserDropdown />
 
-          {/* Mobile Toggle Button */}
-          <button
-            className="md:hidden p-2"
+          {/* Mobile Toggle Button - Visible only on mobile */}
+          <Button
+            className="md:hidden p-2 rounded-md hover:bg-accent"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            aria-label="Toggle menu"
           >
-            {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-          </button>
+            {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+          </Button>
         </div>
       </div>
 
-      {/* Mobile Menu */}
+      {/* Mobile Menu - Full width dropdown */}
       {mobileMenuOpen && (
-        <div className="md:hidden px-4 pb-4">
-          {navItems.map((item: NavItem) => (
-            <div key={item.title} className="mb-2">
-              {item.collapsible?.length ? (
-                <Collapsible
-                  open={openItems[item.title] || false}
-                  onOpenChange={() => toggleCollapsible(item.title)}
-                >
-                  <CollapsibleTrigger className="w-full flex justify-between items-center px-3 py-2 rounded-md text-sm font-medium hover:bg-accent">
-                    <div className="flex items-center gap-2">
-                      {item.icon && <item.icon className="w-4 h-4" />}
-                      {item.title}
-                    </div>
-                    {openItems[item.title] ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-                  </CollapsibleTrigger>
-                  <CollapsibleContent className="pl-6 pt-2 space-y-1">
-                    {item.collapsible.map((sub) => (
-                      <Link
-                        key={sub.title}
-                        to={sub.href}
-                        onClick={() => setMobileMenuOpen(false)}
-                        className={cn(
-                          "block px-2 py-1 rounded-md text-sm hover:bg-muted",
-                          location.pathname === sub.href && "bg-accent text-accent-foreground"
-                        )}
-                      >
-                        {sub.title}
-                      </Link>
-                    ))}
-                  </CollapsibleContent>
-                </Collapsible>
-              ) : (
-                <Link
-                  to={item.href}
-                  onClick={() => setMobileMenuOpen(false)}
-                  className={cn(
-                    "flex items-center gap-2 px-3 py-2 rounded-md text-sm hover:bg-muted",
-                    location.pathname === item.href && "bg-accent text-accent-foreground"
-                  )}
-                >
-                  {item.icon && <item.icon className="w-4 h-4" />}
-                  {item.title}
-                </Link>
-              )}
+        <div className="md:hidden border-t bg-background">
+          <div className="px-4 py-2">
+            <div className="flex justify-end mb-2">
+              <ModeToggle />
             </div>
-          ))}
+            
+            {navItems.map((item: NavItem) => (
+              <div key={item.title} className="mb-1">
+                {item.collapsible?.length ? (
+                  <Collapsible
+                    open={openItems[item.title] || false}
+                    onOpenChange={() => toggleCollapsible(item.title)}
+                  >
+                    <CollapsibleTrigger className="w-full flex justify-between items-center px-3 py-2 rounded-md text-sm font-medium hover:bg-accent">
+                      <div className="flex items-center gap-2">
+                        {item.icon && <item.icon className="w-4 h-4" />}
+                        {item.title}
+                      </div>
+                      {openItems[item.title] ? (
+                        <ChevronUp className="w-4 h-4" />
+                      ) : (
+                        <ChevronDown className="w-4 h-4" />
+                      )}
+                    </CollapsibleTrigger>
+                    <CollapsibleContent className="pl-6 pt-1 space-y-1">
+                      {item.collapsible.map((sub) => (
+                        <Link
+                          key={sub.title}
+                          to={sub.href}
+                          onClick={closeMobileMenu}
+                          className={cn(
+                            "block px-3 py-2 rounded-md text-sm hover:bg-muted",
+                            location.pathname === sub.href && "bg-accent text-accent-foreground"
+                          )}
+                        >
+                          {sub.title}
+                        </Link>
+                      ))}
+                    </CollapsibleContent>
+                  </Collapsible>
+                ) : (
+                  <Link
+                    to={item.href}
+                    onClick={closeMobileMenu}
+                    className={cn(
+                      "flex items-center gap-2 px-3 py-2 rounded-md text-sm hover:bg-muted",
+                      location.pathname === item.href && "bg-accent text-accent-foreground"
+                    )}
+                  >
+                    {item.icon && <item.icon className="w-4 h-4" />}
+                    {item.title}
+                  </Link>
+                )}
+              </div>
+            ))}
+          </div>
         </div>
       )}
     </header>
   );
 }
-

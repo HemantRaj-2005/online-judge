@@ -45,6 +45,11 @@ export default function UserDropdown() {
           <DropdownMenuItem asChild>
             <Link to="/settings">Settings</Link>
           </DropdownMenuItem>
+          {user.isAuthor && (
+            <DropdownMenuItem asChild>
+              <Link to="/create-page">Create Page</Link>
+            </DropdownMenuItem>
+          )}
           <DropdownMenuItem
             onClick={() => {
               dispatch(logout());
