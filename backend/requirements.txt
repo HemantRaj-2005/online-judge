@@ -11,3 +11,4 @@ redis
 google-generativeai
 python-dotenv
 gunicorn
+whitenoise
