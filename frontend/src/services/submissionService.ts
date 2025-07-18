@@ -1,8 +1,6 @@
 // frontend/src/services/submissionService.ts
 
-import { api } from './api';
-
-
+import { api } from "./api";
 
 export interface Submission {
   id: number;
@@ -27,23 +25,38 @@ export const submissionService = {
     language: string,
     username: string
   ) => {
-    const token = localStorage.getItem('authToken');
-    return api.post(`/api/problems/${problemSlug}/submit/`, { code, language, username }, token || undefined);
+    const token = localStorage.getItem("authToken");
+    return api.post(
+      `/api/problems/${problemSlug}/submit/`,
+      { code, language, username },
+      token || undefined
+    );
   },
 
   // Get the status of a submission by ID (optionally by username)
   getSubmissionStatus: async (submissionId: number) => {
-    const token = localStorage.getItem('authToken');
+    const token = localStorage.getItem("authToken");
     return api.get(`/api/submissions/${submissionId}/`, token || undefined);
   },
 
   // Get all submissions for a problem by a given username
-  getUserSubmissionsByUsername: async (problemSlug: string, username?: string) => {
-    const token = localStorage.getItem('authToken');
-    return api.get(`/api/problems/${problemSlug}/submissions/${username}/`, token || undefined);
+  getUserSubmissionsByUsername: async (
+    problemSlug: string,
+    username?: string
+  ) => {
+    const token = localStorage.getItem("authToken");
+    return api.get(
+      `/api/problems/${problemSlug}/submissions/${username}/`,
+      token || undefined
+    );
   },
 
-  getSubmissionById: async (submissionId: number) =>{
-    return api.get(`/api/submissions/${submissionId}`)
-  }
+  getUserSubmissions: async (username: string) => {
+    const token = localStorage.getItem("authToken");
+    return api.get(`/api/users/${username}/submissions/`, token || undefined);
+  },
+
+  getSubmissionById: async (submissionId: number) => {
+    return api.get(`/api/submissions/${submissionId}`);
+  },
 };

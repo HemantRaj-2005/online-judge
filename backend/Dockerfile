@@ -22,6 +22,7 @@ COPY . .
 
 # Collect static files (optional if you use whitenoise or S3 later)
 RUN python manage.py collectstatic --noinput
+RUN ls -l /app/staticfiles
 
 # Expose port
 EXPOSE 8000

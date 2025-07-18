@@ -12,7 +12,12 @@ import ProblemEdit from "./pages/Problem/ProblemEdit";
 import SubmittedSolutionView from "./pages/Problem/SubmittedSolutionView";
 import AuthorProtectedRoute from "./components/AuthorProtectedRoute";
 import ProtectedRoute from "./components/ProtectedRoute";
+import DashBoard from "./pages/DashBoard/DashBoard";
+import { useAppSelector } from "./redux/hook";
+
 export default function App() {
+  const { user } = useAppSelector((state) => state.auth);
+  const username = user?.username || "User";
   return (
     <BrowserRouter>
       <Routes>
@@ -28,6 +33,7 @@ export default function App() {
           <Route path="/create-problem" element={<AuthorProtectedRoute><ProblemCreate /></AuthorProtectedRoute>} />
           <Route path="/problems/:slug/edit-problem" element={<AuthorProtectedRoute><ProblemEdit /></AuthorProtectedRoute>} />
           <Route path="/submissions/:submissionId" element={<ProtectedRoute><SubmittedSolutionView /></ProtectedRoute>} />
+          <Route path="/dashboard/:username" element={<DashBoard />} />
         </Route>
       </Routes>
     </BrowserRouter>

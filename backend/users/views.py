@@ -117,3 +117,4 @@ class ResendVerificationView(APIView):
             send_verification_email(user, request)
             return Response({"message":"Verification Email Send"})
         return Response({"message": "User already verified"}, status=400)
+    

@@ -9,6 +9,7 @@ from .serializers import ProblemSerializer, SubmissionCreateSerializer, Submissi
 from .simple_executor import SimpleExecutor
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
+from django.contrib.auth import get_user_model
 
 
 
@@ -128,7 +129,7 @@ class UserProblemSubmissionsView(generics.ListAPIView):
     permission_classes = [AllowAny]
 
     def get_queryset(self):
-        from django.contrib.auth import get_user_model
+        
         User = get_user_model()
         problem_slug = self.kwargs['slug']
         username = self.kwargs['username']
@@ -139,3 +140,23 @@ class UserProblemSubmissionsView(generics.ListAPIView):
         except User.DoesNotExist:
             return Submission.objects.none()
         return Submission.objects.filter(problem__slug=problem_slug, user=user)
+    
+class UserSubmissionsView(generics.ListAPIView):
+    serializer_class = SubmissionSerializer
+    permission_classes = [AllowAny]
+
+    def get_queryset(self):
+        User = get_user_model()
+        # Get the username from the URL parameters
+        username = self.kwargs['username']
+        try:
+            user = User.objects.get(username=username)
+            submissions = Submission.objects.filter(user=user).select_related('problem').order_by('-submitted_at')
+            return submissions
+        except User.DoesNotExist:
+            return Submission.objects.none()
+
+    def list(self, request, *args, **kwargs):
+        queryset = self.get_queryset()
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)

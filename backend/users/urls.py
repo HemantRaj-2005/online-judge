@@ -11,4 +11,6 @@ urlpatterns = [
     path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('profile/<str:username>/', ProfileAPIView.as_view(), name='user-profile'),
     path('resend-verify/', ResendVerificationView.as_view(), name='resend-verify'),
+    path('edit-profile/<str:username>/', ProfileAPIView.as_view(), name='edit-profile'),
+    path('delete-profile/<str:username>/', ProfileAPIView.as_view(), name='delete-profile'),
 ]

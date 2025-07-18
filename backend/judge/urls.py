@@ -11,4 +11,5 @@ urlpatterns = [
     path('problems/create/', views.ProblemCreateView.as_view(), name='problem-create'),
     path('submissions/<int:pk>/', views.SubmissionDetailView.as_view(), name='submission-detail'),
     path('topics/', views.TopicListView.as_view(), name='topic-list'),
+    path('users/<str:username>/submissions/', views.UserSubmissionsView.as_view(), name='user-submissions'),
 ]
