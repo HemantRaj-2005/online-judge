@@ -2,9 +2,15 @@ import google.generativeai as genai
 from typing import Dict, Any
 import json
 
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+
 class AIAnalysisService:
     def __init__(self):
-        genai.configure(api_key="AIzaSyDTP7T88Xw9rPJWW2gSeTsV8vWnXCCaoDk")
+        api_key = os.getenv("GOOGLE_GENAI_API_KEY")
+        genai.configure(api_key=api_key)
         self.model = genai.GenerativeModel("models/gemini-2.0-flash")
 
     def _clean_and_parse_response(self, output: str) -> Dict[str, Any]:

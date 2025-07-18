@@ -9,3 +9,5 @@ celery
 docker
 redis
 google-generativeai
+python-dotenv
+gunicorn

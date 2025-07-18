@@ -3,3 +3,4 @@ __pycache__
 migrations
 *.sqlite3
 .env
+*.tar

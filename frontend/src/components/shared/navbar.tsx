@@ -38,6 +38,9 @@ export function AppNavbar() {
         {/* Left Section - Logo and Desktop Nav */}
         <div className="flex items-center gap-6">
           <Link to="/" className="flex items-center gap-2 font-bold">
+          <span>
+            <img src="/logo.svg" alt="Logo" className="h-10 w-10 rounded-full" />
+          </span>
             तपस्Code
           </Link>
 

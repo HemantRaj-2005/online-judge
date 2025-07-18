@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="400" height="300" viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg">
+    <!-- Background -->
+    <rect width="400" height="300" fill="#1a1a2e" rx="10" ry="10"/>
+    
+    <!-- Decorative elements -->
+    <circle cx="100" cy="80" r="40" fill="#4ecca3" opacity="0.2"/>
+    <circle cx="300" cy="200" r="60" fill="#f8b500" opacity="0.2"/>
+    
+    <!-- Main content -->
+    <text x="200" y="120" font-family="Arial, sans-serif" font-size="36" font-weight="bold" fill="#ffffff" text-anchor="middle" dominant-baseline="middle">
+        <tspan fill="#4ecca3">तपस्</tspan>
+        <tspan fill="#ffffff">Code</tspan>
+    </text>
+    
+    <!-- Subtitle -->
+    <text x="200" y="160" font-family="Arial, sans-serif" font-size="14" fill="#f8b500" text-anchor="middle">
+        An Online Judge
+    </text>
+    
+    <!-- Tagline -->
+    <text x="200" y="190" font-family="Arial, sans-serif" font-size="12" fill="#eeeeee" text-anchor="middle">
+        where your code decides your karma
+    </text>
+    
+    <!-- Code brackets decoration -->
+    <path d="M80 120 L100 140 L80 160" stroke="#4ecca3" stroke-width="3" fill="none"/>
+    <path d="M320 120 L300 140 L320 160" stroke="#4ecca3" stroke-width="3" fill="none"/>
+    
+    <!-- Karma wheel symbol -->
+    <circle cx="200" cy="230" r="20" stroke="#f8b500" stroke-width="2" fill="none"/>
+    <path d="M200 210 L200 230 L185 245" stroke="#f8b500" stroke-width="2" fill="none"/>
+    <path d="M200 250 L200 230 L215 215" stroke="#f8b500" stroke-width="2" fill="none"/>
+</svg>
