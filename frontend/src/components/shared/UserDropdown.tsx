@@ -47,7 +47,7 @@ export default function UserDropdown() {
           </DropdownMenuItem>
           {user.isAuthor && (
             <DropdownMenuItem asChild>
-              <Link to="/create-page">Create Page</Link>
+              <Link to="/create-problem">Create Problem</Link>
             </DropdownMenuItem>
           )}
           <DropdownMenuItem

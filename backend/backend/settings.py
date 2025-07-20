@@ -36,8 +36,8 @@ SECRET_KEY = 'django-insecure-7^60*rzu9jq0h6aplt86ad2)g8+rkzo@^f!@c^r&d*$b3=3)ds
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-ALLOWED_HOSTS = ['13.51.109.195', 'localhost', '127.0.0.1']
-
+ALLOWED_HOSTS = ['13.51.109.195', 'localhost', '127.0.0.1',"tapascode.me", "www.tapascode.me"]
+CSRF_TRUSTED_ORIGINS = ["https://tapascode.me", "https://www.tapascode.me"]
 
 
 # Application definition
@@ -170,14 +170,14 @@ EMAIL_PORT = 587
 EMAIL_USE_TLS = True                         
 EMAIL_HOST_USER = 'hemantraj2214@gmail.com'    
 EMAIL_HOST_PASSWORD = 'eert yjbd ukuf pxuh'  
-SITE_NAME = "online-judge.com" #will change later 
+SITE_NAME = "https://tapascode.vercel.app" #will change later 
 
 CORS_ALLOW_ALL_ORIGINS = False
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",
     "http://127.0.0.1:5173",
-    "https://online-judge-red.vercel.app",
-    
+    "https://tapascode.vercel.app",
+    "https://tapascode.netlify.app",
 ]
 
 # Allowed methods
