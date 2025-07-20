@@ -34,7 +34,7 @@ FILE_UPLOAD_DIRECTORY_PERMISSIONS = 0o755
 SECRET_KEY = 'django-insecure-7^60*rzu9jq0h6aplt86ad2)g8+rkzo@^f!@c^r&d*$b3=3)ds'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = ['13.51.109.195', 'localhost', '127.0.0.1',"tapascode.me", "www.tapascode.me"]
 CSRF_TRUSTED_ORIGINS = ["https://tapascode.me", "https://www.tapascode.me"]
