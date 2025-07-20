@@ -13,13 +13,13 @@ import SubmittedSolutionView from "./pages/Problem/SubmittedSolutionView";
 import AuthorProtectedRoute from "./components/AuthorProtectedRoute";
 import ProtectedRoute from "./components/ProtectedRoute";
 import DashBoard from "./pages/DashBoard/DashBoard";
-import { useAppSelector } from "./redux/hook";
+import RedirectUnverified from "./components/RedirectUnverified";
 
 export default function App() {
-  const { user } = useAppSelector((state) => state.auth);
-  const username = user?.username || "User";
+
   return (
     <BrowserRouter>
+    <RedirectUnverified>
       <Routes>
         <Route element={<AuthLayout />}>
           <Route path="/sign-up" element={<SignUp />} />
@@ -36,6 +36,7 @@ export default function App() {
           <Route path="/dashboard/:username" element={<DashBoard />} />
         </Route>
       </Routes>
+    </RedirectUnverified>
     </BrowserRouter>
   );
 }
