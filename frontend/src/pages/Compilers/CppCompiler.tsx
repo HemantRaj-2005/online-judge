@@ -8,4 +8,4 @@ export default function CppCompilerPage() {
     <BasicCompiler defaultLanguage="cpp" backendBaseUrl={`${backendBaseUrl}/api/compilers`} />
   );
 }
-// Likewise for Java/Python, set defaultLanguage and page
+

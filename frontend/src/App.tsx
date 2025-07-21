@@ -15,9 +15,10 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import DashBoard from "./pages/DashBoard/DashBoard";
 import RedirectUnverified from "./components/RedirectUnverified";
 import NotFound from "./pages/NotFound/NotFound";
-import CppCompilerPage from "./pages/Compilers/cppCompiler";
-import PythonCompilerPage from "./pages/Compilers/pythonCompiler";
-import JavaCompilerPage from "./pages/Compilers/javaCompiler";
+import CppCompilerPage from "./pages/Compilers/CppCompiler";
+import JavaCompilerPage from "./pages/Compilers/JavaCompiler";
+import PythonCompilerPage from "./pages/Compilers/PythonCompiler";
+
 
 export default function App() {
 
