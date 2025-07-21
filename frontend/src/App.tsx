@@ -14,6 +14,7 @@ import AuthorProtectedRoute from "./components/AuthorProtectedRoute";
 import ProtectedRoute from "./components/ProtectedRoute";
 import DashBoard from "./pages/DashBoard/DashBoard";
 import RedirectUnverified from "./components/RedirectUnverified";
+import NotFound from "./pages/NotFound/NotFound";
 
 export default function App() {
 
@@ -24,6 +25,7 @@ export default function App() {
         <Route element={<AuthLayout />}>
           <Route path="/sign-up" element={<SignUp />} />
           <Route path="/sign-in" element={<SignIn />} />
+          <Route path="*" element={<NotFound />} />
         </Route>
         <Route element={<AppLayout />}>
           <Route path="/" element={<Home />} />
