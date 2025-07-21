@@ -15,6 +15,9 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import DashBoard from "./pages/DashBoard/DashBoard";
 import RedirectUnverified from "./components/RedirectUnverified";
 import NotFound from "./pages/NotFound/NotFound";
+import CppCompilerPage from "./pages/Compilers/cppCompiler";
+import PythonCompilerPage from "./pages/Compilers/pythonCompiler";
+import JavaCompilerPage from "./pages/Compilers/javaCompiler";
 
 export default function App() {
 
@@ -36,6 +39,9 @@ export default function App() {
           <Route path="/problems/:slug/edit-problem" element={<AuthorProtectedRoute><ProblemEdit /></AuthorProtectedRoute>} />
           <Route path="/submissions/:submissionId" element={<ProtectedRoute><SubmittedSolutionView /></ProtectedRoute>} />
           <Route path="/dashboard/:username" element={<DashBoard />} />
+          <Route path="/compilers/cpp" element={<CppCompilerPage />} />
+          <Route path="/compilers/java" element={<JavaCompilerPage />} />
+          <Route path="/compilers/python" element={<PythonCompilerPage />} />
         </Route>
       </Routes>
     </RedirectUnverified>

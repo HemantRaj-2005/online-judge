@@ -54,6 +54,7 @@ INSTALLED_APPS = [
     'judge',  # Added judge app
     'ai_service', #Added ai_service app
     'articles',  # Added articles app
+    'compilers', # Added compilers app
     'rest_framework',
 ]
 
