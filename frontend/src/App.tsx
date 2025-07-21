@@ -18,37 +18,63 @@ import NotFound from "./pages/NotFound/NotFound";
 import CppCompilerPage from "./pages/Compilers/CppCompiler";
 import JavaCompilerPage from "./pages/Compilers/JavaCompiler";
 import PythonCompilerPage from "./pages/Compilers/PythonCompiler";
-
+import ProblemLayout from "./layout/ProblemLayout";
 
 export default function App() {
-
   return (
     <BrowserRouter>
-    <RedirectUnverified>
-      <Routes>
-        <Route element={<AuthLayout />}>
-          <Route path="/sign-up" element={<SignUp />} />
-          <Route path="/sign-in" element={<SignIn />} />
-          <Route path="*" element={<NotFound />} />
-        </Route>
-        <Route element={<AppLayout />}>
-          <Route path="/" element={<Home />} />
-          <Route path="/resend-verification" element={<ResendVerification />} />
-          <Route path="/problems" element={<AllProblemPage />} />
-          <Route path="/problems/:slug" element={<EachProblemPage />} />
-          <Route path="/create-problem" element={<AuthorProtectedRoute><ProblemCreate /></AuthorProtectedRoute>} />
-          <Route path="/problems/:slug/edit-problem" element={<AuthorProtectedRoute><ProblemEdit /></AuthorProtectedRoute>} />
-          <Route path="/submissions/:submissionId" element={<ProtectedRoute><SubmittedSolutionView /></ProtectedRoute>} />
-          <Route path="/dashboard/:username" element={<DashBoard />} />
-          <Route path="/compilers/cpp" element={<CppCompilerPage />} />
-          <Route path="/compilers/java" element={<JavaCompilerPage />} />
-          <Route path="/compilers/python" element={<PythonCompilerPage />} />
-        </Route>
-      </Routes>
-    </RedirectUnverified>
+      <RedirectUnverified>
+        <Routes>
+          <Route element={<AuthLayout />}>
+            <Route path="/sign-up" element={<SignUp />} />
+            <Route path="/sign-in" element={<SignIn />} />
+            <Route path="*" element={<NotFound />} />
+          </Route>
+
+          <Route element={<ProblemLayout />}>
+            <Route path="/problems/:slug" element={<EachProblemPage />} />
+            <Route
+              path="/create-problem"
+              element={
+                <AuthorProtectedRoute>
+                  <ProblemCreate />
+                </AuthorProtectedRoute>
+              }
+            />
+            <Route
+              path="/problems/:slug/edit-problem"
+              element={
+                <AuthorProtectedRoute>
+                  <ProblemEdit />
+                </AuthorProtectedRoute>
+              }
+            />
+            <Route
+              path="/submissions/:submissionId"
+              element={
+                <ProtectedRoute>
+                  <SubmittedSolutionView />
+                </ProtectedRoute>
+              }
+            />
+            <Route path="/compilers/cpp" element={<CppCompilerPage />} />
+            <Route path="/compilers/java" element={<JavaCompilerPage />} />
+            <Route path="/compilers/python" element={<PythonCompilerPage />} />
+          </Route>
+
+          <Route element={<AppLayout />}>
+            <Route path="/" element={<Home />} />
+            <Route
+              path="/resend-verification"
+              element={<ResendVerification />}
+            />
+            <Route path="/problems" element={<AllProblemPage />} />
+            <Route path="/dashboard/:username" element={<DashBoard />} />
+          </Route>
+        </Routes>
+      </RedirectUnverified>
     </BrowserRouter>
   );
 }
-
 
 // change for re deployment
