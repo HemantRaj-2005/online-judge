@@ -16,8 +16,6 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { cn } from "@/lib/utils";
-import DOMPurify from "dompurify";
-import rehypeHighlight from "rehype-highlight";
 import remarkMath from "remark-math";
 import rehypeKatex from "rehype-katex";
 import ReactMarkdown from "react-markdown";
@@ -86,7 +84,11 @@ export default function EachProblemPage() {
         if (data?.example) {
           markdown += `## Example\n`;
           if (data.example.input) {
-            markdown += `**Input**\n\`\`\`json\n${JSON.stringify(data.example.input, null, 2)}\n\`\`\`\n`;
+            markdown += `**Input**\n\`\`\`json\n${JSON.stringify(
+              data.example.input,
+              null,
+              2
+            )}\n\`\`\`\n`;
           }
           if (data.example.explanation) {
             markdown += `**Explanation**\n${data.example.explanation}\n\n`;
@@ -153,42 +155,6 @@ export default function EachProblemPage() {
       veryhard: "Very Hard",
     };
     return map[difficulty] || difficulty;
-  };
-
-  const renderMarkdown = (content: string) => {
-    const sanitized = DOMPurify.sanitize(content);
-    return (
-      <ReactMarkdown
-        remarkPlugins={[remarkMath]}
-        rehypePlugins={[rehypeKatex, rehypeHighlight]}
-        components={{
-          code({ node, className, children, ...props }) {
-            const { inline } = props as { inline?: boolean };
-            const match = /language-(\w+)/.exec(className || "");
-            return !inline && match ? (
-              <div className="bg-gray-900 rounded-md p-4 my-2 overflow-x-auto">
-                <code className={className} {...props}>
-                  {children}
-                </code>
-              </div>
-            ) : (
-              <code className="bg-gray-100 px-1 py-0.5 rounded text-sm">
-                {children}
-              </code>
-            );
-          },
-          table({ children }) {
-            return (
-              <div className="overflow-x-auto">
-                <table className="min-w-full border-collapse">{children}</table>
-              </div>
-            );
-          },
-        }}
-      >
-        {sanitized}
-      </ReactMarkdown>
-    );
   };
 
   if (loading) {
@@ -270,7 +236,12 @@ export default function EachProblemPage() {
                   value="description"
                   className="markdown max-w-none pt-4 space-y-4"
                 >
-                  {renderMarkdown(problem.description)}
+                  <ReactMarkdown
+                    remarkPlugins={[remarkMath]}
+                    rehypePlugins={[rehypeKatex]}
+                  >
+                    {problem.description || "*No description available*"}
+                  </ReactMarkdown>
                 </TabsContent>
                 <TabsContent
                   value="ai-help"
@@ -299,8 +270,13 @@ export default function EachProblemPage() {
                     aiResponse &&
                     !isAiLoading &&
                     !aiError && (
-                      <div className="prose max-w-none">
-                        {renderMarkdown(aiResponse)}
+                      <div className="markdown max-w-none pt-4 space-y-4">
+                        <ReactMarkdown
+                          remarkPlugins={[remarkMath]}
+                          rehypePlugins={[rehypeKatex]}
+                        >
+                          {aiResponse || "*No AI response available*"}
+                        </ReactMarkdown>
                       </div>
                     )}
                 </TabsContent>

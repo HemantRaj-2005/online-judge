@@ -152,11 +152,9 @@
     }
 
     /* Code blocks */
-    & pre {
-      @apply bg-muted dark:bg-muted/50 dark:text-amber-50 p-4 rounded-lg overflow-x-auto my-4;
-    }
+    & pre,
     & code {
-      @apply bg-muted/50 dark:bg-muted dark:text-black px-1 py-0.5 rounded text-sm font-mono;
+      @apply dark:bg-neutral-900 bg-neutral-100 text-foreground dark:text-foreground;
     }
 
     /* Tables */
