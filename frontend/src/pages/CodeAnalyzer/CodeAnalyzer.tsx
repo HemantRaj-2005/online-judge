@@ -3,13 +3,7 @@ import { GoogleGenAI } from "@google/genai";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import {
-  CodeIcon,
-  Loader2,
-  Sparkles,
-  Gauge,
-  Star,
-} from "lucide-react";
+import { CodeIcon, Loader2, Sparkles, Gauge, Star } from "lucide-react";
 
 const ai = new GoogleGenAI({ apiKey: import.meta.env.VITE_GEMINI_API_KEY });
 
@@ -80,7 +74,7 @@ export default function CodeAnalyzer() {
           readability: "-",
           style: "-",
         },
-        optimizations: []
+        optimizations: [],
       });
     }
 
@@ -127,7 +121,7 @@ export default function CodeAnalyzer() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
-          className="max-w-4xl mx-auto bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-xl shadow-xl p-8"
+          className="w-full min-h-screen bg-white/10 dark:bg-black/20 backdrop-blur-lg rounded-none shadow-xl p-8"
         >
           <motion.div
             initial={{ opacity: 0 }}
@@ -139,7 +133,7 @@ export default function CodeAnalyzer() {
               <CodeIcon className="w-6 h-6 text-blue-600 dark:text-blue-400" />
             </div>
             <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-emerald-500 dark:from-blue-400 dark:to-emerald-300">
-              Advanced Code Analyzer
+              Code Analyzer
             </h1>
           </motion.div>
 
