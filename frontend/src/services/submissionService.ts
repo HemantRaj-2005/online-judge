@@ -10,6 +10,7 @@ export interface Submission {
   language: string;
   status: string;
   verdict: string;
+  output: string;
   time_taken: number;
   memory_used: number;
   submitted_at: string;

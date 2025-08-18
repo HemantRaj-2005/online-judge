@@ -12,6 +12,7 @@ import {
 import { aiService } from "@/services/aiServices";
 import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
+import { Textarea } from "@/components/ui/textarea";
 
 export default function SubmittedSolutionView() {
   const { submissionId } = useParams<{ submissionId: string }>();

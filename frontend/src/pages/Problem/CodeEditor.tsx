@@ -148,8 +148,6 @@ export default function CodeEditor({
           ? [response.pitfalls]
           : [],
       };
-
-      console.log("Normalized AI Response:", normalizedResponse);
       setAiResponse(normalizedResponse);
       setIsDialogOpen(true);
     } catch (err) {
@@ -481,6 +479,7 @@ export default function CodeEditor({
                 </span>
               )}
             </AlertDescription>
+            
           </Alert>
         )}
       </CardContent>

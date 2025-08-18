@@ -19,6 +19,7 @@ import CppCompilerPage from "./pages/Compilers/CppCompiler";
 import JavaCompilerPage from "./pages/Compilers/JavaCompiler";
 import PythonCompilerPage from "./pages/Compilers/PythonCompiler";
 import ProblemLayout from "./layout/ProblemLayout";
+import CodeAnalyzer from "./pages/CodeAnalyzer/CodeAnalyzer";
 
 export default function App() {
   return (
@@ -70,6 +71,8 @@ export default function App() {
             />
             <Route path="/problems" element={<AllProblemPage />} />
             <Route path="/dashboard/:username" element={<DashBoard />} />
+            <Route path="/code-analyzer" element={<CodeAnalyzer />} />
+
           </Route>
         </Routes>
       </RedirectUnverified>
