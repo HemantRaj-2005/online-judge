@@ -169,8 +169,8 @@ EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'                
 EMAIL_PORT = 587                             
 EMAIL_USE_TLS = True                         
-EMAIL_HOST_USER = 'hemantraj2214@gmail.com'    
-EMAIL_HOST_PASSWORD = 'eert yjbd ukuf pxuh'  
+EMAIL_HOST_USER = 'email@gmail.com'    
+EMAIL_HOST_PASSWORD = ''  
 SITE_NAME = "https://tapascode.vercel.app" #will change later 
 
 CORS_ALLOW_ALL_ORIGINS = False
