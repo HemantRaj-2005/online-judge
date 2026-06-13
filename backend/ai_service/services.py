@@ -13,7 +13,7 @@ class AIAnalysisService:
         if not api_key:
             raise ValueError("GEMINI_API_KEY environment variable is not configured on the server. Please add it to your server configuration/environment variables.")
         self.client = genai.Client(api_key=api_key)
-        self.model_name = "gemini-2.0-flash"
+        self.model_name = "gemini-3-flash-preview"
 
     def _clean_and_parse_response(self, output: str) -> Dict[str, Any]:
         """Helper method to clean and parse AI response."""
