@@ -20,9 +20,18 @@ def analyze_submission(request, problem_id):
     
     submission = get_object_or_404(Submission, id=submission_id, user_id=request.user.id)
     
-    service = AIAnalysisService()
-    result = service.analyze_complexity(submission.code, submission.language, problem.description)
-    print(result)
+    try:
+        service = AIAnalysisService()
+        result = service.analyze_complexity(submission.code, submission.language, problem.description)
+    except Exception as e:
+        return Response({
+            'error': f'AI Service Unavailable: {str(e)}',
+            'time_complexity': 'N/A',
+            'space_complexity': 'N/A',
+            'explanation': 'AI Complexity Analysis is currently unavailable. Please check the GOOGLE_GENAI_API_KEY environment variable configuration on the server.',
+            'optimization': 'N/A',
+            'errors': [str(e)]
+        }, status=status.HTTP_503_SERVICE_UNAVAILABLE)
     
     user = request.user
     # Save analysis linked to submission
@@ -36,7 +45,6 @@ def analyze_submission(request, problem_id):
     )
     
     return Response(result)
-
 
 
 @api_view(['POST'])
@@ -53,18 +61,26 @@ def explain_problem(request, problem_id):
     if existing_analysis:
         return Response(existing_analysis.analysis_result)
     
-    service = AIAnalysisService()
-    result = service.explain_problem(problem.description)
-
-    user = request.user if request.user.is_authenticated else None
-    AIAnalysis.objects.create(
-        analysis_type='explanation',
-        problem=problem,
-        analysis_result = result,
-        user=user
-    )
-
-    return Response(result)
+    try:
+        service = AIAnalysisService()
+        result = service.explain_problem(problem.description)
+        
+        user = request.user if request.user.is_authenticated else None
+        AIAnalysis.objects.create(
+            analysis_type='explanation',
+            problem=problem,
+            analysis_result = result,
+            user=user
+        )
+        return Response(result)
+    except Exception as e:
+        return Response({
+            'error': f'AI Service Unavailable: {str(e)}',
+            'problem_summary': 'AI Explanation is currently unavailable. Please check the GOOGLE_GENAI_API_KEY environment variable configuration on the server.',
+            'approach': 'Please ask the administrator to configure the GOOGLE_GENAI_API_KEY on the backend server environment variables.',
+            'algorithms': [],
+            'example': None
+        }, status=status.HTTP_503_SERVICE_UNAVAILABLE)
 
 
 @api_view(['POST'])
@@ -75,23 +91,30 @@ def get_hint(request):
     code = request.data.get('code')
     language = request.data.get('language')
 
-    
     problem = get_object_or_404(Problem, id=problem_id)
 
-    service = AIAnalysisService()
-    result = service.provide_hint(problem.description, code, language)
-
-    user = request.user if request.user.is_authenticated else None
-    AIAnalysis.objects.create(
-        analysis_type='hint',
-        problem=problem,
-        user_code=code,
-        programming_language=language,
-        analysis_result=result,
-        user=user
-    )
-
-    return Response(result)
+    try:
+        service = AIAnalysisService()
+        result = service.provide_hint(problem.description, code, language)
+        
+        user = request.user if request.user.is_authenticated else None
+        AIAnalysis.objects.create(
+            analysis_type='hint',
+            problem=problem,
+            user_code=code,
+            programming_language=language,
+            analysis_result=result,
+            user=user
+        )
+        return Response(result)
+    except Exception as e:
+        return Response({
+            'error': f'AI Service Unavailable: {str(e)}',
+            'hint': 'AI Hints are currently unavailable. Please check the GOOGLE_GENAI_API_KEY environment variable configuration on the server.',
+            'approach': ['Please ask the administrator to configure the GOOGLE_GENAI_API_KEY on the backend server environment variables.'],
+            'derivation': [],
+            'complexity': {'time': 'N/A', 'space': 'N/A'}
+        }, status=status.HTTP_503_SERVICE_UNAVAILABLE)
 
 
 @api_view(['POST'])
@@ -103,7 +126,22 @@ def analyze_code_view(request):
     if not code:
         return Response({'error': 'Code is required'}, status=status.HTTP_400_BAD_REQUEST)
 
-    service = AIAnalysisService()
-    result = service.analyze_code(code, language)
-    return Response(result)
+    try:
+        service = AIAnalysisService()
+        result = service.analyze_code(code, language)
+        return Response(result)
+    except Exception as e:
+        return Response({
+            'error': f'AI Service Unavailable: {str(e)}',
+            'language': language,
+            'timeComplexity': 'N/A',
+            'spaceComplexity': 'N/A',
+            'syntaxErrors': f'AI Analysis failed: {str(e)}',
+            'codeQuality': {
+                'maintainability': 'N/A',
+                'readability': 'N/A',
+                'style': 'N/A'
+            },
+            'optimizations': []
+        }, status=status.HTTP_503_SERVICE_UNAVAILABLE)
 

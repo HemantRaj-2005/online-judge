@@ -5,7 +5,7 @@ import { refreshAccessToken } from "@/services/auth";
 
 export function useSilentRefresh() {
   const dispatch = useAppDispatch();
-  const user = useAppSelector((state) => state.auth.user);
+  const isLoggedIn = useAppSelector((state) => !!state.auth.user);
 
   useEffect(() => {
     const refresh = async () => {
@@ -23,17 +23,17 @@ export function useSilentRefresh() {
     };
 
     // Initial refresh on mount
-    if (user) {
+    if (isLoggedIn) {
       refresh();
     }
 
     // Interval to refresh every 4 minutes (240000ms)
     const interval = setInterval(() => {
-      if (user) {
+      if (isLoggedIn) {
         refresh();
       }
     }, 240000);
 
     return () => clearInterval(interval);
-  }, [user, dispatch]);
+  }, [isLoggedIn, dispatch]);
 }

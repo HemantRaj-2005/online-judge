@@ -10,6 +10,8 @@ load_dotenv()
 class AIAnalysisService:
     def __init__(self):
         api_key = os.getenv("GOOGLE_GENAI_API_KEY")
+        if not api_key:
+            raise ValueError("GOOGLE_GENAI_API_KEY environment variable is not configured on the server. Please add it to your server configuration/environment variables.")
         genai.configure(api_key=api_key)
         self.model = genai.GenerativeModel("models/gemini-2.0-flash")
 
@@ -51,10 +53,18 @@ class AIAnalysisService:
         
         Respond with only the JSON object, no markdown or additional text.
         """
-        response = self.model.generate_content(prompt)
-        output = self._clean_and_parse_response(response.text)
-        # print(output)
-        return output
+        try:
+            response = self.model.generate_content(prompt)
+            output = self._clean_and_parse_response(response.text)
+            return output
+        except Exception as e:
+            return {
+                "time_complexity": "N/A",
+                "space_complexity": "N/A",
+                "explanation": "Complexity analysis failed. Please verify your AI API key and connection.",
+                "optimization": "N/A",
+                "errors": [str(e)]
+            }
 
     def explain_problem(self, problem_statement: str) -> Dict[str, Any]:
         """Provide a detailed explanation of the problem statement."""
@@ -70,10 +80,18 @@ class AIAnalysisService:
         
         Respond with only the JSON object, no markdown or additional text.
         """
-        response = self.model.generate_content(prompt)
-        output = self._clean_and_parse_response(response.text)
-        # print(output)
-        return output
+        try:
+            response = self.model.generate_content(prompt)
+            output = self._clean_and_parse_response(response.text)
+            return output
+        except Exception as e:
+            return {
+                "problem_summary": "Failed to generate AI explanation. Please check your API key and connection.",
+                "approach": "Check configuration.",
+                "algorithms": [],
+                "example": None,
+                "error": str(e)
+            }
 
     def provide_hint(self, problem_statement: str, user_code: str, language: str) -> Dict[str, Any]:
         """Provide hints for the given problem and user code."""
@@ -113,9 +131,21 @@ class AIAnalysisService:
         
         Respond with ONLY the raw JSON object, no markdown block formatting, no ```json formatting, and no additional text.
         """
-        response = self.model.generate_content(prompt)
-        output = self._clean_and_parse_response(response.text)
-        return output
+        try:
+            response = self.model.generate_content(prompt)
+            output = self._clean_and_parse_response(response.text)
+            return output
+        except Exception as e:
+            return {
+                "hint": "Could not retrieve progressive hints. Please check server settings.",
+                "approach": ["Verify API key configured on the server."],
+                "derivation": [],
+                "complexity": {
+                    "time": "N/A",
+                    "space": "N/A"
+                },
+                "error": str(e)
+            }
 
     def generate_error_report(self, raw_logs: str, language: str, is_compile: bool) -> Dict[str, Any]:
         """Analyze compiler or runtime logs and return a user-friendly structured error report."""

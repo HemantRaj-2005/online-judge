@@ -2,6 +2,7 @@ import { useAppSelector } from "@/redux/hook";
 import { problemService } from "@/services/problemService";
 import { topicService, type Topic } from "@/services/topicService";
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import MDEditor from "@uiw/react-md-editor";
 import rehypeKatex from "rehype-katex";
 import remarkMath from "remark-math";
@@ -27,6 +28,7 @@ const difficulties = [
 
 export default function ProblemCreate() {
   const { user } = useAppSelector((state) => state.auth);
+  const navigate = useNavigate();
   const [form, setForm] = useState({
     title: "",
     description: "",
@@ -110,18 +112,9 @@ export default function ProblemCreate() {
       if (form.slug && form.slug.trim() !== "") {
         payload.slug = form.slug.trim();
       }
-      await problemService.createProblem(payload, user?.accessToken || "");
-      toast.success("Problem created successfully!");
-      setForm({
-        title: "",
-        description: "",
-        difficulty: "easy",
-        topics: [],
-        time_limit: 1000,
-        memory_limit: 256,
-        slug: "",
-        author: user?.username || "",
-      });
+      const newProblem = await problemService.createProblem(payload, user?.accessToken || "");
+      toast.success("Problem created successfully! Redirecting to testcase manager...");
+      navigate(`/problems/${newProblem.slug}/edit`);
     } catch (err: unknown) {
       toast.error(err instanceof Error ? err.message : "Failed to create problem");
     } finally {

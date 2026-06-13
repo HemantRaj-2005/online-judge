@@ -5,6 +5,7 @@ import tempfile
 import os
 import json
 import re
+import shutil
 
 # Try to import resource module (Linux/Mac only)
 try:
@@ -15,6 +16,21 @@ except ImportError:
 # --- Compilation functions ---
 def compile_code_with_timeout(language, code, user_input, temp_dir, timeout=5):
     """Compile and run code with timeout and (Linux/Mac) resource limits."""
+    # Check binary availability
+    if language == 'cpp':
+        if not shutil.which('g++'):
+            raise Exception("The C++ compiler ('g++') is not installed or available on this server. "
+                            "If deploying on Render, please make sure to use a Docker-based deployment environment "
+                            "containing g++ and other dependencies (see deployment_guide.md).")
+    elif language == 'java':
+        if not shutil.which('javac'):
+            raise Exception("The Java compiler ('javac') is not installed or available on this server. "
+                            "If deploying on Render, please make sure to use a Docker-based deployment environment "
+                            "containing openjdk/javac (see deployment_guide.md).")
+    elif language == 'python':
+        if not shutil.which('python3') and not shutil.which('python'):
+            raise Exception("The Python interpreter is not installed or available on this server.")
+
     try:
         if language == 'cpp':
             return compile_cpp(code, user_input, temp_dir, timeout)

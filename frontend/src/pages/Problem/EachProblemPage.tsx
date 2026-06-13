@@ -137,7 +137,7 @@ export default function EachProblemPage() {
     };
 
     fetchProblem();
-  }, [slug, token]);
+  }, [slug]);
 
   const formatDifficulty = (difficulty: string) => {
     const map: Record<string, string> = {

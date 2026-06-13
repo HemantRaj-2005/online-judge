@@ -3,6 +3,17 @@ export interface Topic {
     name: string;
 }
 
+export interface TestCase {
+    id: number;
+    problem: number;
+    name: string;
+    input_text: string;
+    output_text: string;
+    is_sample: boolean;
+    is_hidden: boolean;
+    explanation?: string;
+}
+
 export interface Problem {
     id: number;
     slug: string;
@@ -97,5 +108,43 @@ export const problemService = {
             body: JSON.stringify({ title, description }),
         });
         return handleResponse(response);
+    },
+
+    // Manage problem test cases
+    async getTestCases(slug: string, token: string): Promise<TestCase[]> {
+        const response = await fetch(`${API_URL}/api/problems/${slug}/testcases/`, {
+            method: 'GET',
+            headers: getHeaders(token),
+        });
+        return handleResponse<TestCase[]>(response);
+    },
+
+    async createTestCase(slug: string, data: Partial<TestCase>, token: string): Promise<TestCase> {
+        const response = await fetch(`${API_URL}/api/problems/${slug}/testcases/`, {
+            method: 'POST',
+            headers: getHeaders(token),
+            body: JSON.stringify(data),
+        });
+        return handleResponse<TestCase>(response);
+    },
+
+    async updateTestCase(id: number, data: Partial<TestCase>, token: string): Promise<TestCase> {
+        const response = await fetch(`${API_URL}/api/testcases/${id}/`, {
+            method: 'PATCH',
+            headers: getHeaders(token),
+            body: JSON.stringify(data),
+        });
+        return handleResponse<TestCase>(response);
+    },
+
+    async deleteTestCase(id: number, token: string): Promise<void> {
+        const response = await fetch(`${API_URL}/api/testcases/${id}/`, {
+            method: 'DELETE',
+            headers: getHeaders(token),
+        });
+        if (!response.ok) {
+            const data = await response.json().catch(() => ({}));
+            throw new Error(data?.detail || 'Failed to delete test case');
+        }
     },
 };

@@ -14,7 +14,7 @@ export const aiService = {
     ),
 
   explainProblem: (problem_id: number, token?: string) =>
-    api.post(`/api/ai/explain-problem/${problem_id}/`, token),
+    api.post(`/api/ai/explain-problem/${problem_id}/`, {}, token),
 
   getHint: (
     problem_id: number,

@@ -4,8 +4,8 @@ from rest_framework.views import APIView
 from rest_framework import generics, status
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, IsAdminUser, BasePermission, AllowAny
-from .models import Problem, Submission
-from .serializers import ProblemSerializer, SubmissionCreateSerializer, SubmissionSerializer
+from .models import Problem, Submission, TestCase
+from .serializers import ProblemSerializer, SubmissionCreateSerializer, SubmissionSerializer, TestCaseSerializer
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
 from django.contrib.auth import get_user_model
@@ -281,3 +281,48 @@ class JudgeSubmitView(APIView):
                 "time_taken": submission.time_taken,
                 "memory_used": submission.memory_used
             }, status=status.HTTP_201_CREATED)
+
+
+class ProblemTestCasesView(generics.ListCreateAPIView):
+    serializer_class = TestCaseSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        slug = self.kwargs['slug']
+        try:
+            problem = Problem.objects.get(slug=slug)
+        except Problem.DoesNotExist:
+            return TestCase.objects.none()
+        
+        if not (self.request.user.is_staff or problem.author == self.request.user):
+            from rest_framework.exceptions import PermissionDenied
+            raise PermissionDenied("You do not have permission to view test cases for this problem.")
+        
+        return TestCase.objects.filter(problem=problem).order_by('id')
+
+    def create(self, request, *args, **kwargs):
+        slug = self.kwargs['slug']
+        try:
+            problem = Problem.objects.get(slug=slug)
+        except Problem.DoesNotExist:
+            return Response({'error': 'Problem not found'}, status=status.HTTP_404_NOT_FOUND)
+
+        if not (request.user.is_staff or problem.author == request.user):
+            return Response({'error': 'You are not authorized to add test cases to this problem.'}, status=status.HTTP_403_FORBIDDEN)
+
+        serializer = self.get_serializer(data=request.data, context={'problem': problem})
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+
+class TestCaseDetailView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = TestCase.objects.all()
+    serializer_class = TestCaseSerializer
+    permission_classes = [IsAuthenticated]
+
+    def check_object_permissions(self, request, obj):
+        super().check_object_permissions(request, obj)
+        if not (request.user.is_staff or obj.problem.author == request.user):
+            from rest_framework.exceptions import PermissionDenied
+            raise PermissionDenied("You do not have permission to modify this test case.")

@@ -38,7 +38,7 @@ SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-7^60*rzu9jq0h6aplt86ad2)g8
 DEBUG = os.getenv('DEBUG', 'True').lower() == 'true'
 
 ALLOWED_HOSTS = ['13.51.109.195', 'localhost', '127.0.0.1',"tapascode.me", "www.tapascode.me","online-judge-api-rz0v.onrender.com","tapascode.me"]
-CSRF_TRUSTED_ORIGINS = ["https://tapascode.me", "https://www.tapascode.me","online-judge-api-rz0v.onrender.com"]
+CSRF_TRUSTED_ORIGINS = ["https://tapascode.me", "https://www.tapascode.me","https://online-judge-api-rz0v.onrender.com"]
 
 
 # Application definition

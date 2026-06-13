@@ -60,7 +60,17 @@ class TestCaseSerializer(serializers.ModelSerializer):
             'id', 'problem', 'name', 'input_text', 'output_text',
             'is_sample', 'is_hidden', 'explanation'
         ]
+        read_only_fields = ['problem', 'name']
+
+    def create(self, validated_data):
+        problem = self.context.get('problem')
+        if not problem:
+            raise serializers.ValidationError("Problem context is required")
+        validated_data['problem'] = problem
         
+        import uuid
+        validated_data['name'] = f"{problem.slug}_tc_{uuid.uuid4().hex[:8]}"
+        return super().create(validated_data)
         
 class SubmissionSerializer(serializers.ModelSerializer):
     user = serializers.StringRelatedField(read_only=True)
@@ -76,7 +86,6 @@ class SubmissionSerializer(serializers.ModelSerializer):
         ]
         read_only_fields = ['status', 'verdict', 'time_taken', 'memory_used', 'submitted_at', 'evaluated_at']
 
-
 class SubmissionCreateSerializer(serializers.ModelSerializer):
     language = serializers.ChoiceField(choices=LanguageChoices.choices)
     problem = serializers.PrimaryKeyRelatedField(read_only=True)
@@ -84,3 +93,4 @@ class SubmissionCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Submission
         fields = ['problem', 'code', 'language']
+
