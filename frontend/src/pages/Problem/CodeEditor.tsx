@@ -1,10 +1,4 @@
-import CodeMirror from "@uiw/react-codemirror";
-import { githubLight, githubDark } from "@uiw/codemirror-theme-github";
-import { dracula } from "@uiw/codemirror-theme-dracula";
-import { python } from "@codemirror/lang-python";
-import { java } from "@codemirror/lang-java";
-import { javascript } from "@codemirror/lang-javascript";
-import { cpp } from "@codemirror/lang-cpp";
+import Editor from "@monaco-editor/react";
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -212,34 +206,6 @@ export default function CodeEditor({
     return () => clearInterval(interval);
   }, [submissionId, username]);
 
-  const getThemeExtension = () => {
-    switch (theme) {
-      case "githubLight":
-        return githubLight;
-      case "githubDark":
-        return githubDark;
-      case "dracula":
-        return dracula;
-      default:
-        return githubDark;
-    }
-  };
-
-  const getLanguageExtension = () => {
-    switch (language) {
-      case "python":
-        return python();
-      case "javascript":
-        return javascript();
-      case "java":
-        return java();
-      case "cpp":
-        return cpp();
-      default:
-        return python();
-    }
-  };
-
   const hintLevels = [
     { level: 1, label: "Observation" },
     { level: 2, label: "Approach" },
@@ -380,19 +346,38 @@ export default function CodeEditor({
       </div>
 
       {/* Code Editor */}
-      <div className="flex-1 min-h-0">
-        <CodeMirror
+      <div className="flex-1 min-h-0 border-b border-white/[0.06]">
+        <Editor
           value={code}
           height={isFullscreen ? "calc(100vh - 180px)" : "400px"}
-          extensions={[getThemeExtension(), getLanguageExtension()]}
-          onChange={setCode}
-          theme={getThemeExtension()}
-          style={{ fontSize: `${fontSize}px` }}
-          basicSetup={{
-            lineNumbers,
-            highlightActiveLine: true,
-            highlightSelectionMatches: true,
-            autocompletion: true,
+          language={language}
+          theme={theme === "githubLight" ? "vs" : "vs-dark"}
+          onChange={(val) => setCode(val ?? "")}
+          loading={
+            <div className="flex items-center justify-center h-full bg-zinc-950 text-muted-foreground gap-2">
+              <Loader2 className="h-5 w-5 animate-spin text-primary" />
+              <span>Initializing Monaco Editor...</span>
+            </div>
+          }
+          options={{
+            fontSize: fontSize,
+            minimap: { enabled: true },
+            automaticLayout: true,
+            lineNumbers: lineNumbers ? "on" : "off",
+            scrollBeyondLastLine: false,
+            cursorBlinking: "smooth",
+            cursorSmoothCaretAnimation: "on",
+            smoothScrolling: true,
+            padding: { top: 12, bottom: 12 },
+            fontFamily: "var(--font-mono, Menlo, Monaco, 'Courier New', monospace)",
+            renderLineHighlight: "all",
+            scrollbar: {
+              vertical: "visible",
+              horizontal: "visible",
+              useShadows: false,
+              verticalScrollbarSize: 10,
+              horizontalScrollbarSize: 10,
+            },
           }}
         />
       </div>

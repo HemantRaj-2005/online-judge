@@ -8,11 +8,11 @@ export default function NotFound() {
   const navigate = useNavigate();
 
   return (
-    <section className="relative min-h-screen py-24 bg-gradient-to-br from-gray-100 to-gray-200 dark:from-black dark:to-gray-900 overflow-hidden">
+    <section className="relative min-h-screen py-24 bg-background grid-pattern overflow-hidden flex items-center justify-center">
       {/* Animated background elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <motion.div
-          className="absolute top-0 left-0 w-80 h-80 bg-gradient-to-r from-red-500/20 to-amber-500/20 dark:from-red-700/20 dark:to-amber-700/20 rounded-full filter blur-3xl -translate-x-1/2 -translate-y-1/2"
+          className="absolute top-0 left-0 w-80 h-80 bg-gradient-to-r from-primary/10 to-accent/10 dark:from-primary/20 dark:to-accent/20 rounded-full filter blur-3xl -translate-x-1/2 -translate-y-1/2"
           animate={{
             scale: [1, 1.2, 1],
             opacity: [0.4, 0.6, 0.4],
@@ -24,7 +24,7 @@ export default function NotFound() {
           }}
         />
         <motion.div
-          className="absolute bottom-0 right-0 w-96 h-96 bg-gradient-to-r from-purple-500/20 to-pink-500/20 dark:from-purple-700/20 dark:to-pink-700/20 rounded-full filter blur-3xl translate-x-1/2 translate-y-1/2"
+          className="absolute bottom-0 right-0 w-96 h-96 bg-gradient-to-r from-accent/10 to-primary/10 dark:from-accent/20 dark:to-primary/20 rounded-full filter blur-3xl translate-x-1/2 translate-y-1/2"
           animate={{
             scale: [1, 1.15, 1],
             opacity: [0.4, 0.6, 0.4],
@@ -38,84 +38,89 @@ export default function NotFound() {
         />
       </div>
 
-      <div className="container mx-auto px-6 text-center relative z-10">
+      <div className="container mx-auto px-4 text-center relative z-10 max-w-4xl">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
-          className="flex justify-center mb-8"
+          className="glass rounded-3xl border border-border p-8 md:p-14 shadow-2xl flex flex-col items-center"
         >
-          <div className="inline-flex items-center px-6 py-3 text-lg font-medium rounded-full bg-red-500/20 dark:bg-red-700/20 text-red-600 dark:text-red-400 shadow-md">
-            <ConstructionIcon className="w-5 h-5 mr-2" />
-            Under Construction
-          </div>
-        </motion.div>
-
-        <motion.h1
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.1 }}
-          className="text-6xl md:text-8xl font-extrabold mb-6 tracking-tight"
-        >
-          <span className="bg-clip-text text-transparent bg-gradient-to-r from-red-600 to-amber-500 dark:from-red-400 dark:to-amber-300">
-            404
-          </span>
-        </motion.h1>
-
-        <motion.h2
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.2 }}
-          className="text-3xl md:text-5xl font-bold mb-6"
-        >
-          <TypeAnimation
-            sequence={[
-              "Page Not Found",
-              1500,
-              "Coming Soon!",
-              1500,
-              "Under Development",
-              1500,
-            ]}
-            wrapper="span"
-            speed={40}
-            repeat={Infinity}
-            className="text-gray-800 dark:text-gray-200"
-          />
-        </motion.h2>
-
-        <motion.p
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.3 }}
-          className="text-xl text-gray-600 dark:text-gray-400 max-w-2xl mx-auto mb-10"
-        >
-          The page you're looking for doesn't exist or is currently being built. Our team is working hard to bring you new features!
-        </motion.p>
-
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.4 }}
-          className="flex flex-col sm:flex-row gap-4 justify-center"
-        >
-          <Button
-            size="lg"
-            className="px-8 py-6 text-lg font-semibold bg-gradient-to-r from-red-600 to-amber-500 hover:from-red-700 hover:to-amber-600 text-white rounded-xl shadow-lg transform transition-transform hover:scale-105 group"
-            onClick={() => navigate("/")}
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            className="flex justify-center mb-6"
           >
-            <HomeIcon className="w-5 h-5 mr-2" />
-            Return Home
-          </Button>
-          <Button
-            variant="outline"
-            size="lg"
-            className="px-8 py-6 text-lg font-semibold border-2 border-red-500 dark:border-red-600 text-red-600 dark:text-red-400 hover:bg-red-500/10 dark:hover:bg-red-600/10 rounded-xl transform transition-transform hover:scale-105 group"
-            onClick={() => navigate("/problems")}
+            <div className="inline-flex items-center px-4 py-1.5 text-xs font-semibold rounded-full bg-primary/10 border border-primary/20 text-primary shadow-sm">
+              <ConstructionIcon className="w-3.5 h-3.5 mr-2" />
+              Under Development
+            </div>
+          </motion.div>
+
+          <motion.h1
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.1 }}
+            className="text-7xl md:text-9xl font-extrabold mb-4 tracking-tighter"
           >
-            <RocketIcon className="w-5 h-5 mr-2" />
-            Explore Problems
-          </Button>
+            <span className="gradient-text-hero">
+              404
+            </span>
+          </motion.h1>
+
+          <motion.h2
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+            className="text-2xl md:text-4xl font-bold mb-4"
+          >
+            <TypeAnimation
+              sequence={[
+                "Page Not Found",
+                1500,
+                "Coming Soon!",
+                1500,
+                "Under Development",
+                1500,
+              ]}
+              wrapper="span"
+              speed={40}
+              repeat={Infinity}
+              className="text-foreground"
+            />
+          </motion.h2>
+
+          <motion.p
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.3 }}
+            className="text-sm md:text-base text-muted-foreground max-w-md mx-auto mb-8 leading-relaxed"
+          >
+            The page you're looking for doesn't exist or is currently being built. Our team is working hard to bring you new features!
+          </motion.p>
+
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.4 }}
+            className="flex flex-col sm:flex-row gap-3 justify-center w-full sm:w-auto"
+          >
+            <Button
+              onClick={() => navigate("/")}
+              className="btn-gradient text-white rounded-xl h-11 px-8 font-semibold transition-all hover:scale-[1.02] active:scale-[0.98] cursor-pointer inline-flex items-center justify-center gap-2 group w-full sm:w-auto"
+            >
+              <HomeIcon className="w-4 h-4" />
+              Return Home
+            </Button>
+            <Button
+              variant="outline"
+              onClick={() => navigate("/problems")}
+              className="rounded-xl h-11 px-8 font-semibold hover:bg-secondary border-border cursor-pointer inline-flex items-center justify-center gap-2 transition-all hover:scale-[1.02] active:scale-[0.98] w-full sm:w-auto"
+            >
+              <RocketIcon className="w-4 h-4 text-primary" />
+              Explore Problems
+            </Button>
+          </motion.div>
         </motion.div>
 
         {/* Floating elements */}
@@ -129,7 +134,7 @@ export default function NotFound() {
             repeat: Infinity,
             ease: "easeInOut",
           }}
-          className="absolute top-1/4 left-12 w-8 h-8 rounded-full bg-amber-500/40 dark:bg-amber-700/40 blur-sm hidden md:block"
+          className="absolute top-1/4 left-6 w-8 h-8 rounded-full bg-primary/20 blur-sm hidden md:block"
         />
         <motion.div
           animate={{
@@ -142,18 +147,9 @@ export default function NotFound() {
             ease: "easeInOut",
             delay: 0.7,
           }}
-          className="absolute bottom-1/3 right-20 w-10 h-10 rounded-full bg-pink-500/40 dark:bg-pink-700/40 blur-sm hidden md:block"
+          className="absolute bottom-1/3 right-12 w-10 h-10 rounded-full bg-accent/20 blur-sm hidden md:block"
         />
       </div>
-
-      {/* Custom CSS */}
-      <style>{`
-        .text-gradient {
-          background-clip: text;
-          -webkit-background-clip: text;
-          color: transparent;
-        }
-      `}</style>
     </section>
   );
 }

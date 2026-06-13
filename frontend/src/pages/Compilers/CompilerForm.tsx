@@ -1,12 +1,6 @@
 import { useState, useEffect } from "react";
-import CodeMirror from "@uiw/react-codemirror";
-import { githubDark } from "@uiw/codemirror-theme-github";
-import { dracula } from "@uiw/codemirror-theme-dracula";
-import { cpp } from "@codemirror/lang-cpp";
-import { java } from "@codemirror/lang-java";
-import { python } from "@codemirror/lang-python";
+import Editor from "@monaco-editor/react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Select,
   SelectTrigger,
@@ -14,10 +8,9 @@ import {
   SelectContent,
   SelectItem,
 } from "@/components/ui/select";
-import { Loader2, CheckCircle2, XCircle } from "lucide-react";
-import { Alert } from "@/components/ui/alert";
+import { Loader2, CheckCircle2, XCircle, Sparkles } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
-import { ScrollArea } from "@/components/ui/scroll-area";
+import { motion } from "framer-motion";
 
 // Default code templates per language
 const DEFAULT_CODE = {
@@ -45,18 +38,6 @@ function getStorageKey(language: string) {
   return `compiler-code-${language}`;
 }
 
-function getLanguageExtension(language: string) {
-  if (language === "cpp") return cpp();
-  if (language === "java") return java();
-  if (language === "python") return python();
-  return python();
-}
-
-function getTheme(theme: string) {
-  if (theme === "dracula") return dracula;
-  return githubDark;
-}
-
 const FONT_SIZES = [12, 14, 16, 18, 20];
 
 interface BasicCompilerProps {
@@ -65,7 +46,6 @@ interface BasicCompilerProps {
 }
 
 function compareOutput(userOutput: string, expectedOutput: string) {
-  // Trim trailing spaces and compare as lines
   const trim = (s: string) =>
     s
       .replace(/[ \t]+$/gm, "")
@@ -132,31 +112,30 @@ export const BasicCompiler = ({
     const accepted = compareOutput(output, expectedOutput);
 
     return (
-      <Alert
-        variant={accepted ? "default" : "destructive"}
-        className="mt-4 p-5 rounded-lg"
+      <div
+        className={`p-5 rounded-2xl border ${
+          accepted
+            ? "bg-emerald-500/5 border-emerald-500/20 text-emerald-400"
+            : "bg-red-500/5 border-red-500/20 text-red-400"
+        }`}
       >
         <div className="flex items-center gap-2 mb-4">
           {accepted ? (
             <>
-              <CheckCircle2 className="text-green-600 w-6 h-6" />
-              <span className="text-green-700 font-semibold text-xl">
-                Accepted
-              </span>
+              <CheckCircle2 className="w-5 h-5 text-emerald-400" />
+              <span className="font-bold text-lg">Accepted</span>
             </>
           ) : (
             <>
-              <XCircle className="text-red-600 w-6 h-6" />
-              <span className="text-red-700 font-semibold text-xl">
-                Wrong Answer
-              </span>
+              <XCircle className="w-5 h-5 text-red-400" />
+              <span className="font-bold text-lg">Wrong Answer</span>
             </>
           )}
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 py-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <div className="font-semibold text-xs mb-2 uppercase text-gray-600">
+            <div className="font-semibold text-[10px] mb-1.5 uppercase tracking-wider text-muted-foreground">
               Your Output
             </div>
             <Textarea
@@ -165,173 +144,181 @@ export const BasicCompiler = ({
                 "YOUR OUTPUT\nAccepted"
               )}
               readOnly
-              className="bg-gray-100"
+              className="w-full border border-border rounded-xl px-3.5 py-2.5 font-mono text-xs bg-secondary/20 resize-none h-32"
             />
           </div>
           <div>
-            <div className="font-semibold text-xs mb-2 uppercase text-gray-600">
+            <div className="font-semibold text-[10px] mb-1.5 uppercase tracking-wider text-muted-foreground">
               Expected Output
             </div>
-            <Textarea value={expectedOutput} readOnly className="bg-gray-100" />
+            <Textarea
+              value={expectedOutput}
+              readOnly
+              className="w-full border border-border rounded-xl px-3.5 py-2.5 font-mono text-xs bg-secondary/20 resize-none h-32"
+            />
           </div>
         </div>
-      </Alert>
+      </div>
     );
   }
 
   return (
-    <div className="relative w-full h-screen overflow-hidden bg-gradient-to-br from-gray-100 to-amber-100 dark:from-black dark:to-gray-900">
+    <div className="relative w-full h-screen overflow-hidden bg-background grid-pattern">
       {/* Background gradient blobs */}
-      <div className="absolute -top-20 left-0 w-60 h-60 pointer-events-none">
-        <div className="w-full h-full bg-gradient-to-r from-red-400/20 to-amber-200/30 rounded-full filter blur-3xl" />
-      </div>
-      <div className="absolute bottom-0 right-0 w-72 h-72 pointer-events-none">
-        <div className="w-full h-full bg-gradient-to-r from-amber-500/30 to-pink-400/20 rounded-full filter blur-3xl" />
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <motion.div
+          className="absolute -top-20 left-0 w-80 h-80 bg-gradient-to-r from-primary/10 to-accent/10 rounded-full filter blur-3xl"
+          animate={{
+            scale: [1, 1.2, 1],
+            opacity: [0.3, 0.5, 0.3],
+          }}
+          transition={{
+            duration: 8,
+            repeat: Infinity,
+            ease: "easeInOut",
+          }}
+        />
+        <motion.div
+          className="absolute bottom-0 right-0 w-96 h-96 bg-gradient-to-r from-accent/10 to-primary/10 rounded-full filter blur-3xl"
+          animate={{
+            scale: [1, 1.15, 1],
+            opacity: [0.3, 0.5, 0.3],
+          }}
+          transition={{
+            duration: 10,
+            repeat: Infinity,
+            ease: "easeInOut",
+            delay: 0.5,
+          }}
+        />
       </div>
 
-      <div className="container mx-auto p-4 h-full flex flex-col">
+      <div className="container mx-auto p-4 md:p-6 h-full flex flex-col max-w-7xl relative z-10">
         {/* Header */}
-        <CardHeader className="p-0 mb-4">
-          <div className="flex justify-between flex-wrap items-center gap-4">
-            <div
-              className="inline-flex items-center px-4 py-2 rounded-full
-              bg-red-500/10 dark:bg-red-700/20 text-red-700 dark:text-red-200
-              text-sm font-semibold shadow-md animate-pulse select-none"
-            >
+        <div className="mb-6 flex justify-between flex-wrap items-center gap-4">
+          <div className="flex items-center gap-3">
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-bold shadow-md">
+              <Sparkles className="w-3.5 h-3.5 animate-pulse" />
               तपस्Code
             </div>
-            <CardTitle
-              className="text-3xl font-extrabold tracking-tight
-              bg-gradient-to-r from-red-600 to-amber-500 dark:from-red-400 dark:to-amber-300
-              bg-clip-text text-transparent"
-            >
-              {defaultLanguage === "cpp" && "C++ Editor"}
-              {defaultLanguage === "java" && "Java Editor"}
-              {defaultLanguage === "python" && "Python Editor"}
-            </CardTitle>
-
-            <div className="flex gap-4 flex-wrap">
-              <Select value={theme} onValueChange={setTheme}>
-                <SelectTrigger className="w-[120px]">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="githubDark">GitHub Dark</SelectItem>
-                  <SelectItem value="dracula">Dracula</SelectItem>
-                </SelectContent>
-              </Select>
-
-              <Select
-                value={String(fontSize)}
-                onValueChange={(v) => setFontSize(Number(v))}
-              >
-                <SelectTrigger className="w-[100px]">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {FONT_SIZES.map((fs) => (
-                    <SelectItem key={fs} value={String(fs)}>
-                      {fs}px
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+            <h1 className="text-2xl font-extrabold tracking-tight gradient-text-hero">
+              {defaultLanguage === "cpp" && "C++ Compiler"}
+              {defaultLanguage === "java" && "Java Compiler"}
+              {defaultLanguage === "python" && "Python Compiler"}
+            </h1>
           </div>
-        </CardHeader>
+
+          <div className="flex gap-3 flex-wrap">
+            <Select value={theme} onValueChange={setTheme}>
+              <SelectTrigger className="w-[130px] bg-secondary/40 border-border rounded-xl">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent className="glass-strong border-border rounded-xl">
+                <SelectItem className="cursor-pointer rounded-lg" value="githubDark">GitHub Dark</SelectItem>
+                <SelectItem className="cursor-pointer rounded-lg" value="dracula">Dracula</SelectItem>
+              </SelectContent>
+            </Select>
+
+            <Select
+              value={String(fontSize)}
+              onValueChange={(v) => setFontSize(Number(v))}
+            >
+              <SelectTrigger className="w-[100px] bg-secondary/40 border-border rounded-xl">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent className="glass-strong border-border rounded-xl">
+                {FONT_SIZES.map((fs) => (
+                  <SelectItem key={fs} value={String(fs)} className="cursor-pointer rounded-lg">
+                    {fs}px
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
 
         {/* Main Content */}
-        <div className="flex-1 grid grid-cols-1 lg:grid-cols-2 gap-6 overflow-hidden">
+        <div className="flex-1 grid grid-cols-1 lg:grid-cols-2 gap-6 overflow-hidden min-h-0">
           {/* Editor Column */}
-          <Card className="h-full overflow-hidden border-2 border-amber-400 dark:border-red-600 shadow-lg">
-            <ScrollArea className="h-full w-full">
-              <CodeMirror
+          <div className="glass h-full overflow-hidden border border-border shadow-2xl rounded-2xl flex flex-col">
+            <div className="px-4 py-2.5 bg-secondary/20 border-b border-border flex items-center justify-between text-xs text-muted-foreground font-mono">
+              <span>main.{defaultLanguage === 'cpp' ? 'cpp' : defaultLanguage === 'java' ? 'java' : 'py'}</span>
+            </div>
+            <div className="flex-1 overflow-hidden rounded-b-2xl">
+              <Editor
                 value={code}
                 height="100%"
-                extensions={[getLanguageExtension(defaultLanguage)]}
-                theme={getTheme(theme)}
-                onChange={setCode}
-                style={{ fontSize: `${fontSize}px`, background: "transparent" }}
-                basicSetup={{
-                  lineNumbers: true,
-                  highlightActiveLine: true,
-                  highlightSelectionMatches: true,
-                  autocompletion: true,
+                language={defaultLanguage === "cpp" ? "cpp" : defaultLanguage === "java" ? "java" : "python"}
+                theme={theme === "githubLight" ? "vs" : "vs-dark"}
+                onChange={(val) => setCode(val ?? "")}
+                loading={
+                  <div className="flex items-center justify-center h-full bg-zinc-950/20 text-muted-foreground gap-2">
+                    <Loader2 className="h-5 w-5 animate-spin text-primary" />
+                    <span>Initializing Monaco Editor...</span>
+                  </div>
+                }
+                options={{
+                  fontSize: fontSize,
+                  minimap: { enabled: false },
+                  automaticLayout: true,
                 }}
               />
-            </ScrollArea>
-          </Card>
+            </div>
+          </div>
 
-          {/* Input/Output Column */}
-
-          <div className="flex flex-col gap-4 pr-4 overflow-auto">
+          {/* Right Column (Inputs & Outputs) */}
+          <div className="flex flex-col gap-6 overflow-y-auto pr-2">
             {/* Input Section */}
-            <Card className="border-2 border-amber-400/50 dark:border-red-600/50">
-              <CardContent className="p-4">
-                <div className="mb-2 font-medium">
-                  Standard Input{" "}
-                  <span className="ml-1 text-xs text-gray-400">(optional)</span>
-                </div>
-                <Textarea
-                  className="w-full border-2 border-amber-400/50 rounded-xl px-3 py-2 font-mono bg-white/70 dark:bg-black/60
-                    focus:border-red-400 focus:ring-amber-300 transition"
-                  rows={4}
-                  placeholder="Enter input for the program..."
-                  value={input}
-                  onChange={(e) => setInput(e.target.value)}
-                />
-              </CardContent>
-            </Card>
+            <div className="glass-strong p-5 rounded-2xl border border-border">
+              <div className="mb-2 text-sm font-semibold text-muted-foreground">Input</div>
+              <Textarea
+                className="w-full border border-border rounded-xl px-3.5 py-2.5 font-mono text-xs bg-secondary/20 focus:ring-primary/20 focus:border-primary/50 transition resize-none"
+                rows={3}
+                placeholder="Enter program input here..."
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+              />
+            </div>
 
             {/* Expected Output Section */}
-            <Card className="border-2 border-amber-400/50 dark:border-red-600/50">
-              <CardContent className="p-4">
-                <div className="mb-2 font-medium">
-                  Expected Output{" "}
-                  <span className="ml-1 text-xs text-gray-400">
-                    (for comparison, optional)
-                  </span>
-                </div>
-                <Textarea
-                  className="w-full border-2 border-amber-400/50 rounded-xl px-3 py-2 font-mono bg-white/70 dark:bg-black/60
-                    focus:border-red-400 focus:ring-amber-300 transition"
-                  rows={4}
-                  placeholder="Paste expected output from the problem statement..."
-                  value={expectedOutput}
-                  onChange={(e) => setExpectedOutput(e.target.value)}
-                />
-              </CardContent>
-            </Card>
+            <div className="glass-strong p-5 rounded-2xl border border-border">
+              <div className="mb-2 text-sm font-semibold text-muted-foreground flex items-center gap-1.5">
+                Expected Output
+                <span className="text-xs text-muted-foreground/50 font-normal">(for comparison, optional)</span>
+              </div>
+              <Textarea
+                className="w-full border border-border rounded-xl px-3.5 py-2.5 font-mono text-xs bg-secondary/20 focus:ring-primary/20 focus:border-primary/50 transition resize-none"
+                rows={4}
+                placeholder="Paste expected output from the problem statement..."
+                value={expectedOutput}
+                onChange={(e) => setExpectedOutput(e.target.value)}
+              />
+            </div>
 
             {/* Run Button */}
             <Button
               onClick={handleRun}
               disabled={loading}
-              className="px-8 py-3 text-lg font-bold
-                  bg-gradient-to-r from-red-600 to-amber-400 hover:from-red-500 hover:to-amber-500
-                  text-white rounded-xl shadow-xl transition-transform duration-150
-                  hover:scale-105 focus:ring-2 focus:ring-amber-500/80"
+              className="btn-gradient text-white rounded-xl h-12 text-base font-bold shadow-xl transition-all hover:scale-[1.02] active:scale-[0.98] cursor-pointer inline-flex items-center justify-center gap-2 w-full"
             >
               {loading ? (
                 <>
-                  <Loader2 className="animate-spin w-5 h-5 mr-2" />
-                  Running...
+                  <Loader2 className="animate-spin w-5 h-5" />
+                  Running Program...
                 </>
               ) : (
-                "Run"
+                "Run Code"
               )}
             </Button>
 
             {/* Output Section */}
             {output !== null && (
-              <Card className="border-2 border-amber-400/50 dark:border-red-600/50">
-                <CardContent className="p-4">
-                  <div className="mb-2 font-medium">Output</div>
-                  <pre className="font-mono text-sm p-2 rounded bg-gray-50 border border-amber-300 dark:bg-amber-900/30 dark:border-amber-700 overflow-auto">
-                    {output}
-                  </pre>
-                </CardContent>
-              </Card>
+              <div className="glass-strong p-5 rounded-2xl border border-border">
+                <div className="mb-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Output</div>
+                <pre className="font-mono text-sm p-4 rounded-xl bg-secondary/25 border border-border overflow-auto">
+                  {output}
+                </pre>
+              </div>
             )}
 
             {/* Comparison Section */}
@@ -339,16 +326,12 @@ export const BasicCompiler = ({
 
             {/* Error Section */}
             {error && (
-              <Card className="border-2 border-red-400/50 dark:border-red-600/50">
-                <CardContent className="p-4">
-                  <div className="mb-2 font-medium text-red-600 dark:text-red-400">
-                    Error
-                  </div>
-                  <pre className="font-mono text-sm whitespace-pre-wrap text-red-700 dark:text-red-300">
-                    {error}
-                  </pre>
-                </CardContent>
-              </Card>
+              <div className="glass-strong p-5 rounded-2xl border border-red-500/20 text-red-400 bg-red-500/5">
+                <div className="mb-2 text-xs font-semibold uppercase tracking-wider">Error</div>
+                <pre className="font-mono text-xs whitespace-pre-wrap leading-relaxed">
+                  {error}
+                </pre>
+              </div>
             )}
           </div>
         </div>

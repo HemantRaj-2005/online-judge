@@ -6,12 +6,6 @@ import MDEditor from "@uiw/react-md-editor";
 import rehypeKatex from "rehype-katex";
 import remarkMath from "remark-math";
 import "katex/dist/katex.min.css";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -21,7 +15,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
 import ReactMarkdown from "react-markdown";
 import { Copy, Sparkles, Check, Loader2 } from "lucide-react";
-
+import { motion } from "framer-motion";
 
 const difficulties = [
   { value: 'veryeasy', label: 'Very Easy' },
@@ -113,7 +107,6 @@ export default function ProblemCreate() {
         time_limit: Number(form.time_limit),
         memory_limit: Number(form.memory_limit),
       };
-      // Only include slug if user entered it (not empty string)
       if (form.slug && form.slug.trim() !== "") {
         payload.slug = form.slug.trim();
       }
@@ -137,52 +130,99 @@ export default function ProblemCreate() {
   };
 
   return (
-    <div className="container mx-auto p-4 max-w-6xl">
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-2xl">Create New Problem</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={submitCreateProblem} className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <section className="relative min-h-screen py-12 bg-background grid-pattern overflow-hidden">
+      {/* Animated background elements */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <motion.div
+          className="absolute top-0 left-0 w-80 h-80 bg-gradient-to-r from-primary/10 to-accent/10 dark:from-primary/20 dark:to-accent/20 rounded-full filter blur-3xl -translate-x-1/2 -translate-y-1/2"
+          animate={{
+            scale: [1, 1.2, 1],
+            opacity: [0.4, 0.6, 0.4],
+          }}
+          transition={{
+            duration: 8,
+            repeat: Infinity,
+            ease: "easeInOut",
+          }}
+        />
+        <motion.div
+          className="absolute bottom-0 right-0 w-96 h-96 bg-gradient-to-r from-accent/10 to-primary/10 dark:from-accent/20 dark:to-primary/20 rounded-full filter blur-3xl translate-x-1/2 translate-y-1/2"
+          animate={{
+            scale: [1, 1.15, 1],
+            opacity: [0.4, 0.6, 0.4],
+          }}
+          transition={{
+            duration: 10,
+            repeat: Infinity,
+            ease: "easeInOut",
+            delay: 0.5,
+          }}
+        />
+      </div>
+
+      <div className="container mx-auto px-4 md:px-6 relative z-10 max-w-5xl">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+          className="w-full glass rounded-3xl border border-border p-6 md:p-10 shadow-2xl"
+        >
+          <div className="flex items-center gap-3 mb-8">
+            <div className="p-3 rounded-2xl bg-primary/10 text-primary border border-primary/20">
+              <Sparkles className="w-6 h-6" />
+            </div>
+            <div>
+              <h1 className="text-3xl font-extrabold tracking-tight gradient-text-hero">
+                Create New Problem
+              </h1>
+              <p className="text-sm text-muted-foreground mt-1">
+                Configure your task parameters, write description in markdown, and generate AI testcases.
+              </p>
+            </div>
+          </div>
+
+          <form onSubmit={submitCreateProblem} className="space-y-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               {/* Left Column - Problem Metadata */}
-              <div className="space-y-4">
+              <div className="space-y-5">
                 <div>
-                  <Label htmlFor="title">Title</Label>
+                  <Label htmlFor="title" className="text-sm font-semibold mb-2 block text-muted-foreground">Title</Label>
                   <Input
                     id="title"
                     name="title"
                     value={form.title}
                     onChange={handleChange}
                     required
+                    className="bg-secondary/40 border-border rounded-xl h-10"
                   />
                 </div>
 
                 <div>
-                  <Label>Difficulty</Label>
+                  <Label className="text-sm font-semibold mb-2 block text-muted-foreground">Difficulty</Label>
                   <Select value={form.difficulty} onValueChange={handleDifficultyChange}>
-                    <SelectTrigger>
+                    <SelectTrigger className="w-full bg-secondary/40 border-border rounded-xl h-10">
                       <SelectValue placeholder="Select difficulty" />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className="glass-strong border-border rounded-xl">
                       {difficulties.map(d => (
-                        <SelectItem key={d.value} value={d.value}>{d.label}</SelectItem>
+                        <SelectItem key={d.value} value={d.value} className="cursor-pointer rounded-lg">{d.label}</SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
                 </div>
 
                 <div>
-                  <Label>Topics</Label>
-                  <div className="flex flex-wrap gap-2">
+                  <Label className="text-sm font-semibold mb-2 block text-muted-foreground">Topics</Label>
+                  <div className="flex flex-wrap gap-3 p-4 rounded-2xl bg-secondary/20 border border-border">
                     {allTopics.map(topic => (
-                      <div key={topic.id} className="flex items-center space-x-2">
+                      <div key={topic.id} className="flex items-center space-x-2 bg-secondary/40 px-3 py-1.5 rounded-xl border border-border">
                         <Checkbox
                           id={`topic-${topic.id}`}
                           checked={form.topics.includes(topic.name)}
                           onCheckedChange={() => handleTopicsChange(topic.name)}
+                          className="border-border rounded-md animate-none"
                         />
-                        <Label htmlFor={`topic-${topic.id}`} className="font-normal">
+                        <Label htmlFor={`topic-${topic.id}`} className="font-medium text-xs text-foreground cursor-pointer select-none">
                           {topic.name}
                         </Label>
                       </div>
@@ -192,10 +232,10 @@ export default function ProblemCreate() {
               </div>
 
               {/* Right Column - Limits & Author */}
-              <div className="space-y-4">
+              <div className="space-y-5">
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <Label htmlFor="time_limit">Time Limit (ms)</Label>
+                    <Label htmlFor="time_limit" className="text-sm font-semibold mb-2 block text-muted-foreground">Time Limit (ms)</Label>
                     <Input
                       id="time_limit"
                       name="time_limit"
@@ -204,10 +244,11 @@ export default function ProblemCreate() {
                       value={form.time_limit}
                       onChange={handleChange}
                       required
+                      className="bg-secondary/40 border-border rounded-xl h-10"
                     />
                   </div>
                   <div>
-                    <Label htmlFor="memory_limit">Memory Limit (MB)</Label>
+                    <Label htmlFor="memory_limit" className="text-sm font-semibold mb-2 block text-muted-foreground">Memory Limit (MB)</Label>
                     <Input
                       id="memory_limit"
                       name="memory_limit"
@@ -216,50 +257,49 @@ export default function ProblemCreate() {
                       value={form.memory_limit}
                       onChange={handleChange}
                       required
+                      className="bg-secondary/40 border-border rounded-xl h-10"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <Label htmlFor="slug">Slug</Label>
+                  <Label htmlFor="slug" className="text-sm font-semibold mb-2 block text-muted-foreground">Slug</Label>
                   <Input
                     id="slug"
                     name="slug"
                     value={form.slug}
                     onChange={handleChange}
-                    required
+                    className="bg-secondary/40 border-border rounded-xl h-10"
                   />
                 </div>
 
-                <Card>
-                  <CardHeader className="p-4">
-                    <div className="font-medium">Author Information</div>
-                  </CardHeader>
-                  <CardContent className="p-4 pt-0 space-y-1">
-                    <div className="flex justify-between">
-                      <span className="text-sm text-muted-foreground">Username:</span>
-                      <span className="text-sm font-medium">{form.author}</span>
+                <div className="glass-strong p-5 rounded-2xl border border-border">
+                  <div className="font-semibold text-sm mb-3 text-foreground">Author Information</div>
+                  <div className="space-y-2 text-xs">
+                    <div className="flex justify-between border-b border-border/40 pb-2">
+                      <span className="text-muted-foreground">Username:</span>
+                      <span className="font-semibold text-foreground">{form.author}</span>
                     </div>
-                    <div className="flex justify-between">
-                      <span className="text-sm text-muted-foreground">Created At:</span>
-                      <span className="text-sm font-medium">
+                    <div className="flex justify-between pt-1">
+                      <span className="text-muted-foreground">Created At:</span>
+                      <span className="font-semibold text-foreground">
                         {new Date().toLocaleDateString()}
                       </span>
                     </div>
-                  </CardContent>
-                </Card>
+                  </div>
+                </div>
               </div>
             </div>
 
             {/* Description Editor */}
-            <div>
-              <Label>Problem Description</Label>
-              <Tabs defaultValue="write" className="mt-2">
-                <TabsList>
-                  <TabsTrigger value="write">Write</TabsTrigger>
-                  <TabsTrigger value="preview">Preview</TabsTrigger>
+            <div className="space-y-2">
+              <Label className="text-sm font-semibold text-muted-foreground">Problem Description</Label>
+              <Tabs defaultValue="write" className="mt-2 w-full">
+                <TabsList className="bg-secondary/40 rounded-xl p-1 h-auto w-fit mb-3 border border-border">
+                  <TabsTrigger value="write" className="rounded-lg text-xs px-4 py-1.5 data-[state=active]:bg-primary data-[state=active]:text-white transition-all">Write</TabsTrigger>
+                  <TabsTrigger value="preview" className="rounded-lg text-xs px-4 py-1.5 data-[state=active]:bg-primary data-[state=active]:text-white transition-all">Preview</TabsTrigger>
                 </TabsList>
-                <TabsContent value="write" className="border rounded-md overflow-hidden">
+                <TabsContent value="write" className="rounded-2xl overflow-hidden border border-border bg-card">
                   <MDEditor
                     value={form.description}
                     onChange={handleDescriptionChange}
@@ -268,8 +308,8 @@ export default function ProblemCreate() {
                     visibleDragbar={false}
                   />
                 </TabsContent>
-                <TabsContent value="preview" className="border rounded-md p-4">
-                  <div className="markdown">
+                <TabsContent value="preview" className="glass-strong rounded-2xl p-6 border border-border min-h-[400px]">
+                  <div className="markdown prose dark:prose-invert max-w-none">
                     <ReactMarkdown
                       remarkPlugins={[remarkMath]}
                       rehypePlugins={[rehypeKatex]}
@@ -279,29 +319,28 @@ export default function ProblemCreate() {
                   </div>
                 </TabsContent>
               </Tabs>
-              <div className="text-sm text-muted-foreground mt-2">
+              <div className="text-xs text-muted-foreground mt-2">
                 Supports Markdown with LaTeX math expressions (e.g., $E=mc^2$)
               </div>
             </div>
 
             {/* AI Test Case Generator */}
-            <div className="border rounded-md p-4 bg-gray-50/50 dark:bg-gray-900/50 space-y-4">
+            <div className="glass-strong p-6 rounded-2xl border border-border space-y-6">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div className="space-y-1">
-                  <h4 className="text-lg font-semibold flex items-center gap-2">
-                    <Sparkles className="h-5 w-5 text-green-500 animate-pulse" />
+                  <h4 className="text-base font-bold flex items-center gap-2 text-foreground">
+                    <Sparkles className="h-5 w-5 text-accent animate-pulse" />
                     AI Test Case Generator
                   </h4>
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-xs text-muted-foreground">
                     Automatically generate sample, edge, corner, stress, and randomized test cases for this problem statement.
                   </p>
                 </div>
                 <Button
                   type="button"
-                  variant="outline"
                   onClick={handleGenerateTestCases}
                   disabled={genLoading}
-                  className="gap-2 shrink-0 self-start sm:self-center"
+                  className="btn-gradient text-white rounded-xl h-10 px-5 transition-all hover:scale-[1.02] active:scale-[0.98] cursor-pointer inline-flex items-center gap-2 text-xs shrink-0 self-start sm:self-center"
                 >
                   {genLoading ? (
                     <>
@@ -310,7 +349,7 @@ export default function ProblemCreate() {
                     </>
                   ) : (
                     <>
-                      <Sparkles className="h-4 w-4 text-green-500" />
+                      <Sparkles className="h-4 w-4 text-white" />
                       Generate Test Cases
                     </>
                   )}
@@ -318,34 +357,32 @@ export default function ProblemCreate() {
               </div>
 
               {generatedCases && (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
                   {Object.entries(generatedCases).map(([category, cases]: [string, any]) => {
                     if (category === "error" || !Array.isArray(cases) || cases.length === 0) return null;
                     return (
-                      <Card key={category} className="shadow-sm border border-gray-200 dark:border-gray-800">
-                        <CardHeader className="p-3 bg-gray-100/50 dark:bg-gray-950/50 border-b">
-                          <CardTitle className="text-sm font-semibold capitalize flex items-center justify-between">
-                            <span>{category} Cases</span>
-                            <span className="text-xs bg-green-100 dark:bg-green-950 text-green-700 dark:text-green-300 px-2 py-0.5 rounded-full">
-                              {cases.length} Generated
-                            </span>
-                          </CardTitle>
-                        </CardHeader>
-                        <CardContent className="p-3 space-y-3 max-h-[250px] overflow-y-auto">
+                      <div key={category} className="glass rounded-2xl border border-border overflow-hidden shadow-sm">
+                        <div className="p-4 bg-secondary/30 border-b border-border flex items-center justify-between">
+                          <span className="text-sm font-bold capitalize text-foreground">{category} Cases</span>
+                          <span className="text-[10px] font-semibold bg-primary/10 text-primary px-2 py-0.5 rounded-full border border-primary/20">
+                            {cases.length} Generated
+                          </span>
+                        </div>
+                        <div className="p-4 space-y-4 max-h-[300px] overflow-y-auto">
                           {cases.map((c: any, index: number) => {
                             const caseId = `${category}-${index}`;
                             return (
-                              <div key={index} className="space-y-2 border-b last:border-0 pb-2 last:pb-0">
+                              <div key={index} className="space-y-2 border-b border-border/40 last:border-0 pb-3 last:pb-0">
                                 {c.explanation && (
-                                  <div className="text-xs text-muted-foreground italic">
+                                  <div className="text-[11px] text-muted-foreground italic bg-secondary/10 px-2.5 py-1.5 rounded-lg border border-border/50">
                                     Why: {c.explanation}
                                   </div>
                                 )}
-                                <div className="grid grid-cols-2 gap-2 text-xs">
+                                <div className="grid grid-cols-2 gap-3 text-xs">
                                   <div className="space-y-1">
-                                    <span className="text-muted-foreground font-medium block">Input:</span>
+                                    <span className="text-muted-foreground text-[10px] font-semibold uppercase tracking-wider block">Input</span>
                                     <div className="relative group">
-                                      <pre className="bg-gray-100 dark:bg-gray-950 p-2 rounded text-[11px] font-mono whitespace-pre-wrap select-all max-h-[80px] overflow-y-auto">
+                                      <pre className="bg-secondary/35 border border-border/50 p-2.5 rounded-xl text-[11px] font-mono whitespace-pre-wrap select-all max-h-[80px] overflow-y-auto">
                                         {c.input}
                                       </pre>
                                       <Button
@@ -353,16 +390,16 @@ export default function ProblemCreate() {
                                         size="icon"
                                         variant="ghost"
                                         onClick={() => copyToClipboard(c.input, `${caseId}-in`)}
-                                        className="absolute top-1 right-1 h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity"
+                                        className="absolute top-1 right-1 h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity rounded-md hover:bg-secondary"
                                       >
                                         {copiedId === `${caseId}-in` ? <Check className="h-3 w-3 text-green-500" /> : <Copy className="h-3 w-3" />}
                                       </Button>
                                     </div>
                                   </div>
                                   <div className="space-y-1">
-                                    <span className="text-muted-foreground font-medium block">Output:</span>
+                                    <span className="text-muted-foreground text-[10px] font-semibold uppercase tracking-wider block">Output</span>
                                     <div className="relative group">
-                                      <pre className="bg-gray-100 dark:bg-gray-950 p-2 rounded text-[11px] font-mono whitespace-pre-wrap select-all max-h-[80px] overflow-y-auto">
+                                      <pre className="bg-secondary/35 border border-border/50 p-2.5 rounded-xl text-[11px] font-mono whitespace-pre-wrap select-all max-h-[80px] overflow-y-auto">
                                         {c.output}
                                       </pre>
                                       <Button
@@ -370,7 +407,7 @@ export default function ProblemCreate() {
                                         size="icon"
                                         variant="ghost"
                                         onClick={() => copyToClipboard(c.output, `${caseId}-out`)}
-                                        className="absolute top-1 right-1 h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity"
+                                        className="absolute top-1 right-1 h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity rounded-md hover:bg-secondary"
                                       >
                                         {copiedId === `${caseId}-out` ? <Check className="h-3 w-3 text-green-500" /> : <Copy className="h-3 w-3" />}
                                       </Button>
@@ -380,8 +417,8 @@ export default function ProblemCreate() {
                               </div>
                             );
                           })}
-                        </CardContent>
-                      </Card>
+                        </div>
+                      </div>
                     );
                   })}
                 </div>
@@ -389,14 +426,23 @@ export default function ProblemCreate() {
             </div>
 
             {/* Form Actions */}
-            <div className="flex justify-end gap-2">
-              <Button type="button" variant="outline" onClick={() => window.history.back()}>
+            <div className="flex justify-end gap-3 pt-4 border-t border-border">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => window.history.back()}
+                className="rounded-xl h-10 px-5 hover:bg-secondary border-border"
+              >
                 Cancel
               </Button>
-              <Button type="submit" disabled={loading}>
+              <Button
+                type="submit"
+                disabled={loading}
+                className="btn-gradient text-white rounded-xl h-10 px-6 font-semibold transition-all hover:scale-[1.02] active:scale-[0.98]"
+              >
                 {loading ? (
                   <>
-                    <span className="animate-spin mr-2">↻</span>
+                    <Loader2 className="animate-spin mr-2 h-4 w-4" />
                     Creating...
                   </>
                 ) : (
@@ -405,8 +451,8 @@ export default function ProblemCreate() {
               </Button>
             </div>
           </form>
-        </CardContent>
-      </Card>
-    </div>
+        </motion.div>
+      </div>
+    </section>
   );
 }
