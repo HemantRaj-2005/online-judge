@@ -1,175 +1,222 @@
 import { useAppSelector } from "@/redux/hook";
 import SubmissionsOnDashboard from "./SubmissionsOnDashboard";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { 
+import {
   Mail,
   User,
-  Bookmark,
+  Calendar,
   Trophy,
-  Clock,
   CheckCircle,
-  Code
+  Code,
+  Flame,
+  Target,
 } from "lucide-react";
 import { motion } from "framer-motion";
-import { useTheme } from "@/components/theme-provider";
 
 export default function DashBoard() {
   const { user } = useAppSelector((state) => state.auth);
   const initials = user?.username?.slice(0, 2).toUpperCase() || "US";
-  const { theme } = useTheme();
-  
-  const lightGradient = "from-amber-500 to-rose-500";
-  const darkGradient = "from-indigo-500 via-purple-500 to-pink-500";
-  const gradientClass = theme === "dark" ? darkGradient : lightGradient;
+
+  const statCards = [
+    {
+      icon: CheckCircle,
+      label: "Problems Solved",
+      value: "24",
+      change: "+5 this month",
+      gradient: "from-emerald-500 to-teal-500",
+      iconBg: "bg-emerald-500/10",
+      iconColor: "text-emerald-400",
+    },
+    {
+      icon: Flame,
+      label: "Current Streak",
+      value: "7 days",
+      change: "Keep it going!",
+      gradient: "from-amber-500 to-orange-500",
+      iconBg: "bg-amber-500/10",
+      iconColor: "text-amber-400",
+    },
+    {
+      icon: Target,
+      label: "Accuracy",
+      value: "85%",
+      change: "+2.5% from last month",
+      gradient: "from-indigo-500 to-purple-500",
+      iconBg: "bg-indigo-500/10",
+      iconColor: "text-indigo-400",
+    },
+  ];
+
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: { staggerChildren: 0.08, delayChildren: 0.1 },
+    },
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 16 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: { duration: 0.4, ease: "easeOut" },
+    },
+  };
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      {/* Welcome Section */}
-       <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5 }}
-    >
-      <Card className={`mb-6 bg-gradient-to-r ${gradientClass} border-none shadow-lg`}>
-        <motion.div
-          whileHover={{ scale: 1.01 }}
-          whileTap={{ scale: 0.98 }}
-        >
-          <CardHeader className="pb-4">
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.2 }}
-            >
-              <CardTitle className="text-white text-2xl md:text-3xl font-bold">
-                Welcome back, {user?.username || "Coder"}! 👋
-              </CardTitle>
-              <motion.p 
-                className="text-primary-foreground/80"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.4 }}
-              >
-                Check your progress and recent activity
-              </motion.p>
-            </motion.div>
-          </CardHeader>
+    <div className="container mx-auto px-4 py-8 max-w-6xl">
+      <motion.div
+        variants={containerVariants}
+        initial="hidden"
+        animate="visible"
+      >
+        {/* Header */}
+        <motion.div variants={itemVariants} className="mb-8">
+          <h1 className="text-2xl font-bold text-foreground">
+            Welcome back,{" "}
+            <span className="gradient-text">
+              {user?.username || "Coder"}
+            </span>{" "}
+            👋
+          </h1>
+          <p className="text-sm text-muted-foreground mt-1">
+            Here's your progress overview and recent activity.
+          </p>
         </motion.div>
-      </Card>
-    </motion.div>
 
-      {/* Main Content Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Profile Card */}
-        <Card className="lg:col-span-1">
-          <CardHeader className="flex flex-row items-center space-x-4 space-y-0">
-            <Avatar>
-              <AvatarFallback className="bg-primary text-primary-foreground">
-                {initials}
-              </AvatarFallback>
-            </Avatar>
-            <div>
-              <CardTitle>{user?.username}</CardTitle>
-              <p className="text-sm text-muted-foreground">{user?.email}</p>
-            </div>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="flex items-center space-x-4">
-              <div className="p-2 rounded-lg bg-secondary">
-                <User className="h-5 w-5 text-primary" />
+        {/* Stats Grid */}
+        <motion.div
+          variants={itemVariants}
+          className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8"
+        >
+          {statCards.map((stat) => (
+            <div
+              key={stat.label}
+              className="glass rounded-2xl p-5 glow-border transition-all"
+            >
+              <div className="flex items-center justify-between mb-3">
+                <span className="text-sm text-muted-foreground font-medium">
+                  {stat.label}
+                </span>
+                <div className={`p-2 rounded-xl ${stat.iconBg}`}>
+                  <stat.icon className={`w-4 h-4 ${stat.iconColor}`} />
+                </div>
               </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Username</p>
-                <p>{user?.username}</p>
+              <div className="text-3xl font-bold text-foreground">
+                {stat.value}
               </div>
-            </div>
-            <div className="flex items-center space-x-4">
-              <div className="p-2 rounded-lg bg-secondary">
-                <Mail className="h-5 w-5 text-primary" />
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Email</p>
-                <p>{user?.email}</p>
-              </div>
-            </div>
-            <div className="flex items-center space-x-4">
-              <div className="p-2 rounded-lg bg-secondary">
-                <Bookmark className="h-5 w-5 text-primary" />
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Member since</p>
-                <p>July 2025</p>
+              <div className="flex items-center gap-1.5 mt-1.5">
+                <Badge
+                  variant="secondary"
+                  className="text-[10px] px-1.5 py-0 h-5 rounded-md bg-primary/[0.08] text-primary border-0"
+                >
+                  ↑
+                </Badge>
+                <span className="text-xs text-muted-foreground">
+                  {stat.change}
+                </span>
               </div>
             </div>
-          </CardContent>
-        </Card>
+          ))}
+        </motion.div>
 
-        {/* Submissions Section */}
-        <Card className="lg:col-span-2">
-          <CardHeader>
-            <div className="flex items-center space-x-2">
-              <Code className="h-5 w-5 text-primary" />
-              <CardTitle>Recent Submissions</CardTitle>
+        {/* Main Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Profile Card */}
+          <motion.div variants={itemVariants} className="lg:col-span-1">
+            <div className="glass rounded-2xl p-6 glow-border h-full">
+              <div className="flex items-center gap-4 mb-6">
+                <div className="relative">
+                  <div className="absolute -inset-1 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-full opacity-50 blur-sm" />
+                  <Avatar className="h-14 w-14 relative">
+                    <AvatarFallback className="bg-gradient-to-br from-indigo-500 to-purple-600 text-white text-lg font-bold">
+                      {initials}
+                    </AvatarFallback>
+                  </Avatar>
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-foreground">
+                    {user?.username}
+                  </h3>
+                  <p className="text-sm text-muted-foreground">{user?.email}</p>
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                {[
+                  {
+                    icon: User,
+                    label: "Username",
+                    value: user?.username,
+                  },
+                  {
+                    icon: Mail,
+                    label: "Email",
+                    value: user?.email,
+                  },
+                  {
+                    icon: Calendar,
+                    label: "Member since",
+                    value: "July 2025",
+                  },
+                  {
+                    icon: Trophy,
+                    label: "Rank",
+                    value: "#142",
+                  },
+                ].map((item) => (
+                  <div
+                    key={item.label}
+                    className="flex items-center gap-3 py-2"
+                  >
+                    <div className="p-2 rounded-xl bg-white/[0.04]">
+                      <item.icon className="h-4 w-4 text-muted-foreground" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs text-muted-foreground">
+                        {item.label}
+                      </p>
+                      <p className="text-sm font-medium text-foreground truncate">
+                        {item.value}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
-          </CardHeader>
-          <CardContent>
-            <SubmissionsOnDashboard username={user?.username} limit={20} />
-          </CardContent>
-        </Card>
-      </div>
+          </motion.div>
 
-      {/* Stats Section */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
-        <Card>
-       
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              Problems Solved
-            </CardTitle>
-            <CheckCircle className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">24</div>
-            <p className="text-xs text-muted-foreground mt-1">
-              +5 from last month
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Current Streak</CardTitle>
-            <Clock className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">7 days</div>
-            <p className="text-xs text-muted-foreground mt-1">
-              Keep it going!
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Accuracy</CardTitle>
-            <Trophy className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">85%</div>
-            <div className="flex items-center mt-1">
-              <Badge variant="secondary" className="text-xs">
-                +2.5%
-              </Badge>
-              <span className="text-xs text-muted-foreground ml-1">
-                from last month
-              </span>
+          {/* Submissions */}
+          <motion.div variants={itemVariants} className="lg:col-span-2">
+            <div className="glass rounded-2xl p-6 glow-border">
+              <div className="flex items-center gap-2 mb-5">
+                <div className="p-2 rounded-xl bg-primary/[0.08]">
+                  <Code className="h-4 w-4 text-primary" />
+                </div>
+                <div>
+                  <h3 className="text-base font-semibold text-foreground">
+                    Recent Submissions
+                  </h3>
+                  <p className="text-xs text-muted-foreground">
+                    Your latest coding activity
+                  </p>
+                </div>
+              </div>
+              <SubmissionsOnDashboard username={user?.username} limit={20} />
             </div>
-          </CardContent>
-        </Card>
-        <p>Note: The above stats section is static, dynamic services coming soon..</p>
-      </div>
+          </motion.div>
+        </div>
+
+        {/* Note */}
+        <motion.p
+          variants={itemVariants}
+          className="text-xs text-muted-foreground/50 text-center mt-8"
+        >
+          Note: Stats are currently static. Dynamic analytics coming soon.
+        </motion.p>
+      </motion.div>
     </div>
   );
 }

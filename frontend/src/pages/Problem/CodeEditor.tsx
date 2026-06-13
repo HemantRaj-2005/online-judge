@@ -7,7 +7,6 @@ import { javascript } from "@codemirror/lang-javascript";
 import { cpp } from "@codemirror/lang-cpp";
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Select,
   SelectTrigger,
@@ -29,7 +28,7 @@ import {
   DialogTitle,
   DialogDescription,
 } from "@/components/ui/dialog";
-import { Loader2, Maximize, Minimize, Settings } from "lucide-react";
+import { Loader2, Maximize, Minimize, Settings, Send, Sparkles } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -241,40 +240,60 @@ export default function CodeEditor({
     }
   };
 
+  const hintLevels = [
+    { level: 1, label: "Observation" },
+    { level: 2, label: "Approach" },
+    { level: 3, label: "Derivation" },
+    { level: 4, label: "Complexity" },
+  ];
+
   return (
-    <Card className={isFullscreen ? "fixed inset-0 z-50 h-screen" : "w-full"}>
-      <CardHeader className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <CardTitle className="flex items-center gap-3">
-          Code Editor
-          <Badge>{language}</Badge>
-        </CardTitle>
-        <div className="flex items-center gap-2">
+    <div
+      className={
+        isFullscreen
+          ? "fixed inset-0 z-50 bg-background flex flex-col"
+          : "w-full flex flex-col glass rounded-2xl overflow-hidden glow-border"
+      }
+    >
+      {/* Toolbar */}
+      <div className="flex items-center justify-between px-4 py-3 border-b border-white/[0.06]">
+        <div className="flex items-center gap-3">
+          <span className="text-sm font-semibold text-foreground">Editor</span>
+          <Badge variant="outline" className="text-[10px] font-mono border-white/[0.08] rounded-md">
+            {language.toUpperCase()}
+          </Badge>
+        </div>
+        <div className="flex items-center gap-1.5">
           <Button
             variant="ghost"
             size="icon"
             onClick={() => setIsFullscreen((v) => !v)}
-            className="shrink-0"
+            className="h-8 w-8 rounded-lg hover:bg-white/[0.06]"
           >
             {isFullscreen ? (
-              <Minimize className="h-4 w-4" />
+              <Minimize className="h-3.5 w-3.5" />
             ) : (
-              <Maximize className="h-4 w-4" />
+              <Maximize className="h-3.5 w-3.5" />
             )}
           </Button>
           <Popover>
             <PopoverTrigger asChild>
-              <Button variant="ghost" size="icon" className="shrink-0">
-                <Settings className="h-4 w-4" />
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8 rounded-lg hover:bg-white/[0.06]"
+              >
+                <Settings className="h-3.5 w-3.5" />
               </Button>
             </PopoverTrigger>
-            <PopoverContent className="w-64 space-y-4">
+            <PopoverContent className="w-64 space-y-4 glass-strong rounded-xl border-white/[0.08]">
               <div>
-                <Label>Theme</Label>
+                <Label className="text-xs">Theme</Label>
                 <Select value={theme} onValueChange={setTheme}>
-                  <SelectTrigger>
+                  <SelectTrigger className="mt-1.5 h-9 rounded-lg bg-white/[0.02] border-white/[0.08]">
                     <SelectValue />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="glass-strong rounded-xl border-white/[0.08]">
                     <SelectItem value="githubDark">GitHub Dark</SelectItem>
                     <SelectItem value="githubLight">GitHub Light</SelectItem>
                     <SelectItem value="dracula">Dracula</SelectItem>
@@ -282,16 +301,17 @@ export default function CodeEditor({
                 </Select>
               </div>
               <div>
-                <Label>Font Size: {fontSize}px</Label>
+                <Label className="text-xs">Font Size: {fontSize}px</Label>
                 <Slider
                   value={[fontSize]}
                   onValueChange={([v]) => setFontSize(v)}
                   min={10}
                   max={24}
+                  className="mt-2"
                 />
               </div>
               <div className="flex justify-between items-center">
-                <Label>Line Numbers</Label>
+                <Label className="text-xs">Line Numbers</Label>
                 <Switch
                   checked={lineNumbers}
                   onCheckedChange={setLineNumbers}
@@ -300,228 +320,304 @@ export default function CodeEditor({
             </PopoverContent>
           </Popover>
         </div>
-      </CardHeader>
+      </div>
 
-      <CardContent className="space-y-4">
-        {/* AI Section */}
-        <div className="flex flex-wrap gap-2">
-          <Button
-            onClick={handleGetHint}
-            disabled={aiLoading || submitting}
-            variant="outline"
-          >
-            {aiLoading ? (
-              <Loader2 className="h-4 w-4 animate-spin mr-2" />
-            ) : null}
-            Get AI Hint
-          </Button>
+      {/* Controls Bar */}
+      <div className="flex items-center gap-2 px-4 py-2.5 border-b border-white/[0.06]">
+        <Select
+          value={language}
+          onValueChange={(lang) => {
+            setLanguage(lang);
+            setCode(getLanguageTemplate(lang));
+          }}
+        >
+          <SelectTrigger className="w-32 h-8 text-xs rounded-lg bg-white/[0.02] border-white/[0.08]">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent className="glass-strong rounded-xl border-white/[0.08]">
+            <SelectItem value="python">Python</SelectItem>
+            <SelectItem value="javascript">JavaScript</SelectItem>
+            <SelectItem value="java">Java</SelectItem>
+            <SelectItem value="cpp">C++</SelectItem>
+          </SelectContent>
+        </Select>
 
-          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-            <DialogContent className="max-w-2xl">
-              <DialogHeader>
-                <DialogTitle>AI Hints for Your Code</DialogTitle>
-                <DialogDescription>
-                  Review the AI-generated feedback to improve your code,
-                  including positive aspects, missing elements, next steps, and
-                  potential pitfalls.
-                </DialogDescription>
-              </DialogHeader>
-              {/* // Replace the dialog content section with this fixed version: */}
-              <div className="space-y-4 max-h-[60vh] overflow-y-auto pr-2">
-                {aiLoading && (
-                  <div className="flex items-center gap-2 text-muted-foreground">
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                    Analyzing your code...
-                  </div>
-                )}
-                {aiError && (
-                  <Alert variant="destructive">
-                    <AlertDescription>{aiError}</AlertDescription>
-                  </Alert>
-                )}
-                {aiResponse && (
-                  <div className="space-y-6">
-                    {/* Level Tabs Selection */}
-                    <div className="flex border-b border-gray-200 dark:border-gray-800">
-                      {[1, 2, 3, 4].map((level) => (
-                        <button
-                          key={level}
-                          className={`flex-1 py-2 text-center text-sm font-medium border-b-2 transition-colors ${
-                            activeHintLevel === level
-                              ? "border-green-500 text-green-600 dark:text-green-400"
-                              : "border-transparent text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
-                          }`}
-                          onClick={() => setActiveHintLevel(level)}
-                        >
-                          Level {level}
-                          <span className="block text-xs font-normal text-gray-400">
-                            {level === 1 && "Observation"}
-                            {level === 2 && "Approach"}
-                            {level === 3 && "Derivation"}
-                            {level === 4 && "Complexity"}
-                          </span>
-                        </button>
-                      ))}
-                    </div>
+        <div className="flex-1" />
 
-                    {/* Progressive Hint Content */}
-                    <div className="mt-4 space-y-4 min-h-[150px]">
-                      {activeHintLevel >= 1 && (
-                        <div className="p-4 bg-gray-50 dark:bg-gray-900 rounded-lg border">
-                          <h4 className="font-semibold text-gray-800 dark:text-gray-200 mb-2">Level 1: Observation</h4>
-                          <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
-                            {aiResponse.hint}
-                          </p>
-                        </div>
-                      )}
+        <Button
+          onClick={handleGetHint}
+          disabled={aiLoading || submitting}
+          variant="outline"
+          size="sm"
+          className="h-8 rounded-lg text-xs border-white/[0.08] hover:bg-white/[0.04] gap-1.5"
+        >
+          {aiLoading ? (
+            <Loader2 className="h-3.5 w-3.5 animate-spin" />
+          ) : (
+            <Sparkles className="h-3.5 w-3.5 text-primary" />
+          )}
+          AI Hint
+        </Button>
 
-                      {activeHintLevel >= 2 && (
-                        <div className="p-4 bg-gray-50 dark:bg-gray-900 rounded-lg border transition-opacity">
-                          <h4 className="font-semibold text-gray-800 dark:text-gray-200 mb-2">Level 2: Strategic Approach</h4>
-                          {aiResponse.approach && aiResponse.approach.length > 0 ? (
-                            <ul className="list-disc pl-5 space-y-1 text-sm text-gray-600 dark:text-gray-400">
-                              {aiResponse.approach.map((item, idx) => (
-                                <li key={idx}>{item}</li>
-                              ))}
-                            </ul>
-                          ) : (
-                            <p className="text-sm text-muted-foreground">No approach details provided.</p>
-                          )}
-                        </div>
-                      )}
+        <Button
+          onClick={handleSubmit}
+          disabled={submitting}
+          size="sm"
+          className="h-8 rounded-lg text-xs btn-gradient text-white gap-1.5"
+        >
+          {submitting ? (
+            <>
+              <Loader2 className="h-3.5 w-3.5 animate-spin" />
+              Submitting...
+            </>
+          ) : (
+            <>
+              <Send className="h-3.5 w-3.5" />
+              Submit
+            </>
+          )}
+        </Button>
+      </div>
 
-                      {activeHintLevel >= 3 && (
-                        <div className="p-4 bg-gray-50 dark:bg-gray-900 rounded-lg border transition-opacity">
-                          <h4 className="font-semibold text-gray-800 dark:text-gray-200 mb-2">Level 3: Step-by-Step Derivation</h4>
-                          {aiResponse.derivation && aiResponse.derivation.length > 0 ? (
-                            <div className="space-y-3">
-                              {aiResponse.derivation.map((item, idx) => (
-                                <div key={idx} className="flex items-start gap-2 text-sm text-gray-600 dark:text-gray-400">
-                                  <span className="font-medium text-green-600 dark:text-green-400 min-w-[50px]">Step {item.step || idx + 1}:</span>
-                                  <span className="flex-1">{item.content}</span>
-                                </div>
-                              ))}
-                            </div>
-                          ) : (
-                            <p className="text-sm text-muted-foreground">No derivation steps provided.</p>
-                          )}
-                        </div>
-                      )}
+      {/* Code Editor */}
+      <div className="flex-1 min-h-0">
+        <CodeMirror
+          value={code}
+          height={isFullscreen ? "calc(100vh - 180px)" : "400px"}
+          extensions={[getThemeExtension(), getLanguageExtension()]}
+          onChange={setCode}
+          theme={getThemeExtension()}
+          style={{ fontSize: `${fontSize}px` }}
+          basicSetup={{
+            lineNumbers,
+            highlightActiveLine: true,
+            highlightSelectionMatches: true,
+            autocompletion: true,
+          }}
+        />
+      </div>
 
-                      {activeHintLevel >= 4 && (
-                        <div className="p-4 bg-gray-50 dark:bg-gray-900 rounded-lg border transition-opacity">
-                          <h4 className="font-semibold text-gray-800 dark:text-gray-200 mb-2">Level 4: Complexity Analysis</h4>
-                          <div className="grid grid-cols-2 gap-4 text-sm">
-                            <div className="p-3 bg-white dark:bg-black rounded border">
-                              <span className="text-xs text-muted-foreground block">Time Complexity</span>
-                              <span className="font-mono font-bold text-green-600 dark:text-green-400 text-base">{aiResponse.complexity?.time || "O(?)"}</span>
-                            </div>
-                            <div className="p-3 bg-white dark:bg-black rounded border">
-                              <span className="text-xs text-muted-foreground block">Space Complexity</span>
-                              <span className="font-mono font-bold text-green-600 dark:text-green-400 text-base">{aiResponse.complexity?.space || "O(?)"}</span>
-                            </div>
-                          </div>
-                        </div>
-                      )}
-                    </div>
-
-                    <div className="text-xs text-muted-foreground italic border-t pt-3">
-                      Disclaimer: AI-generated hints may occasionally be inaccurate or incomplete. Always verify the suggested approach before using it in your final solution.
-                    </div>
-                  </div>
-                )}
-              </div>
-            </DialogContent>
-          </Dialog>
-        </div>
-
-        {/* Editor Controls */}
-        <div className="flex flex-col sm:flex-row gap-4">
-          <Select
-            value={language}
-            onValueChange={(lang) => {
-              setLanguage(lang);
-              setCode(getLanguageTemplate(lang));
-            }}
-          >
-            <SelectTrigger className="w-[180px]">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="python">Python</SelectItem>
-              <SelectItem value="javascript">JavaScript</SelectItem>
-              <SelectItem value="java">Java</SelectItem>
-              <SelectItem value="cpp">C++</SelectItem>
-            </SelectContent>
-          </Select>
-
-          <Button
-            onClick={handleSubmit}
-            disabled={submitting}
-            className="flex-1 sm:flex-none"
-          >
-            {submitting ? (
-              <>
-                <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                Submitting...
-              </>
-            ) : (
-              "Submit Code"
-            )}
-          </Button>
-        </div>
-
-        {/* Code Editor */}
-        <div className="border rounded-md overflow-hidden">
-          <CodeMirror
-            value={code}
-            height="400px"
-            extensions={[getThemeExtension(), getLanguageExtension()]}
-            onChange={setCode}
-            theme={getThemeExtension()}
-            style={{ fontSize: `${fontSize}px` }}
-            basicSetup={{
-              lineNumbers,
-              highlightActiveLine: true,
-              highlightSelectionMatches: true,
-              autocompletion: true,
-            }}
+      {/* Submission Status */}
+      {submissionStatus && (
+        <div className="px-4 py-3 border-t border-white/[0.06]">
+          <SubmissionStatusBar
+            status={submissionStatus}
+            submissionId={submissionId}
           />
         </div>
+      )}
 
-        {/* Submission Status */}
-        {submissionStatus && (
-          <Alert variant={getStatusVariant(submissionStatus)}>
-            <AlertDescription>
-              <span className="font-medium">Status:</span>{" "}
-              {formatStatus(submissionStatus)}
-              {submissionId && (
-                <span className="block text-sm mt-1">
-                  Submission ID: {submissionId}
-                </span>
-              )}
-            </AlertDescription>
-            
-          </Alert>
-        )}
-      </CardContent>
-    </Card>
+      {/* AI Hint Dialog */}
+      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+        <DialogContent className="max-w-2xl glass-strong rounded-2xl border-white/[0.08]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Sparkles className="w-4 h-4 text-primary" />
+              AI Hints
+            </DialogTitle>
+            <DialogDescription>
+              Progressive hints to guide your problem-solving approach.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 max-h-[60vh] overflow-y-auto pr-2">
+            {aiLoading && (
+              <div className="flex items-center gap-2 text-muted-foreground py-8 justify-center">
+                <Loader2 className="h-4 w-4 animate-spin" />
+                <span className="text-sm">Analyzing your code...</span>
+              </div>
+            )}
+            {aiError && (
+              <Alert variant="destructive" className="rounded-xl">
+                <AlertDescription>{aiError}</AlertDescription>
+              </Alert>
+            )}
+            {aiResponse && (
+              <div className="space-y-4">
+                {/* Level Tabs */}
+                <div className="flex rounded-xl bg-white/[0.03] p-1 gap-1">
+                  {hintLevels.map(({ level, label }) => (
+                    <button
+                      key={level}
+                      className={`flex-1 py-2 px-2 rounded-lg text-xs font-medium transition-all ${
+                        activeHintLevel === level
+                          ? "bg-primary/[0.15] text-primary"
+                          : "text-muted-foreground hover:text-foreground"
+                      }`}
+                      onClick={() => setActiveHintLevel(level)}
+                    >
+                      <span className="block">L{level}</span>
+                      <span className="block text-[10px] opacity-60 mt-0.5">
+                        {label}
+                      </span>
+                    </button>
+                  ))}
+                </div>
+
+                {/* Content */}
+                <div className="space-y-3 min-h-[120px]">
+                  {activeHintLevel >= 1 && (
+                    <div className="p-4 rounded-xl bg-white/[0.02] border border-white/[0.06]">
+                      <h4 className="text-sm font-semibold text-foreground mb-2">
+                        Observation
+                      </h4>
+                      <p className="text-sm text-muted-foreground leading-relaxed">
+                        {aiResponse.hint}
+                      </p>
+                    </div>
+                  )}
+                  {activeHintLevel >= 2 && (
+                    <div className="p-4 rounded-xl bg-white/[0.02] border border-white/[0.06]">
+                      <h4 className="text-sm font-semibold text-foreground mb-2">
+                        Strategic Approach
+                      </h4>
+                      {aiResponse.approach?.length > 0 ? (
+                        <ul className="list-disc pl-5 space-y-1 text-sm text-muted-foreground">
+                          {aiResponse.approach.map((item, idx) => (
+                            <li key={idx}>{item}</li>
+                          ))}
+                        </ul>
+                      ) : (
+                        <p className="text-sm text-muted-foreground">
+                          No approach details provided.
+                        </p>
+                      )}
+                    </div>
+                  )}
+                  {activeHintLevel >= 3 && (
+                    <div className="p-4 rounded-xl bg-white/[0.02] border border-white/[0.06]">
+                      <h4 className="text-sm font-semibold text-foreground mb-2">
+                        Step-by-Step
+                      </h4>
+                      {aiResponse.derivation?.length > 0 ? (
+                        <div className="space-y-2">
+                          {aiResponse.derivation.map((item, idx) => (
+                            <div
+                              key={idx}
+                              className="flex items-start gap-2 text-sm"
+                            >
+                              <span className="font-mono text-xs text-primary min-w-[40px]">
+                                {String(item.step || idx + 1).padStart(2, "0")}
+                              </span>
+                              <span className="text-muted-foreground flex-1">
+                                {item.content}
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <p className="text-sm text-muted-foreground">
+                          No derivation steps provided.
+                        </p>
+                      )}
+                    </div>
+                  )}
+                  {activeHintLevel >= 4 && (
+                    <div className="p-4 rounded-xl bg-white/[0.02] border border-white/[0.06]">
+                      <h4 className="text-sm font-semibold text-foreground mb-2">
+                        Complexity Analysis
+                      </h4>
+                      <div className="grid grid-cols-2 gap-3">
+                        <div className="p-3 rounded-lg bg-white/[0.02] border border-white/[0.06]">
+                          <span className="text-[10px] text-muted-foreground block">
+                            Time
+                          </span>
+                          <span className="font-mono font-bold text-primary text-sm">
+                            {aiResponse.complexity?.time || "O(?)"}
+                          </span>
+                        </div>
+                        <div className="p-3 rounded-lg bg-white/[0.02] border border-white/[0.06]">
+                          <span className="text-[10px] text-muted-foreground block">
+                            Space
+                          </span>
+                          <span className="font-mono font-bold text-primary text-sm">
+                            {aiResponse.complexity?.space || "O(?)"}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                <p className="text-[10px] text-muted-foreground/50 italic border-t border-white/[0.06] pt-3">
+                  AI-generated hints may be inaccurate. Always verify before using.
+                </p>
+              </div>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
+    </div>
   );
 }
 
-// Helper functions
+// Submission status bar component
+function SubmissionStatusBar({
+  status,
+  submissionId,
+}: {
+  status: string;
+  submissionId: number | null;
+}) {
+  const config = getStatusConfig(status);
+  return (
+    <div
+      className={`flex items-center gap-2 px-3 py-2 rounded-xl text-sm ${config.bg}`}
+    >
+      <span className={`w-2 h-2 rounded-full ${config.dot}`} />
+      <span className={`font-medium ${config.text}`}>
+        {formatStatus(status)}
+      </span>
+      {submissionId && (
+        <span className="text-xs text-muted-foreground ml-auto">
+          #{submissionId}
+        </span>
+      )}
+    </div>
+  );
+}
+
+function getStatusConfig(status: string) {
+  switch (status) {
+    case "accepted":
+      return {
+        bg: "bg-emerald-500/10",
+        text: "text-emerald-400",
+        dot: "bg-emerald-400",
+      };
+    case "wrong_answer":
+      return {
+        bg: "bg-red-500/10",
+        text: "text-red-400",
+        dot: "bg-red-400",
+      };
+    case "time_limit_exceeded":
+      return {
+        bg: "bg-amber-500/10",
+        text: "text-amber-400",
+        dot: "bg-amber-400",
+      };
+    case "pending":
+    case "running":
+    case "submitting":
+      return {
+        bg: "bg-blue-500/10",
+        text: "text-blue-400",
+        dot: "bg-blue-400 animate-pulse",
+      };
+    default:
+      return {
+        bg: "bg-rose-500/10",
+        text: "text-rose-400",
+        dot: "bg-rose-400",
+      };
+  }
+}
+
 function formatStatus(status: string) {
   return status
     .split("_")
     .map((s) => s[0].toUpperCase() + s.slice(1))
     .join(" ");
-}
-
-function getStatusVariant(status: string) {
-  if (["accepted"].includes(status)) return "default";
-  if (["compilation_error", "wrong_answer", "runtime_error"].includes(status))
-    return "destructive";
-  return "default";
 }
 
 function getLanguageTemplate(language: string): string {

@@ -1,74 +1,108 @@
-import React from 'react'
-import { motion, useInView } from "framer-motion"
-import { Code, Trophy, Brain } from "lucide-react"
+import { useRef } from "react";
+import { motion, useInView } from "framer-motion";
+import { Search, Code2, Zap } from "lucide-react";
 
-// Define TypeScript interface for process steps
-interface ProcessStep {
-  icon: React.ComponentType<React.SVGProps<SVGSVGElement>>
-  title: string
-  description: string
+interface Step {
+  icon: React.ComponentType<React.SVGProps<SVGSVGElement>>;
+  title: string;
+  description: string;
+  gradient: string;
 }
 
-export default function Working() {
-  const steps: ProcessStep[] = [
-    {
-      icon: Code,
-      title: "Problem Exploration",
-      description: "Dive into a curated selection of coding challenges tailored to your skill level.",
-    },
-    {
-      icon: Brain,
-      title: "Skill Development",
-      description: "Learn algorithms and data structures through guided solutions and hints.",
-    },
-    {
-      icon: Trophy,
-      title: "Competitive Excellence",
-      description: "Compete in contests to test your skills and climb the global leaderboard.",
-    },
-  ]
+const steps: Step[] = [
+  {
+    icon: Search,
+    title: "Pick a Challenge",
+    description:
+      "Browse our curated collection of problems filtered by difficulty, topic, and tags. Find the perfect challenge for your skill level.",
+    gradient: "from-indigo-500 to-blue-500",
+  },
+  {
+    icon: Code2,
+    title: "Write Your Solution",
+    description:
+      "Use our powerful in-browser editor with syntax highlighting, auto-completion, and multi-language support to craft your solution.",
+    gradient: "from-purple-500 to-pink-500",
+  },
+  {
+    icon: Zap,
+    title: "Get Instant Feedback",
+    description:
+      "Submit your code and receive real-time results with detailed test case analysis, runtime metrics, and memory usage statistics.",
+    gradient: "from-cyan-500 to-teal-500",
+  },
+];
 
-  // Use ref and useInView for scroll-triggered animations
-  const ref = React.useRef<HTMLDivElement>(null)
-  const isInView = useInView(ref, { once: true, amount: 0.3 })
+export default function Working() {
+  const ref = useRef<HTMLDivElement>(null);
+  const isInView = useInView(ref, { once: true, amount: 0.2 });
 
   return (
-    <section className="py-20 bg-gradient-to-br from-gray-100 to-gray-200 dark:from-black dark:to-gray-900 overflow-hidden">
-      <div className="container mx-auto px-6">
+    <section className="py-24 relative overflow-hidden" ref={ref}>
+      {/* Background */}
+      <div className="absolute inset-0 grid-pattern opacity-40" />
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[500px] h-[300px] bg-primary/[0.04] rounded-full blur-[120px]" />
+
+      <div className="container mx-auto px-6 relative z-10">
+        {/* Header */}
         <motion.div
-          initial={{ opacity: 0, y: 30 }}
+          initial={{ opacity: 0, y: 20 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.6, ease: "easeOut" }}
-          className="text-center mb-12"
+          className="text-center mb-16"
         >
-          <h2 className="text-4xl md:text-5xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-green-600 to-blue-400 dark:from-green-300 dark:to-blue-100 animate-shine">
-            Our <span className="bg-clip-text text-transparent bg-gradient-to-r from-purple-600 to-cyan-500 dark:from-purple-300 dark:to-cyan-300">Proven</span> Process
+          <span className="inline-flex items-center gap-2 px-3.5 py-1.5 text-xs font-medium rounded-full bg-primary/[0.1] text-primary border border-primary/[0.15] mb-4">
+            How It Works
+          </span>
+          <h2 className="text-3xl md:text-4xl font-bold tracking-tight">
+            Three Steps to{" "}
+            <span className="gradient-text">Mastery</span>
           </h2>
-          <p className="text-xl text-gray-600 dark:text-gray-200 mt-4 max-w-2xl mx-auto animate-glow">
-            A structured approach to master coding and excel in competitive programming.
+          <p className="text-muted-foreground mt-3 max-w-md mx-auto">
+            A streamlined workflow designed to maximize your learning and growth.
           </p>
         </motion.div>
-        <div ref={ref} className="grid md:grid-cols-3 gap-8">
+
+        {/* Timeline */}
+        <div className="max-w-2xl mx-auto relative">
+          {/* Vertical line */}
+          <div className="absolute left-6 md:left-8 top-0 bottom-0 w-px bg-gradient-to-b from-primary/20 via-primary/10 to-transparent" />
+
           {steps.map((step, index) => (
             <motion.div
               key={step.title}
-              initial={{ opacity: 0, y: 20 }}
-              animate={isInView ? { opacity: 1, y: 0 } : {}}
-              transition={{ duration: 0.5, delay: index * 0.1, ease: "easeOut" }}
-              className="group relative p-8 rounded-2xl bg-gradient-to-br from-gray-100/50 to-gray-200/50 dark:from-gray-950/50 dark:to-black/50 border-2 border-gray-300 dark:border-gray-800 hover:border-green-500 dark:hover:border-green-500 transition-all duration-300 hover:shadow-xl hover:shadow-green-500/10 dark:hover:shadow-green-500/10 flex flex-col h-full"
+              initial={{ opacity: 0, x: -20 }}
+              animate={isInView ? { opacity: 1, x: 0 } : {}}
+              transition={{
+                duration: 0.5,
+                delay: index * 0.15,
+                ease: "easeOut",
+              }}
+              className="relative flex gap-6 md:gap-8 mb-12 last:mb-0"
             >
-              <div className="absolute inset-0 bg-gradient-to-br from-green-500/10 to-blue-500/10 dark:from-green-600/10 dark:to-blue-600/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-2xl" />
-              <div className="relative z-10 flex flex-col">
-                <motion.div
-                  className="w-12 h-12 rounded-xl bg-green-500/20 dark:bg-green-600/20 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300"
-                  whileHover={{ rotate: 10 }}
+              {/* Step indicator */}
+              <div className="flex-shrink-0 relative z-10">
+                <div
+                  className={`w-12 h-12 md:w-16 md:h-16 rounded-2xl bg-gradient-to-br ${step.gradient} flex items-center justify-center shadow-lg`}
+                  style={{
+                    boxShadow: `0 8px 32px rgba(99, 102, 241, 0.15)`,
+                  }}
                 >
-                  <step.icon className="w-6 h-6 text-green-500 dark:text-green-400" />
-                </motion.div>
-                <h3 className="text-xl font-semibold bg-clip-text text-transparent bg-gradient-to-r from-green-600 to-blue-400 dark:from-green-300 dark:to-blue-100 animate-shine mb-2">
-                  {step.title}
-                </h3>
-                <p className="text-gray-600 dark:text-gray-200 animate-glow flex-grow">
+                  <step.icon className="w-5 h-5 md:w-6 md:h-6 text-white" />
+                </div>
+              </div>
+
+              {/* Content */}
+              <div className="glass rounded-2xl p-5 md:p-6 flex-1 glow-border">
+                <div className="flex items-center gap-3 mb-2">
+                  <span className="text-xs font-mono text-primary/60">
+                    0{index + 1}
+                  </span>
+                  <h3 className="text-lg font-semibold text-foreground">
+                    {step.title}
+                  </h3>
+                </div>
+                <p className="text-sm text-muted-foreground leading-relaxed">
                   {step.description}
                 </p>
               </div>
@@ -76,34 +110,6 @@ export default function Working() {
           ))}
         </div>
       </div>
-
-      {/* Custom CSS for shiny text effect */}
-      <style>{`
-        @keyframes shine {
-          0% {
-            background-position: -200%;
-          }
-          100% {
-            background-position: 200%;
-          }
-        }
-        .animate-shine {
-          background-size: 200% auto;
-          animation: shine 4s linear infinite;
-          text-shadow: 0 0 8px rgba(255, 255, 255, 0.3), 0 0 12px rgba(34, 197, 94, 0.2);
-        }
-        @keyframes glow {
-          0%, 100% {
-            text-shadow: 0 0 4px rgba(255, 255, 255, 0.2), 0 0 8px rgba(34, 197, 94, 0.1);
-          }
-          50% {
-            text-shadow: 0 0 8px rgba(255, 255, 255, 0.4), 0 0 16px rgba(34, 197, 94, 0.3);
-          }
-        }
-        .animate-glow {
-          animation: glow 3s ease-in-out infinite;
-        }
-      `}</style>
     </section>
-  )
+  );
 }

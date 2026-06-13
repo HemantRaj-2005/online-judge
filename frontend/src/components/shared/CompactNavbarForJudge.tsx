@@ -1,4 +1,3 @@
-// components/CompactNavbar.tsx
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ChevronDown } from "lucide-react";
@@ -8,7 +7,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { HomeIcon, CodeIcon, Projector } from "lucide-react";
+import { HomeIcon, CodeIcon, LayoutList } from "lucide-react";
 import UserDropdown from "./UserDropdown";
 import { ModeToggle } from "../mode-toggle";
 import Draggable from "react-draggable";
@@ -32,16 +31,16 @@ export function CompactNavbarForJudge() {
         style={{ touchAction: "none" }}
         aria-label="Draggable judge navbar"
       >
-        <div className="flex items-center gap-2 bg-white/5 dark:bg-gray-950/5 backdrop-blur-xs px-4 py-2 rounded-full shadow-lg border border-gray-200 dark:border-gray-700">
+        <div className="flex items-center gap-1.5 glass-strong px-3 py-2 rounded-2xl shadow-2xl shadow-black/20">
           {/* Home */}
           <Button
             asChild
             variant="ghost"
             size="icon"
-            className="rounded-full hover:bg-gray-200/50 dark:hover:bg-gray-700/50"
+            className="rounded-xl hover:bg-white/[0.06] h-9 w-9"
           >
             <Link to="/">
-              <HomeIcon className="h-5 w-5" />
+              <HomeIcon className="h-4 w-4" />
             </Link>
           </Button>
 
@@ -51,38 +50,28 @@ export function CompactNavbarForJudge() {
               <Button
                 variant="ghost"
                 size="icon"
-                className="rounded-full hover:bg-gray-200/50 dark:hover:bg-gray-700/50"
+                className="rounded-xl hover:bg-white/[0.06] h-9 w-9"
               >
-                <div className="flex items-center gap-1">
-                  <CodeIcon className="h-5 w-5" />
-                  <ChevronDown className="h-4 w-4 opacity-50" />
+                <div className="flex items-center gap-0.5">
+                  <CodeIcon className="h-4 w-4" />
+                  <ChevronDown className="h-3 w-3 opacity-50" />
                 </div>
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="center" className="w-48">
+            <DropdownMenuContent align="center" className="w-40 glass-strong rounded-xl border-white/[0.08]">
               <DropdownMenuItem asChild>
-                <Link to="/compilers/cpp" className="cursor-pointer">
+                <Link to="/compilers/cpp" className="cursor-pointer rounded-lg">
                   C++
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuItem asChild>
-                <Link to="/compilers/java" className="cursor-pointer">
+                <Link to="/compilers/java" className="cursor-pointer rounded-lg">
                   Java
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuItem asChild>
-                <Link to="/compilers/python" className="cursor-pointer">
+                <Link to="/compilers/python" className="cursor-pointer rounded-lg">
                   Python
-                </Link>
-              </DropdownMenuItem>
-              <DropdownMenuItem asChild>
-                <Link to="/compilers/javascript" className="cursor-pointer">
-                  JavaScript
-                </Link>
-              </DropdownMenuItem>
-              <DropdownMenuItem asChild>
-                <Link to="/compilers/go" className="cursor-pointer">
-                  Go
                 </Link>
               </DropdownMenuItem>
             </DropdownMenuContent>
@@ -93,16 +82,19 @@ export function CompactNavbarForJudge() {
             asChild
             variant="ghost"
             size="icon"
-            className="rounded-full hover:bg-gray-200/50 dark:hover:bg-gray-700/50"
+            className="rounded-xl hover:bg-white/[0.06] h-9 w-9"
           >
             <Link to="/problems">
-              <Projector className="h-5 w-5" />
+              <LayoutList className="h-4 w-4" />
             </Link>
           </Button>
+
+          <div className="w-px h-5 bg-white/[0.08] mx-0.5" />
+
           <ModeToggle />
 
           {/* User Profile/Login */}
-          <div className="ml-1">
+          <div className="ml-0.5">
             <UserDropdown />
           </div>
         </div>

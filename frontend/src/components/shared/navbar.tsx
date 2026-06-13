@@ -1,187 +1,198 @@
-// components/shared/app-navbar.tsx
 import { Link, useLocation } from "react-router-dom";
 import { navItems, type NavItem } from "./NavItems";
 import UserDropdown from "./UserDropdown";
 import { useState } from "react";
-import { ChevronDown, ChevronUp, Menu, X } from "lucide-react";
+import { ChevronDown, Menu, X } from "lucide-react";
 import { ModeToggle } from "../mode-toggle";
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "../ui/collapsible";
-import {
-  NavigationMenu,
-  NavigationMenuItem,
-  NavigationMenuLink,
-  NavigationMenuList,
-} from "../ui/navigation-menu";
 import { cn } from "@/lib/utils";
 import { Button } from "../ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "../ui/dropdown-menu";
+import { motion, AnimatePresence } from "framer-motion";
+import { Sheet, SheetContent, SheetTrigger } from "../ui/sheet";
 
 export function AppNavbar() {
   const location = useLocation();
-  const [openItems, setOpenItems] = useState<{ [key: string]: boolean }>({});
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  const toggleCollapsible = (title: string) => {
-    setOpenItems((prev) => ({ ...prev, [title]: !prev[title] }));
-  };
-
-  const closeMobileMenu = () => {
-    setMobileMenuOpen(false);
-  };
-
   return (
-    <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container flex h-14 items-center justify-between px-4">
-        {/* Left Section - Logo and Desktop Nav */}
-        <div className="flex items-center gap-6">
-          <Link to="/" className="flex items-center gap-2 font-bold">
-          <span>
-            <img src="/logo.svg" alt="Logo" className="h-10 w-10 rounded-full" />
-          </span>
+    <header className="sticky top-0 z-50 w-full glass-navbar">
+      <div className="container mx-auto flex h-16 items-center justify-between px-4 lg:px-6">
+        {/* Left — Logo */}
+        <Link to="/" className="flex items-center gap-2.5 group">
+          <img
+            src="/logo.svg"
+            alt="Logo"
+            className="h-8 w-8 rounded-lg transition-transform group-hover:scale-110"
+          />
+          <span className="text-lg font-bold tracking-tight gradient-text hidden sm:inline-block">
             तपस्Code
-          </Link>
+          </span>
+        </Link>
 
-          {/* Desktop Nav - Hidden on mobile */}
-          <NavigationMenu className="hidden md:flex">
-            <NavigationMenuList className="flex items-center gap-1">
-              {navItems.map((item: NavItem) => (
-                <NavigationMenuItem key={item.title} className="flex items-center">
-                  {item.collapsible?.length ? (
-                    <Collapsible
-                      open={openItems[item.title] || false}
-                      onOpenChange={() => toggleCollapsible(item.title)}
-                    >
-                      <CollapsibleTrigger asChild>
-                        <NavigationMenuLink
-                          className={cn(
-                            "flex h-10 items-center px-3 rounded-md text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground",
-                            location.pathname.startsWith(item.href) &&
-                              "bg-accent text-accent-foreground"
-                          )}
-                        >
-                          <div className="flex items-center gap-2">
-                            {item.icon && <item.icon className="w-4 h-4" />}
-                            <span>{item.title}</span>
-                            {openItems[item.title] ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-                          </div>
-                        </NavigationMenuLink>
-                      </CollapsibleTrigger>
-                      <CollapsibleContent className="absolute mt-1 min-w-[180px] rounded-md border bg-popover p-1 shadow-lg z-50">
-                        <div className="grid gap-1">
-                          {item.collapsible.map((sub) => (
-                            <Link
-                              key={sub.title}
-                              to={sub.href}
-                              className={cn(
-                                "flex items-center gap-2 px-3 py-2 text-sm rounded-md hover:bg-accent",
-                                location.pathname === sub.href && "bg-accent text-accent-foreground"
-                              )}
-                            >
-                              {sub.title}
-                            </Link>
-                          ))}
-                        </div>
-                      </CollapsibleContent>
-                    </Collapsible>
-                  ) : (
-                    <Link
-                      to={item.href}
+        {/* Center — Desktop Nav */}
+        <nav className="hidden md:flex items-center gap-1">
+          {navItems.map((item: NavItem) => (
+            <div key={item.title}>
+              {item.collapsible?.length ? (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <button
                       className={cn(
-                        "flex items-center gap-2 h-10 px-3 rounded-md text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground",
-                        location.pathname === item.href && "bg-accent text-accent-foreground"
+                        "flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200",
+                        "text-muted-foreground hover:text-foreground hover:bg-white/[0.04]",
+                        location.pathname.startsWith(item.href) &&
+                          "text-foreground bg-white/[0.06]"
                       )}
                     >
-                      {item.icon && <item.icon className="w-4 h-4" />}
                       {item.title}
-                    </Link>
+                      <ChevronDown className="w-3.5 h-3.5 opacity-50" />
+                    </button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent
+                    align="center"
+                    className="w-44 glass-strong rounded-xl border-white/[0.08] mt-1"
+                  >
+                    {item.collapsible.map((sub) => (
+                      <DropdownMenuItem key={sub.title} asChild>
+                        <Link
+                          to={sub.href}
+                          className={cn(
+                            "cursor-pointer rounded-lg text-sm",
+                            location.pathname === sub.href &&
+                              "text-primary font-medium"
+                          )}
+                        >
+                          {sub.title}
+                        </Link>
+                      </DropdownMenuItem>
+                    ))}
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              ) : (
+                <Link
+                  to={item.href}
+                  className={cn(
+                    "relative flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200",
+                    "text-muted-foreground hover:text-foreground hover:bg-white/[0.04]",
+                    location.pathname === item.href &&
+                      "text-foreground"
                   )}
-                </NavigationMenuItem>
-              ))}
-            </NavigationMenuList>
-          </NavigationMenu>
-        </div>
+                >
+                  {item.title}
+                  {location.pathname === item.href && (
+                    <motion.div
+                      layoutId="nav-indicator"
+                      className="absolute bottom-0 left-3 right-3 h-[2px] bg-primary rounded-full"
+                      transition={{ type: "spring", stiffness: 380, damping: 30 }}
+                    />
+                  )}
+                </Link>
+              )}
+            </div>
+          ))}
+        </nav>
 
-        {/* Right Section - User controls */}
+        {/* Right — Controls */}
         <div className="flex items-center gap-2">
           <div className="hidden md:block">
             <ModeToggle />
           </div>
           <UserDropdown />
 
-          {/* Mobile Toggle Button - Visible only on mobile */}
-          <Button
-            className="md:hidden p-2 rounded-md hover:bg-accent"
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            aria-label="Toggle menu"
-          >
-            {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-          </Button>
-        </div>
-      </div>
-
-      {/* Mobile Menu - Full width dropdown */}
-      {mobileMenuOpen && (
-        <div className="md:hidden border-t bg-background">
-          <div className="px-4 py-2">
-            <div className="flex justify-end mb-2">
-              <ModeToggle />
-            </div>
-            
-            {navItems.map((item: NavItem) => (
-              <div key={item.title} className="mb-1">
-                {item.collapsible?.length ? (
-                  <Collapsible
-                    open={openItems[item.title] || false}
-                    onOpenChange={() => toggleCollapsible(item.title)}
-                  >
-                    <CollapsibleTrigger className="w-full flex justify-between items-center px-3 py-2 rounded-md text-sm font-medium hover:bg-accent">
-                      <div className="flex items-center gap-2">
-                        {item.icon && <item.icon className="w-4 h-4" />}
-                        {item.title}
-                      </div>
-                      {openItems[item.title] ? (
-                        <ChevronUp className="w-4 h-4" />
+          {/* Mobile Menu Trigger */}
+          <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
+            <SheetTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="md:hidden rounded-lg hover:bg-white/[0.06]"
+                aria-label="Toggle menu"
+              >
+                <AnimatePresence mode="wait">
+                  {mobileMenuOpen ? (
+                    <motion.div
+                      key="close"
+                      initial={{ rotate: -90, opacity: 0 }}
+                      animate={{ rotate: 0, opacity: 1 }}
+                      exit={{ rotate: 90, opacity: 0 }}
+                      transition={{ duration: 0.15 }}
+                    >
+                      <X className="w-5 h-5" />
+                    </motion.div>
+                  ) : (
+                    <motion.div
+                      key="menu"
+                      initial={{ rotate: 90, opacity: 0 }}
+                      animate={{ rotate: 0, opacity: 1 }}
+                      exit={{ rotate: -90, opacity: 0 }}
+                      transition={{ duration: 0.15 }}
+                    >
+                      <Menu className="w-5 h-5" />
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </Button>
+            </SheetTrigger>
+            <SheetContent side="right" className="w-72 glass-strong border-l border-white/[0.06] p-0">
+              <div className="flex flex-col h-full pt-12 px-4">
+                <div className="flex justify-end mb-4 px-2">
+                  <ModeToggle />
+                </div>
+                <nav className="flex flex-col gap-1">
+                  {navItems.map((item: NavItem) => (
+                    <div key={item.title}>
+                      {item.collapsible?.length ? (
+                        <div className="space-y-1">
+                          <span className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-muted-foreground">
+                            {item.icon && <item.icon className="w-4 h-4" />}
+                            {item.title}
+                          </span>
+                          <div className="pl-6 space-y-0.5">
+                            {item.collapsible.map((sub) => (
+                              <Link
+                                key={sub.title}
+                                to={sub.href}
+                                onClick={() => setMobileMenuOpen(false)}
+                                className={cn(
+                                  "block px-3 py-2 rounded-lg text-sm transition-colors",
+                                  "text-muted-foreground hover:text-foreground hover:bg-white/[0.04]",
+                                  location.pathname === sub.href &&
+                                    "text-primary bg-primary/[0.08]"
+                                )}
+                              >
+                                {sub.title}
+                              </Link>
+                            ))}
+                          </div>
+                        </div>
                       ) : (
-                        <ChevronDown className="w-4 h-4" />
-                      )}
-                    </CollapsibleTrigger>
-                    <CollapsibleContent className="pl-6 pt-1 space-y-1">
-                      {item.collapsible.map((sub) => (
                         <Link
-                          key={sub.title}
-                          to={sub.href}
-                          onClick={closeMobileMenu}
+                          to={item.href}
+                          onClick={() => setMobileMenuOpen(false)}
                           className={cn(
-                            "block px-3 py-2 rounded-md text-sm hover:bg-muted",
-                            location.pathname === sub.href && "bg-accent text-accent-foreground"
+                            "flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors",
+                            "text-muted-foreground hover:text-foreground hover:bg-white/[0.04]",
+                            location.pathname === item.href &&
+                              "text-primary bg-primary/[0.08]"
                           )}
                         >
-                          {sub.title}
+                          {item.icon && <item.icon className="w-4 h-4" />}
+                          {item.title}
                         </Link>
-                      ))}
-                    </CollapsibleContent>
-                  </Collapsible>
-                ) : (
-                  <Link
-                    to={item.href}
-                    onClick={closeMobileMenu}
-                    className={cn(
-                      "flex items-center gap-2 px-3 py-2 rounded-md text-sm hover:bg-muted",
-                      location.pathname === item.href && "bg-accent text-accent-foreground"
-                    )}
-                  >
-                    {item.icon && <item.icon className="w-4 h-4" />}
-                    {item.title}
-                  </Link>
-                )}
+                      )}
+                    </div>
+                  ))}
+                </nav>
               </div>
-            ))}
-          </div>
+            </SheetContent>
+          </Sheet>
         </div>
-      )}
+      </div>
     </header>
   );
 }

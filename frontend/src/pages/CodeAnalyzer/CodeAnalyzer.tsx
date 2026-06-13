@@ -43,7 +43,6 @@ export default function CodeAnalyzer() {
     try {
       const response = await aiService.analyzeCode(code, language, user?.accessToken);
       
-      // Axios or fetch service wrapper might return nested data object
       const parsed: Analysis = (response as any).data || response;
       setResult(parsed);
       toast.success("Analysis complete!");
@@ -72,11 +71,11 @@ export default function CodeAnalyzer() {
   };
 
   return (
-    <section className="relative min-h-screen py-12 bg-gradient-to-br from-gray-100 to-gray-200 dark:from-black dark:to-gray-900 overflow-hidden">
+    <section className="relative min-h-screen py-12 bg-background grid-pattern overflow-hidden">
       {/* Animated background elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <motion.div
-          className="absolute top-0 left-0 w-80 h-80 bg-gradient-to-r from-blue-500/20 to-emerald-500/20 dark:from-blue-700/20 dark:to-emerald-700/20 rounded-full filter blur-3xl -translate-x-1/2 -translate-y-1/2"
+          className="absolute top-0 left-0 w-80 h-80 bg-gradient-to-r from-primary/10 to-accent/10 dark:from-primary/20 dark:to-accent/20 rounded-full filter blur-3xl -translate-x-1/2 -translate-y-1/2"
           animate={{
             scale: [1, 1.2, 1],
             opacity: [0.4, 0.6, 0.4],
@@ -88,7 +87,7 @@ export default function CodeAnalyzer() {
           }}
         />
         <motion.div
-          className="absolute bottom-0 right-0 w-96 h-96 bg-gradient-to-r from-purple-500/20 to-indigo-500/20 dark:from-purple-700/20 dark:to-indigo-700/20 rounded-full filter blur-3xl translate-x-1/2 translate-y-1/2"
+          className="absolute bottom-0 right-0 w-96 h-96 bg-gradient-to-r from-accent/10 to-primary/10 dark:from-accent/20 dark:to-primary/20 rounded-full filter blur-3xl translate-x-1/2 translate-y-1/2"
           animate={{
             scale: [1, 1.15, 1],
             opacity: [0.4, 0.6, 0.4],
@@ -102,25 +101,30 @@ export default function CodeAnalyzer() {
         />
       </div>
 
-      <div className="container mx-auto px-6 relative z-10">
+      <div className="container mx-auto max-w-5xl px-4 md:px-6 relative z-10">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
-          className="w-full min-h-screen bg-white/10 dark:bg-black/20 backdrop-blur-lg rounded-none shadow-xl p-8"
+          className="w-full glass rounded-3xl border border-border p-6 md:p-10 shadow-2xl"
         >
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.2 }}
-            className="flex items-center gap-3 mb-6"
+            className="flex items-center gap-3 mb-8"
           >
-            <div className="p-3 rounded-full bg-blue-100 dark:bg-blue-900/50">
-              <CodeIcon className="w-6 h-6 text-blue-600 dark:text-blue-400" />
+            <div className="p-3 rounded-2xl bg-primary/10 text-primary border border-primary/20">
+              <CodeIcon className="w-6 h-6" />
             </div>
-            <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-emerald-500 dark:from-blue-400 dark:to-emerald-300">
-              Code Analyzer
-            </h1>
+            <div>
+              <h1 className="text-3xl font-extrabold tracking-tight gradient-text-hero">
+                AI Code Analyzer
+              </h1>
+              <p className="text-sm text-muted-foreground mt-1">
+                Evaluate computational complexity, style bugs, and code efficiency.
+              </p>
+            </div>
           </motion.div>
 
           <motion.div
@@ -131,18 +135,18 @@ export default function CodeAnalyzer() {
           >
             <div className="flex flex-col md:flex-row gap-4 items-stretch md:items-center justify-between">
               <div className="w-full md:w-64">
-                <label className="text-sm font-semibold mb-2 block text-gray-700 dark:text-gray-300">
+                <label className="text-sm font-semibold mb-2 block text-muted-foreground">
                   Select Language
                 </label>
                 <Select value={language} onValueChange={setLanguage}>
-                  <SelectTrigger className="w-full bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-755">
+                  <SelectTrigger className="w-full bg-secondary/40 border-border rounded-xl">
                     <SelectValue placeholder="Select Language" />
                   </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="python">Python</SelectItem>
-                    <SelectItem value="cpp">C++</SelectItem>
-                    <SelectItem value="java">Java</SelectItem>
-                    <SelectItem value="javascript">JavaScript</SelectItem>
+                  <SelectContent className="glass-strong border-border rounded-xl">
+                    <SelectItem className="cursor-pointer rounded-lg" value="python">Python</SelectItem>
+                    <SelectItem className="cursor-pointer rounded-lg" value="cpp">C++</SelectItem>
+                    <SelectItem className="cursor-pointer rounded-lg" value="java">Java</SelectItem>
+                    <SelectItem className="cursor-pointer rounded-lg" value="javascript">JavaScript</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -151,24 +155,23 @@ export default function CodeAnalyzer() {
             <Textarea
               value={code}
               onChange={(e) => setCode(e.target.value)}
-              placeholder="Paste your code here..."
-              className="h-64 font-mono text-base bg-white dark:bg-gray-900 border-gray-300 dark:border-gray-800"
+              placeholder="Paste your code here to analyze complexity, style, and potential bug fixes..."
+              className="h-80 font-mono text-sm bg-secondary/20 border-border rounded-xl focus:ring-primary/20 focus:border-primary/50"
             />
 
             <Button
               onClick={analyzeCode}
               disabled={loading}
-              size="lg"
-              className="px-8 py-6 text-lg font-semibold bg-gradient-to-r from-blue-600 to-emerald-500 hover:from-blue-700 hover:to-emerald-600 text-white rounded-xl shadow-lg transform transition-transform hover:scale-105 group"
+              className="btn-gradient text-white font-semibold rounded-xl h-12 px-8 transition-all hover:scale-[1.02] active:scale-[0.98] cursor-pointer inline-flex items-center justify-center gap-2 group w-full md:w-auto"
             >
               {loading ? (
                 <>
-                  <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-                  Analyzing...
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  Analyzing Code...
                 </>
               ) : (
                 <>
-                  <Sparkles className="w-5 h-5 mr-2 group-hover:animate-pulse" />
+                  <Sparkles className="w-4 h-4 group-hover:animate-pulse" />
                   Analyze Code
                 </>
               )}
@@ -176,45 +179,47 @@ export default function CodeAnalyzer() {
 
             {result && (
               <motion.div
-                initial={{ opacity: 0, scale: 0.95 }}
+                initial={{ opacity: 0, scale: 0.98 }}
                 animate={{ opacity: 1, scale: 1 }}
-                className="space-y-6 mt-6"
+                className="space-y-6 mt-10 pt-6 border-t border-border"
               >
+                <h2 className="text-xl font-bold tracking-tight">Analysis Results</h2>
+                
                 {/* Basic Analysis */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                  <div className="p-4 rounded-lg bg-white dark:bg-gray-800 shadow-sm border border-gray-150 dark:border-gray-700">
-                    <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                  <div className="glass-strong p-5 rounded-2xl border border-border glow-border">
+                    <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1">
                       Language
                     </p>
-                    <p className="text-lg font-semibold text-blue-600 dark:text-blue-400 capitalize">
+                    <p className="text-lg font-bold text-primary capitalize">
                       {result.language}
                     </p>
                   </div>
-                  <div className="p-4 rounded-lg bg-white dark:bg-gray-800 shadow-sm border border-gray-150 dark:border-gray-700">
-                    <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                  <div className="glass-strong p-5 rounded-2xl border border-border glow-border">
+                    <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1">
                       Time Complexity
                     </p>
-                    <p className="text-lg font-semibold text-emerald-600 dark:text-emerald-400">
+                    <p className="text-lg font-bold text-cyan-400">
                       {result.timeComplexity}
                     </p>
                   </div>
-                  <div className="p-4 rounded-lg bg-white dark:bg-gray-800 shadow-sm border border-gray-150 dark:border-gray-700">
-                    <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                  <div className="glass-strong p-5 rounded-2xl border border-border glow-border">
+                    <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1">
                       Space Complexity
                     </p>
-                    <p className="text-lg font-semibold text-purple-600 dark:text-purple-400">
+                    <p className="text-lg font-bold text-purple-400">
                       {result.spaceComplexity}
                     </p>
                   </div>
-                  <div className="p-4 rounded-lg bg-white dark:bg-gray-800 shadow-sm border border-gray-150 dark:border-gray-700">
-                    <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                  <div className="glass-strong p-5 rounded-2xl border border-border glow-border">
+                    <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1">
                       Syntax Errors
                     </p>
                     <p
-                      className={`text-lg font-semibold ${
+                      className={`text-lg font-bold ${
                         result.syntaxErrors && !result.syntaxErrors.toLowerCase().includes("none")
-                          ? "text-red-600 dark:text-red-400"
-                          : "text-gray-800 dark:text-gray-200"
+                          ? "text-red-400"
+                          : "text-emerald-400"
                       }`}
                     >
                       {result.syntaxErrors || "None detected"}
@@ -225,78 +230,72 @@ export default function CodeAnalyzer() {
                 {/* Expandable Sections */}
                 <div className="space-y-4">
                   {/* Code Quality */}
-                  <motion.div
-                    className="rounded-lg overflow-hidden shadow-sm border border-gray-150 dark:border-gray-700"
-                    whileHover={{ scale: 1.01 }}
-                  >
+                  <div className="glass rounded-2xl border border-border overflow-hidden">
                     <button
                       onClick={() => toggleSection("quality")}
-                      className="w-full flex items-center justify-between p-4 bg-gradient-to-r from-blue-50 to-emerald-50 dark:from-blue-900/50 dark:to-emerald-900/50 text-gray-800 dark:text-gray-250"
+                      className="w-full flex items-center justify-between p-5 bg-secondary/30 hover:bg-secondary/50 text-foreground transition-colors"
                     >
                       <div className="flex items-center gap-3">
-                        <Star className="w-5 h-5 text-yellow-500" />
-                        <h3 className="text-lg font-semibold">Code Quality</h3>
+                        <Star className="w-5 h-5 text-amber-400 fill-amber-400/20" />
+                        <h3 className="text-base font-semibold">Code Quality</h3>
                       </div>
                       <ChevronDown
-                        className={`w-5 h-5 transition-transform ${
+                        className={`w-4 h-4 text-muted-foreground transition-transform duration-200 ${
                           expandedSection === "quality" ? "rotate-180" : ""
                         }`}
                       />
                     </button>
                     {expandedSection === "quality" && (
-                      <div className="p-4 bg-white dark:bg-gray-800 space-y-3">
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                          <div className="p-3 rounded-md bg-gray-50 dark:bg-gray-700">
-                            <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                      <div className="p-6 border-t border-border bg-card/30 space-y-3">
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                          <div className="p-4 rounded-xl bg-secondary/20 border border-border">
+                            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1">
                               Maintainability
                             </p>
-                            <p className="font-medium">
+                            <p className="text-base font-semibold text-foreground">
                               {result.codeQuality.maintainability}
                             </p>
                           </div>
-                          <div className="p-3 rounded-md bg-gray-50 dark:bg-gray-700">
-                            <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                          <div className="p-4 rounded-xl bg-secondary/20 border border-border">
+                            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1">
                               Readability
                             </p>
-                            <p className="font-medium">
+                            <p className="text-base font-semibold text-foreground">
                               {result.codeQuality.readability}
                             </p>
                           </div>
-                          <div className="p-3 rounded-md bg-gray-50 dark:bg-gray-700">
-                            <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
-                              Style
+                          <div className="p-4 rounded-xl bg-secondary/20 border border-border">
+                            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1">
+                              Style Consistency
                             </p>
-                            <p className="font-medium">
+                            <p className="text-base font-semibold text-foreground">
                               {result.codeQuality.style}
                             </p>
                           </div>
                         </div>
                       </div>
                     )}
-                  </motion.div>
+                  </div>
 
                   {/* Optimizations */}
-                  <motion.div
-                    className="rounded-lg overflow-hidden shadow-sm border border-gray-150 dark:border-gray-700"
-                    whileHover={{ scale: 1.01 }}
-                  >
+                  <div className="glass rounded-2xl border border-border overflow-hidden">
                     <button
                       onClick={() => toggleSection("optimizations")}
-                      className="w-full flex items-center justify-between p-4 bg-gradient-to-r from-green-50 to-teal-50 dark:from-green-900/50 dark:to-teal-900/50 text-gray-800 dark:text-gray-250"
+                      className="w-full flex items-center justify-between p-5 bg-secondary/30 hover:bg-secondary/50 text-foreground transition-colors"
                     >
                       <div className="flex items-center gap-3">
-                        <Gauge className="w-5 h-5 text-green-500" />
-                        <h3 className="text-lg font-semibold">
+                        <Gauge className="w-5 h-5 text-cyan-400" />
+                        <h3 className="text-base font-semibold">
                           Optimization Suggestions
                         </h3>
                         {result.optimizations.length > 0 && (
-                          <span className="px-2 py-1 text-xs rounded-full bg-green-100 dark:bg-green-900/50 text-green-800 dark:text-green-200">
+                          <span className="px-2 py-0.5 text-xs font-semibold rounded-full bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">
                             {result.optimizations.length}
                           </span>
                         )}
                       </div>
                       <ChevronDown
-                        className={`w-5 h-5 transition-transform ${
+                        className={`w-4 h-4 text-muted-foreground transition-transform duration-200 ${
                           expandedSection === "optimizations"
                             ? "rotate-180"
                             : ""
@@ -304,59 +303,34 @@ export default function CodeAnalyzer() {
                       />
                     </button>
                     {expandedSection === "optimizations" && (
-                      <div className="p-4 bg-white dark:bg-gray-800 space-y-3">
+                      <div className="p-6 border-t border-border bg-card/30 space-y-3">
                         {result.optimizations.length > 0 ? (
-                          <ul className="space-y-2">
+                          <div className="space-y-3">
                             {result.optimizations.map((opt, index) => (
-                              <li
+                              <div
                                 key={index}
-                                className="flex items-start gap-2"
+                                className="flex items-start gap-3 p-4 rounded-xl bg-secondary/20 border border-border"
                               >
-                                <span className="text-green-500">•</span>
-                                <span>{opt}</span>
-                              </li>
+                                <span className="flex-shrink-0 w-6 h-6 rounded-lg bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 flex items-center justify-center text-xs font-mono font-bold">
+                                  {index + 1}
+                                </span>
+                                <span className="text-sm leading-relaxed text-muted-foreground">{opt}</span>
+                              </div>
                             ))}
-                          </ul>
+                          </div>
                         ) : (
-                          <p className="text-gray-500 dark:text-gray-400">
-                            No optimization suggestions
+                          <p className="text-sm text-muted-foreground">
+                            No optimization suggestions needed. Your code is already clean!
                           </p>
                         )}
                       </div>
                     )}
-                  </motion.div>
+                  </div>
                 </div>
               </motion.div>
             )}
           </motion.div>
         </motion.div>
-
-        {/* Floating elements */}
-        <motion.div
-          animate={{
-            y: [0, -15, 0],
-            rotate: [0, 5, 0],
-          }}
-          transition={{
-            duration: 6,
-            repeat: Infinity,
-            ease: "easeInOut",
-          }}
-          className="absolute top-1/4 left-10 w-8 h-8 rounded-full bg-emerald-500/40 dark:bg-emerald-700/40 blur-sm hidden md:block"
-        />
-        <motion.div
-          animate={{
-            y: [0, 15, 0],
-            rotate: [0, -5, 0],
-          }}
-          transition={{
-            duration: 5,
-            repeat: Infinity,
-            ease: "easeInOut",
-            delay: 0.7,
-          }}
-          className="absolute bottom-1/4 right-12 w-10 h-10 rounded-full bg-indigo-500/40 dark:bg-indigo-700/40 blur-sm hidden md:block"
-        />
       </div>
     </section>
   );

@@ -10,10 +10,8 @@ import {
   ResizablePanelGroup,
 } from "@/components/ui/resizable";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Separator } from "@/components/ui/separator";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { cn } from "@/lib/utils";
 import remarkMath from "remark-math";
@@ -23,6 +21,7 @@ import "katex/dist/katex.min.css";
 import "highlight.js/styles/github-dark.css";
 import { aiService } from "@/services/aiServices";
 import { Button } from "@/components/ui/button";
+import { Loader2, Sparkles, Clock, HardDrive } from "lucide-react";
 
 export default function EachProblemPage() {
   const { slug } = useParams<{ slug: string }>();
@@ -42,30 +41,26 @@ export default function EachProblemPage() {
     try {
       setIsAiLoading(true);
       setAiError(null);
-      setAiResponse(""); // Reset previous response
+      setAiResponse("");
 
       const response = await aiService.explainProblem(problem.id, token);
       console.log("AI explainProblem response:", response);
 
-      // Format the response as a Markdown string
       const formatResponseAsMarkdown = (data: any): string => {
         let markdown = "";
 
-        // Problem Summary
         if (data?.problem_summary) {
           markdown += `## Problem Summary\n${data.problem_summary}\n\n`;
         } else {
           markdown += `## Problem Summary\nNo summary provided.\n\n`;
         }
 
-        // Approach
         if (data?.approach) {
           markdown += `## Approach\n${data.approach}\n\n`;
         } else {
           markdown += `## Approach\nNo approach provided.\n\n`;
         }
 
-        // Algorithms
         if (Array.isArray(data?.algorithms) && data.algorithms.length > 0) {
           markdown += `## Algorithm\n`;
           data.algorithms.forEach((algo: any, index: number) => {
@@ -80,7 +75,6 @@ export default function EachProblemPage() {
           markdown += `## Algorithm\nNo algorithm provided.\n\n`;
         }
 
-        // Example
         if (data?.example) {
           markdown += `## Example\n`;
           if (data.example.input) {
@@ -103,7 +97,6 @@ export default function EachProblemPage() {
         return markdown.trim();
       };
 
-      // Handle response.data or response directly
       const data = (response as any).data || response;
       console.log("Processed data:", JSON.stringify(data, null, 2));
 
@@ -157,18 +150,35 @@ export default function EachProblemPage() {
     return map[difficulty] || difficulty;
   };
 
+  const getDifficultyClasses = (difficulty: string) => {
+    switch (difficulty) {
+      case "easy":
+      case "veryeasy":
+        return "bg-emerald-500/10 text-emerald-400 border-emerald-500/20";
+      case "medium":
+        return "bg-amber-500/10 text-amber-400 border-amber-500/20";
+      case "hard":
+      case "veryhard":
+        return "bg-rose-500/10 text-rose-400 border-rose-500/20";
+      default:
+        return "bg-white/[0.04] text-muted-foreground";
+    }
+  };
+
   if (loading) {
     return (
-      <div className="flex justify-center items-center h-64">Loading...</div>
+      <div className="flex justify-center items-center h-64">
+        <Loader2 className="w-5 h-5 text-primary animate-spin" />
+      </div>
     );
   }
 
   if (error || !problem) {
     return (
       <div className="flex justify-center items-center h-64">
-        <Alert variant="destructive" className="w-auto">
+        <Alert variant="destructive" className="w-auto rounded-xl">
           <AlertDescription>
-            Error: {error || "Problem not found"}
+            {error || "Problem not found"}
           </AlertDescription>
         </Alert>
       </div>
@@ -176,62 +186,82 @@ export default function EachProblemPage() {
   }
 
   return (
-    <div className="h-full p-4">
+    <div className="h-full p-3">
       <ResizablePanelGroup
         direction="horizontal"
-        className="min-h-[calc(100vh-8rem)] rounded-lg border"
+        className="min-h-[calc(100vh-6rem)] rounded-2xl border border-white/[0.06] overflow-hidden"
       >
+        {/* Left Panel — Problem Description */}
         <ResizablePanel defaultSize={50} minSize={30}>
-          <ScrollArea className="h-full p-4">
-            <div className="space-y-4">
-              <div className="flex justify-between items-start">
-                <div>
-                  <h1 className="text-2xl font-bold tracking-tight">
+          <ScrollArea className="h-full">
+            <div className="p-5 space-y-5">
+              {/* Problem Header */}
+              <div>
+                <div className="flex items-start justify-between gap-4">
+                  <h1 className="text-xl font-bold text-foreground tracking-tight">
                     {problem.title}
                   </h1>
-                  <div className="flex items-center gap-2 mt-2">
-                    <Badge
-                      className={cn(
-                        problem.difficulty === "easy" ||
-                          problem.difficulty === "veryeasy"
-                          ? "bg-green-100 text-green-800 hover:bg-green-100/80 border-green-200"
-                          : problem.difficulty === "medium"
-                          ? "bg-yellow-100 text-yellow-800 hover:bg-yellow-100/80 border-yellow-200"
-                          : "bg-red-100 text-red-800 hover:bg-red-100/80 border-red-200"
-                      )}
-                    >
-                      {formatDifficulty(problem.difficulty)}
-                    </Badge>
-                    <span className="text-sm text-muted-foreground">
-                      Time Limit: {problem.time_limit}ms
-                    </span>
-                    <span className="text-sm text-muted-foreground">
-                      Memory Limit: {problem.memory_limit}MB
-                    </span>
-                  </div>
+                  <span className="text-xs text-muted-foreground/60 shrink-0">
+                    by {problem.author}
+                  </span>
                 </div>
-                <div className="text-sm text-muted-foreground">
-                  Author: {problem.author}
+
+                <div className="flex items-center gap-3 mt-3">
+                  <span
+                    className={cn(
+                      "inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-medium border",
+                      getDifficultyClasses(problem.difficulty)
+                    )}
+                  >
+                    {formatDifficulty(problem.difficulty)}
+                  </span>
+                  <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                    <Clock className="w-3 h-3" />
+                    {problem.time_limit}ms
+                  </div>
+                  <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                    <HardDrive className="w-3 h-3" />
+                    {problem.memory_limit}MB
+                  </div>
                 </div>
               </div>
 
+              {/* Topics */}
               {problem.topics.length > 0 && (
-                <div className="flex flex-wrap gap-2">
+                <div className="flex flex-wrap gap-1.5">
                   {problem.topics.map((topic, index) => (
-                    <Badge key={index} variant="secondary">
+                    <Badge
+                      key={index}
+                      variant="outline"
+                      className="text-[10px] border-white/[0.08] text-muted-foreground rounded-md"
+                    >
                       {typeof topic === "string" ? topic : topic.name}
                     </Badge>
                   ))}
                 </div>
               )}
 
-              <Separator />
+              {/* Separator */}
+              <div className="h-px bg-white/[0.06]" />
 
+              {/* Tabs */}
               <Tabs defaultValue="description" className="w-full">
-                <TabsList>
-                  <TabsTrigger value="description">Description</TabsTrigger>
-                  <TabsTrigger value="ai-help">AI Help</TabsTrigger>
+                <TabsList className="bg-white/[0.03] rounded-xl p-1 h-auto">
+                  <TabsTrigger
+                    value="description"
+                    className="rounded-lg text-xs data-[state=active]:bg-white/[0.06] data-[state=active]:text-foreground"
+                  >
+                    Description
+                  </TabsTrigger>
+                  <TabsTrigger
+                    value="ai-help"
+                    className="rounded-lg text-xs data-[state=active]:bg-white/[0.06] data-[state=active]:text-foreground gap-1"
+                  >
+                    <Sparkles className="w-3 h-3" />
+                    AI Help
+                  </TabsTrigger>
                 </TabsList>
+
                 <TabsContent
                   value="description"
                   className="markdown max-w-none pt-4 space-y-4"
@@ -243,34 +273,44 @@ export default function EachProblemPage() {
                     {problem.description || "*No description available*"}
                   </ReactMarkdown>
                 </TabsContent>
+
                 <TabsContent
                   value="ai-help"
-                  className="markdown max-w-none pt-4 space-y-4"
+                  className="max-w-none pt-4 space-y-4"
                 >
-                  <div className="flex gap-2 mb-2">
-                    <Button
-                      variant={aiTab === "explanation" ? "default" : "outline"}
-                      onClick={handleExplainProblem}
-                      disabled={isAiLoading}
-                    >
-                      Explain Problem
-                    </Button>
-                  </div>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleExplainProblem}
+                    disabled={isAiLoading}
+                    className="rounded-lg text-xs border-white/[0.08] hover:bg-white/[0.04] gap-1.5"
+                  >
+                    {isAiLoading ? (
+                      <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                    ) : (
+                      <Sparkles className="h-3.5 w-3.5 text-primary" />
+                    )}
+                    Explain Problem
+                  </Button>
+
                   {isAiLoading && (
-                    <div className="text-muted-foreground">
-                      Loading AI response...
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground py-4">
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      Generating explanation...
                     </div>
                   )}
+
                   {aiError && (
-                    <Alert variant="destructive">
+                    <Alert variant="destructive" className="rounded-xl">
                       <AlertDescription>{aiError}</AlertDescription>
                     </Alert>
                   )}
+
                   {aiTab === "explanation" &&
                     aiResponse &&
                     !isAiLoading &&
                     !aiError && (
-                      <div className="markdown max-w-none pt-4 space-y-4">
+                      <div className="markdown max-w-none space-y-4 p-4 rounded-xl bg-white/[0.02] border border-white/[0.06]">
                         <ReactMarkdown
                           remarkPlugins={[remarkMath]}
                           rehypePlugins={[rehypeKatex]}
@@ -285,16 +325,27 @@ export default function EachProblemPage() {
           </ScrollArea>
         </ResizablePanel>
 
-        <ResizableHandle withHandle />
+        <ResizableHandle withHandle className="bg-white/[0.03] hover:bg-primary/20 transition-colors" />
 
+        {/* Right Panel — Editor / Submissions */}
         <ResizablePanel defaultSize={50} minSize={30}>
           <Tabs defaultValue="editor" className="h-full flex flex-col">
-            <TabsList className="px-4 pt-2">
-              <TabsTrigger value="editor">Editor</TabsTrigger>
-              <TabsTrigger value="submissions">Submissions</TabsTrigger>
+            <TabsList className="mx-3 mt-3 bg-white/[0.03] rounded-xl p-1 h-auto w-fit">
+              <TabsTrigger
+                value="editor"
+                className="rounded-lg text-xs data-[state=active]:bg-white/[0.06] data-[state=active]:text-foreground"
+              >
+                Editor
+              </TabsTrigger>
+              <TabsTrigger
+                value="submissions"
+                className="rounded-lg text-xs data-[state=active]:bg-white/[0.06] data-[state=active]:text-foreground"
+              >
+                Submissions
+              </TabsTrigger>
             </TabsList>
 
-            <TabsContent value="editor" className="flex-1 p-4 overflow-auto">
+            <TabsContent value="editor" className="flex-1 p-3 overflow-auto">
               {slug && isAuthenticated ? (
                 <CodeEditor
                   problemSlug={slug}
@@ -302,31 +353,30 @@ export default function EachProblemPage() {
                   problemDescription={problem.description}
                 />
               ) : (
-                <Card className="h-full flex items-center justify-center">
-                  <CardContent className="text-center p-6">
-                    <Alert>
-                      <AlertDescription>
-                        Please sign in to submit your solution.
-                      </AlertDescription>
-                    </Alert>
-                  </CardContent>
-                </Card>
+                <div className="h-full flex items-center justify-center">
+                  <div className="glass rounded-2xl p-6 text-center max-w-sm">
+                    <p className="text-sm text-muted-foreground">
+                      Please sign in to submit your solution.
+                    </p>
+                  </div>
+                </div>
               )}
             </TabsContent>
 
-            <TabsContent value="submissions" className="flex-1 overflow-auto">
+            <TabsContent
+              value="submissions"
+              className="flex-1 overflow-auto p-3"
+            >
               {slug && isAuthenticated ? (
                 <SubmissionHistory problemSlug={slug} username={username} />
               ) : (
-                <Card className="h-full flex items-center justify-center">
-                  <CardContent className="text-center p-6">
-                    <Alert>
-                      <AlertDescription>
-                        Please sign in to view your submissions.
-                      </AlertDescription>
-                    </Alert>
-                  </CardContent>
-                </Card>
+                <div className="h-full flex items-center justify-center">
+                  <div className="glass rounded-2xl p-6 text-center max-w-sm">
+                    <p className="text-sm text-muted-foreground">
+                      Please sign in to view your submissions.
+                    </p>
+                  </div>
+                </div>
               )}
             </TabsContent>
           </Tabs>
@@ -335,5 +385,3 @@ export default function EachProblemPage() {
     </div>
   );
 }
-
-

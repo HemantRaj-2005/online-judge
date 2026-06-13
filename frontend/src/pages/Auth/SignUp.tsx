@@ -4,7 +4,7 @@ import { toast, Toaster } from "sonner";
 import { useAppDispatch } from "@/redux/hook";
 import { setUser } from "@/redux/user/authSlice";
 import { authService } from "@/services/auth";
-import { motion, useScroll, useTransform } from "framer-motion";
+import { motion } from "framer-motion";
 import {
   User,
   Mail,
@@ -15,17 +15,9 @@ import {
   PenLine,
   Loader2,
   ArrowRight,
-  Home,
+  ArrowLeft,
 } from "lucide-react";
 
-import {
-  Card,
-  CardHeader,
-  CardTitle,
-  CardContent,
-  CardFooter,
-  CardDescription,
-} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
@@ -44,9 +36,6 @@ export default function SignUp() {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
-  const { scrollY } = useScroll();
-  const parallaxY1 = useTransform(scrollY, [0, 500], [0, -50]);
-  const parallaxY2 = useTransform(scrollY, [0, 500], [0, 50]);
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -62,7 +51,6 @@ export default function SignUp() {
   };
 
   const handleSignUp = async () => {
-    // Basic validation
     if (!formData.username.trim()) {
       toast.error("Validation Error", { description: "Username is required" });
       return;
@@ -79,9 +67,9 @@ export default function SignUp() {
     setLoading(true);
     try {
       const res = await authService.register(formData);
-      localStorage.setItem('authToken', res.access_token);
-      localStorage.setItem('refresh_token', res.refresh_token);
-      
+      localStorage.setItem("authToken", res.access_token);
+      localStorage.setItem("refresh_token", res.refresh_token);
+
       dispatch(
         setUser({
           username: res.username,
@@ -117,259 +105,248 @@ export default function SignUp() {
     }
   };
 
+  const inputClasses =
+    "pl-10 h-10 rounded-xl bg-white/[0.02] border-white/[0.08] focus:border-primary/40 focus:ring-primary/20";
+
   return (
-    <section className="relative min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200 dark:from-black dark:to-gray-900 overflow-hidden p-4">
-      {/* Animated background elements */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <motion.div
-          className="absolute top-0 left-0 w-80 h-80 bg-gradient-to-r from-green-500/30 to-blue-500/30 dark:from-green-700/30 dark:to-blue-700/30 rounded-full filter blur-3xl -translate-x-1/2 -translate-y-1/2"
-          style={{ y: parallaxY1 }}
-          animate={{
-            scale: [1, 1.2, 1],
-            opacity: [0.4, 0.6, 0.4],
-          }}
-          transition={{
-            duration: 8,
-            repeat: Infinity,
-            ease: "easeInOut",
-          }}
-        />
-        <motion.div
-          className="absolute bottom-0 right-0 w-96 h-96 bg-gradient-to-r from-purple-500/30 to-cyan-500/30 dark:from-purple-700/30 dark:to-cyan-700/30 rounded-full filter blur-3xl translate-x-1/2 translate-y-1/2"
-          style={{ y: parallaxY2 }}
-          animate={{
-            scale: [1, 1.15, 1],
-            opacity: [0.4, 0.6, 0.4],
-          }}
-          transition={{
-            duration: 10,
-            repeat: Infinity,
-            ease: "easeInOut",
-            delay: 0.5,
-          }}
-        />
+    <section className="relative min-h-screen flex overflow-hidden">
+      {/* Left — Branding Panel */}
+      <div className="hidden lg:flex lg:w-1/2 relative items-center justify-center p-12">
+        <div className="absolute inset-0 bg-gradient-to-br from-purple-950 via-indigo-950 to-slate-950" />
+        <div className="absolute inset-0 grid-pattern opacity-30" />
+        <div className="absolute top-1/3 right-1/4 w-72 h-72 bg-purple-500/20 rounded-full blur-[100px] animate-float" />
+        <div className="absolute bottom-1/3 left-1/4 w-56 h-56 bg-cyan-500/15 rounded-full blur-[80px] animate-float-delayed" />
+
+        <div className="relative z-10 max-w-md">
+          <Link to="/" className="flex items-center gap-2 mb-10">
+            <img src="/logo.svg" alt="Logo" className="h-9 w-9 rounded-lg" />
+            <span className="text-xl font-bold gradient-text">तपस्Code</span>
+          </Link>
+          <h1 className="text-4xl font-bold text-white leading-tight mb-4">
+            Start your path to
+            <br />
+            coding excellence.
+          </h1>
+          <p className="text-white/50 text-base leading-relaxed">
+            Join thousands of developers mastering algorithms, data structures,
+            and competitive programming on our platform.
+          </p>
+
+          {/* Stats */}
+          <div className="mt-10 flex gap-8">
+            {[
+              { value: "500+", label: "Problems" },
+              { value: "10K+", label: "Users" },
+              { value: "95%", label: "Satisfaction" },
+            ].map((stat) => (
+              <div key={stat.label}>
+                <div className="text-2xl font-bold text-white">
+                  {stat.value}
+                </div>
+                <div className="text-xs text-white/40 mt-0.5">
+                  {stat.label}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
 
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-        className="w-full max-w-lg z-10"
-      >
-        <Card className="shadow-xl border-0 dark:border dark:border-gray-700 bg-white/90 dark:bg-gray-950 backdrop-blur-sm">
-          <CardHeader className="text-center space-y-4">
-            <motion.div
-              initial={{ scale: 0.9 }}
-              animate={{ scale: 1 }}
-              transition={{ duration: 0.3 }}
-            >
-              <CardTitle className="text-3xl font-bold bg-gradient-to-r from-green-600 to-blue-500 dark:from-green-400 dark:to-blue-300 bg-clip-text text-transparent">
-                Join Our Community
-              </CardTitle>
-            </motion.div>
-            <CardDescription className="text-gray-600 dark:text-gray-400">
-              Create your account to start your coding journey
-            </CardDescription>
-          </CardHeader>
+      {/* Right — Form Panel */}
+      <div className="flex-1 flex items-center justify-center p-6 lg:p-12 bg-background overflow-y-auto">
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4 }}
+          className="w-full max-w-sm"
+        >
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => navigate("/")}
+            className="mb-6 gap-1.5 text-muted-foreground hover:text-foreground -ml-2"
+          >
+            <ArrowLeft className="w-3.5 h-3.5" />
+            Home
+          </Button>
 
-          <CardContent className="space-y-6">
-            <div className="grid grid-cols-2 gap-4">
-              <Button
-                variant="outline"
-                className="gap-2"
-                onClick={() => toast.info("Coming soon!")}
-              >
-                GitHub
-              </Button>
-              <Button
-                variant="outline"
-                className="gap-2"
-                onClick={() => toast.info("Coming soon!")}
-              >
-                Google
-              </Button>
-            </div>
+          <div className="mb-6">
+            <h2 className="text-2xl font-bold text-foreground">
+              Create account
+            </h2>
+            <p className="text-sm text-muted-foreground mt-1">
+              Sign up to begin your coding journey.
+            </p>
+          </div>
 
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <Separator className="w-full" />
-              </div>
-              <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-background px-2 text-muted-foreground">
-                  Or register with email
-                </span>
-              </div>
-            </div>
-
-            <div className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="username">Username</Label>
-                <div className="relative">
-                  <User className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-                  <Input
-                    id="username"
-                    name="username"
-                    placeholder="coder123"
-                    value={formData.username}
-                    onChange={handleInputChange}
-                    className="pl-10"
-                    onKeyDown={handleKeyDown}
-                    required
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
-                <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-                  <Input
-                    id="email"
-                    type="email"
-                    name="email"
-                    placeholder="your@email.com"
-                    value={formData.email}
-                    onChange={handleInputChange}
-                    className="pl-10"
-                    onKeyDown={handleKeyDown}
-                    required
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="password">Password</Label>
-                <div className="relative">
-                  <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-                  <Input
-                    id="password"
-                    name="password"
-                    type={showPassword ? "text" : "password"}
-                    placeholder="Create a password"
-                    value={formData.password}
-                    onChange={handleInputChange}
-                    className="pl-10"
-                    onKeyDown={handleKeyDown}
-                    required
-                  />
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="absolute right-2 top-1/2 transform -translate-y-1/2 h-6 w-6 p-0"
-                    onClick={() => setShowPassword(!showPassword)}
-                  >
-                    {showPassword ? (
-                      <EyeOff className="h-4 w-4" />
-                    ) : (
-                      <Eye className="h-4 w-4" />
-                    )}
-                  </Button>
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="institution">Institution (Optional)</Label>
-                <div className="relative">
-                  <School className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-                  <Input
-                    id="institution"
-                    name="institution"
-                    placeholder="Your school or organization"
-                    value={formData.institution}
-                    onChange={handleInputChange}
-                    className="pl-10"
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="bio">Bio (Optional)</Label>
-                <div className="relative">
-                  <PenLine className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                  <Textarea
-                    id="bio"
-                    name="bio"
-                    placeholder="Tell us about yourself..."
-                    value={formData.bio}
-                    onChange={handleInputChange}
-                    className="pl-10"
-                    rows={4}
-                  />
-                </div>
-              </div>
-            </div>
-          </CardContent>
-
-          <CardFooter className="flex flex-col space-y-4">
+          {/* OAuth */}
+          <div className="grid grid-cols-2 gap-3 mb-5">
             <Button
-              className="w-full gap-2"
-              onClick={handleSignUp}
-              disabled={loading}
+              variant="outline"
+              className="h-10 rounded-xl text-sm border-white/[0.08] hover:bg-white/[0.04]"
+              onClick={() => toast.info("Coming soon!")}
             >
-              {loading ? (
-                <>
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                  Creating account...
-                </>
-              ) : (
-                <>
-                  Sign Up <ArrowRight className="h-4 w-4" />
-                </>
-              )}
+              GitHub
             </Button>
+            <Button
+              variant="outline"
+              className="h-10 rounded-xl text-sm border-white/[0.08] hover:bg-white/[0.04]"
+              onClick={() => toast.info("Coming soon!")}
+            >
+              Google
+            </Button>
+          </div>
 
-            <div className="text-sm text-center text-muted-foreground">
-              Already have an account?{" "}
-              <Link to="/sign-in">
+          <div className="relative mb-5">
+            <div className="absolute inset-0 flex items-center">
+              <Separator />
+            </div>
+            <div className="relative flex justify-center text-xs uppercase">
+              <span className="bg-background px-3 text-muted-foreground">
+                or
+              </span>
+            </div>
+          </div>
+
+          {/* Form */}
+          <div className="space-y-3.5">
+            <div className="space-y-1.5">
+              <Label htmlFor="username" className="text-sm">
+                Username
+              </Label>
+              <div className="relative">
+                <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/50" />
+                <Input
+                  id="username"
+                  name="username"
+                  placeholder="coder123"
+                  value={formData.username}
+                  onChange={handleInputChange}
+                  className={inputClasses}
+                  onKeyDown={handleKeyDown}
+                  required
+                />
+              </div>
+            </div>
+
+            <div className="space-y-1.5">
+              <Label htmlFor="email" className="text-sm">
+                Email
+              </Label>
+              <div className="relative">
+                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/50" />
+                <Input
+                  id="email"
+                  type="email"
+                  name="email"
+                  placeholder="you@example.com"
+                  value={formData.email}
+                  onChange={handleInputChange}
+                  className={inputClasses}
+                  onKeyDown={handleKeyDown}
+                  required
+                />
+              </div>
+            </div>
+
+            <div className="space-y-1.5">
+              <Label htmlFor="password" className="text-sm">
+                Password
+              </Label>
+              <div className="relative">
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/50" />
+                <Input
+                  id="password"
+                  name="password"
+                  type={showPassword ? "text" : "password"}
+                  placeholder="Create a password"
+                  value={formData.password}
+                  onChange={handleInputChange}
+                  className={`${inputClasses} pr-10`}
+                  onKeyDown={handleKeyDown}
+                  required
+                />
                 <Button
-                  variant="link"
-                  className="p-0 h-auto text-green-600 dark:text-green-400"
+                  variant="ghost"
+                  size="sm"
+                  className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7 p-0 rounded-lg"
+                  onClick={() => setShowPassword(!showPassword)}
                 >
-                  Sign in instead
+                  {showPassword ? (
+                    <EyeOff className="h-3.5 w-3.5 text-muted-foreground" />
+                  ) : (
+                    <Eye className="h-3.5 w-3.5 text-muted-foreground" />
+                  )}
                 </Button>
-              </Link>
+              </div>
             </div>
 
-            <Button
-              variant="ghost"
-              className="mt-4 gap-2"
-              onClick={() => navigate("/")}
-            >
-              <Home className="h-4 w-4" />
-              Return to Home
-            </Button>
-          </CardFooter>
-        </Card>
-      </motion.div>
+            <div className="space-y-1.5">
+              <Label htmlFor="institution" className="text-sm">
+                Institution{" "}
+                <span className="text-muted-foreground">(optional)</span>
+              </Label>
+              <div className="relative">
+                <School className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/50" />
+                <Input
+                  id="institution"
+                  name="institution"
+                  placeholder="Your school or org"
+                  value={formData.institution}
+                  onChange={handleInputChange}
+                  className={inputClasses}
+                />
+              </div>
+            </div>
 
-      {/* Floating elements */}
-      <motion.div
-        style={{ y: parallaxY1 }}
-        animate={{
-          y: [0, -20, 0],
-          rotate: [0, 10, 0],
-        }}
-        transition={{
-          duration: 5,
-          repeat: Infinity,
-          ease: "easeInOut",
-        }}
-        className="absolute top-1/4 left-12 w-8 h-8 rounded-full bg-green-500/40 dark:bg-green-700/40 blur-sm hidden md:block"
-      />
-      <motion.div
-        style={{ y: parallaxY2 }}
-        animate={{
-          y: [0, 20, 0],
-          rotate: [0, -10, 0],
-        }}
-        transition={{
-          duration: 4,
-          repeat: Infinity,
-          ease: "easeInOut",
-          delay: 0.7,
-        }}
-        className="absolute bottom-1/3 right-20 w-10 h-10 rounded-full bg-cyan-500/40 dark:bg-cyan-700/40 blur-sm hidden md:block"
-      />
+            <div className="space-y-1.5">
+              <Label htmlFor="bio" className="text-sm">
+                Bio{" "}
+                <span className="text-muted-foreground">(optional)</span>
+              </Label>
+              <div className="relative">
+                <PenLine className="absolute left-3 top-3 h-4 w-4 text-muted-foreground/50" />
+                <Textarea
+                  id="bio"
+                  name="bio"
+                  placeholder="Tell us about yourself..."
+                  value={formData.bio}
+                  onChange={handleInputChange}
+                  className="pl-10 rounded-xl bg-white/[0.02] border-white/[0.08] focus:border-primary/40 focus:ring-primary/20"
+                  rows={3}
+                />
+              </div>
+            </div>
+          </div>
+
+          <Button
+            className="w-full mt-5 h-10 rounded-xl btn-gradient text-white font-medium gap-2"
+            onClick={handleSignUp}
+            disabled={loading}
+          >
+            {loading ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin" />
+                Creating account...
+              </>
+            ) : (
+              <>
+                Create Account <ArrowRight className="h-3.5 w-3.5" />
+              </>
+            )}
+          </Button>
+
+          <p className="text-sm text-center text-muted-foreground mt-5">
+            Already have an account?{" "}
+            <Link
+              to="/sign-in"
+              className="text-primary hover:text-primary/80 font-medium transition-colors"
+            >
+              Sign in
+            </Link>
+          </p>
+        </motion.div>
+      </div>
 
       <Toaster position="top-center" richColors />
     </section>

@@ -1,183 +1,212 @@
 import { useEffect, useState } from "react";
-import { motion, useScroll, useTransform } from "framer-motion";
+import { motion } from "framer-motion";
 import { TypeAnimation } from "react-type-animation";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
+import { ArrowRight, Play } from "lucide-react";
+
+const stats = [
+  { value: "500+", label: "Problems" },
+  { value: "10K+", label: "Users" },
+  { value: "50+", label: "Topics" },
+  { value: "3", label: "Languages" },
+];
+
+const codeSnippet = `function solve(arr, target) {
+  const map = new Map();
+  for (let i = 0; i < arr.length; i++) {
+    const comp = target - arr[i];
+    if (map.has(comp)) {
+      return [map.get(comp), i];
+    }
+    map.set(arr[i], i);
+  }
+  return [-1, -1];
+}`;
 
 export default function Hero() {
-  const [isMounted, setIsMounted] = useState<boolean>(false);
-  const { scrollY } = useScroll();
+  const [isMounted, setIsMounted] = useState(false);
   const navigate = useNavigate();
-  const parallaxY1 = useTransform(scrollY, [0, 500], [0, -50]);
-  const parallaxY2 = useTransform(scrollY, [0, 500], [0, 50]);
 
   useEffect(() => {
     setIsMounted(true);
   }, []);
 
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: { staggerChildren: 0.12, delayChildren: 0.1 },
+    },
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 24 },
+    visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: "easeOut" } },
+  };
+
   return (
-    <section
-      className="relative py-24 md:py-36 bg-gradient-to-br from-gray-100 to-gray-200 dark:from-black dark:to-gray-900 overflow-hidden"
-    >
-      {/* Animated background elements with parallax */}
+    <section className="relative min-h-[90vh] flex items-center overflow-hidden">
+      {/* Grid dot pattern */}
+      <div className="absolute inset-0 grid-pattern opacity-60" />
+
+      {/* Gradient orbs */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <motion.div
-          className="absolute top-0 left-0 w-80 h-80 bg-gradient-to-r from-green-500/30 to-blue-500/30 dark:from-green-700/30 dark:to-blue-700/30 rounded-full filter blur-3xl -translate-x-1/2 -translate-y-1/2"
-          style={{ y: parallaxY1 }}
-          animate={{
-            scale: [1, 1.2, 1],
-            opacity: [0.4, 0.6, 0.4],
-          }}
-          transition={{
-            duration: 8,
-            repeat: Infinity,
-            ease: "easeInOut",
-          }}
-        />
-        <motion.div
-          className="absolute bottom-0 right-0 w-96 h-96 bg-gradient-to-r from-purple-500/30 to-cyan-500/30 dark:from-purple-700/30 dark:to-cyan-700/30 rounded-full filter blur-3xl translate-x-1/2 translate-y-1/2"
-          style={{ y: parallaxY2 }}
-          animate={{
-            scale: [1, 1.15, 1],
-            opacity: [0.4, 0.6, 0.4],
-          }}
-          transition={{
-            duration: 10,
-            repeat: Infinity,
-            ease: "easeInOut",
-            delay: 0.5,
-          }}
-        />
+        <div className="absolute -top-40 -left-40 w-[500px] h-[500px] bg-indigo-500/[0.12] rounded-full blur-[120px] animate-float" />
+        <div className="absolute top-1/3 -right-32 w-[400px] h-[400px] bg-purple-500/[0.10] rounded-full blur-[100px] animate-float-delayed" />
+        <div className="absolute -bottom-32 left-1/3 w-[350px] h-[350px] bg-cyan-500/[0.08] rounded-full blur-[100px] animate-float-slow" />
       </div>
 
-      <div className="container mx-auto px-6 text-center relative z-10">
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={isMounted ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.6, ease: "easeOut" }}
-          className="mb-8"
-        >
-          <span className="inline-block px-4 py-2 text-base font-semibold rounded-full bg-green-500/20 dark:bg-green-700/20 text-green-600 dark:text-green-400 shadow-md animate-pulse">
-            💻 Master Competitive Programming
-          </span>
-        </motion.div>
-
-        <motion.h1
-          initial={{ opacity: 0, y: 30 }}
-          animate={isMounted ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.6, delay: 0.1, ease: "easeOut" }}
-          className="text-5xl md:text-7xl font-extrabold mb-6 tracking-tight"
-        >
-          <span className="bg-clip-text text-transparent bg-gradient-to-r from-green-600 to-blue-400 dark:from-green-400 dark:to-blue-200 animate-shine">
-            Code Your Way to
-          </span>{" "}
-          <TypeAnimation
-            sequence={["Success", 1500, "Mastery", 1500, "Victory", 1500]}
-            wrapper="span"
-            speed={40}
-            repeat={Infinity}
-            className="bg-clip-text text-transparent bg-gradient-to-r from-purple-600 to-cyan-500 dark:from-purple-400 dark:to-cyan-400 animate-shine"
-          />
-        </motion.h1>
-
-        <motion.p
-          initial={{ opacity: 0, y: 30 }}
-          animate={isMounted ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.6, delay: 0.2, ease: "easeOut" }}
-          className="text-xl md:text-2xl text-gray-600 dark:text-gray-400 max-w-3xl mx-auto mb-10 animate-glow"
-        >
-          Solve challenging problems, sharpen your coding skills, and compete with coders worldwide.
-        </motion.p>
-
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={isMounted ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.6, delay: 0.3, ease: "easeOut" }}
-          className="flex flex-col sm:flex-row gap-4 justify-center mb-16"
-        >
-          <Button
-            size="lg"
-            className="px-10 py-6 text-lg font-semibold bg-green-600 hover:bg-green-700 dark:bg-green-700 dark:hover:bg-green-800 text-white rounded-xl shadow-lg transform transition-transform hover:scale-105 relative overflow-hidden group"
-            onClick={() => navigate("/problems")}
+      {/* Content */}
+      <div className="container mx-auto px-6 relative z-10">
+        <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+          {/* Left — Text Content */}
+          <motion.div
+            variants={containerVariants}
+            initial="hidden"
+            animate={isMounted ? "visible" : "hidden"}
+            className="max-w-2xl"
           >
-            <span className="relative z-10 animate-shine-text">Start Coding Now</span>
-            <span className="absolute inset-0 bg-gradient-to-r from-green-700 to-blue-600 dark:from-green-800 dark:to-blue-700 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-          </Button>
-          <Button
-            size="lg"
-            variant="outline"
-            className="px-10 py-6 text-lg font-semibold border-2 border-green-500 dark:border-green-600 text-green-600 dark:text-green-400 hover:bg-green-500/10 dark:hover:bg-green-600/10 rounded-xl transform transition-transform hover:scale-105 relative group"
-            onClick={() => window.location.href = "/how-it-works"}
-          >
-            <span className="relative z-10 animate-shine-text">Learn How It Works</span>
-            <span className="absolute inset-0 border-2 border-transparent group-hover:border-green-500 dark:group-hover:border-green-600 rounded-xl transition-all duration-300" />
-          </Button>
-        </motion.div>
+            {/* Badge */}
+            <motion.div variants={itemVariants}>
+              <span className="inline-flex items-center gap-2 px-3.5 py-1.5 text-xs font-medium rounded-full bg-primary/[0.1] text-primary border border-primary/[0.15]">
+                <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
+                Open Source Online Judge
+              </span>
+            </motion.div>
 
-        {/* Enhanced floating elements with parallax */}
-        <motion.div
-          style={{ y: parallaxY1 }}
-          animate={{
-            y: [0, -20, 0],
-            rotate: [0, 10, 0],
-          }}
-          transition={{
-            duration: 5,
-            repeat: Infinity,
-            ease: "easeInOut",
-          }}
-          className="absolute top-1/4 left-12 w-8 h-8 rounded-full bg-green-500/40 dark:bg-green-700/40 blur-sm hidden md:block"
-        />
-        <motion.div
-          style={{ y: parallaxY2 }}
-          animate={{
-            y: [0, 20, 0],
-            rotate: [0, -10, 0],
-          }}
-          transition={{
-            duration: 4,
-            repeat: Infinity,
-            ease: "easeInOut",
-            delay: 0.7,
-          }}
-          className="absolute bottom-1/3 right-20 w-10 h-10 rounded-full bg-cyan-500/40 dark:bg-cyan-700/40 blur-sm hidden md:block"
-        />
+            {/* Headline */}
+            <motion.h1
+              variants={itemVariants}
+              className="mt-6 text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-extrabold tracking-tight leading-[1.1]"
+            >
+              <span className="gradient-text-hero">
+                Master the{" "}
+              </span>
+              <br />
+              <span className="gradient-text-hero">Art of </span>
+              <TypeAnimation
+                sequence={[
+                  "Code",
+                  2000,
+                  "Algorithms",
+                  2000,
+                  "Problem Solving",
+                  2000,
+                ]}
+                wrapper="span"
+                speed={40}
+                repeat={Infinity}
+                className="gradient-text"
+              />
+            </motion.h1>
+
+            {/* Subtitle */}
+            <motion.p
+              variants={itemVariants}
+              className="mt-5 text-lg text-muted-foreground max-w-lg leading-relaxed"
+            >
+              Solve challenging problems, sharpen your skills with instant
+              feedback, and track your progress — all in one premium platform.
+            </motion.p>
+
+            {/* CTAs */}
+            <motion.div variants={itemVariants} className="mt-8 flex flex-wrap gap-3">
+              <Button
+                size="lg"
+                onClick={() => navigate("/problems")}
+                className="btn-gradient text-white rounded-xl px-7 h-12 text-sm font-semibold gap-2"
+              >
+                Start Solving
+                <ArrowRight className="w-4 h-4" />
+              </Button>
+              <Button
+                size="lg"
+                variant="outline"
+                onClick={() => navigate("/problems")}
+                className="rounded-xl px-7 h-12 text-sm font-semibold border-white/[0.1] hover:bg-white/[0.04] gap-2"
+              >
+                <Play className="w-4 h-4" />
+                Explore Problems
+              </Button>
+            </motion.div>
+
+            {/* Stats */}
+            <motion.div
+              variants={itemVariants}
+              className="mt-12 flex flex-wrap gap-8"
+            >
+              {stats.map((stat) => (
+                <div key={stat.label}>
+                  <div className="text-2xl font-bold text-foreground">
+                    {stat.value}
+                  </div>
+                  <div className="text-xs text-muted-foreground mt-0.5">
+                    {stat.label}
+                  </div>
+                </div>
+              ))}
+            </motion.div>
+          </motion.div>
+
+          {/* Right — Floating Code Card */}
+          <motion.div
+            initial={{ opacity: 0, x: 40, rotateY: -8 }}
+            animate={
+              isMounted
+                ? { opacity: 1, x: 0, rotateY: 0 }
+                : {}
+            }
+            transition={{ duration: 0.8, delay: 0.4, ease: "easeOut" }}
+            className="hidden lg:block"
+          >
+            <div className="relative">
+              {/* Glow behind card */}
+              <div className="absolute -inset-4 bg-gradient-to-br from-indigo-500/[0.15] via-purple-500/[0.10] to-cyan-500/[0.15] rounded-3xl blur-2xl" />
+
+              {/* Code card */}
+              <div className="relative glass rounded-2xl p-5 glow-border">
+                {/* Window chrome */}
+                <div className="flex items-center gap-2 mb-4">
+                  <div className="w-3 h-3 rounded-full bg-red-400/60" />
+                  <div className="w-3 h-3 rounded-full bg-yellow-400/60" />
+                  <div className="w-3 h-3 rounded-full bg-green-400/60" />
+                  <span className="ml-2 text-xs text-muted-foreground font-mono">
+                    two_sum.js
+                  </span>
+                </div>
+
+                {/* Code */}
+                <pre className="text-[13px] leading-relaxed font-mono text-muted-foreground overflow-x-auto">
+                  <code>
+                    {codeSnippet.split("\n").map((line, i) => (
+                      <div key={i} className="flex">
+                        <span className="select-none w-8 text-right pr-4 text-white/[0.15] text-xs leading-relaxed">
+                          {i + 1}
+                        </span>
+                        <span className="text-foreground/70">{line}</span>
+                      </div>
+                    ))}
+                  </code>
+                </pre>
+
+                {/* Status bar */}
+                <div className="mt-4 pt-3 border-t border-white/[0.06] flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                    <span className="text-xs text-emerald-400 font-medium">
+                      Accepted
+                    </span>
+                  </div>
+                  <span className="text-xs text-muted-foreground">
+                    Runtime: 4ms · Memory: 42MB
+                  </span>
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        </div>
       </div>
-
-      {/* Custom CSS for shiny text effect */}
-      <style>{`
-        @keyframes shine {
-          0% {
-            background-position: -200%;
-          }
-          100% {
-            background-position: 200%;
-          }
-        }
-        .animate-shine {
-          background-size: 200% auto;
-          animation: shine 4s linear infinite;
-          text-shadow: 0 0 8px rgba(255, 255, 255, 0.3), 0 0 12px rgba(34, 197, 94, 0.2);
-        }
-        .animate-shine-text {
-          background: linear-gradient(90deg, #ffffff 0%, #22c55e 50%, #ffffff 100%);
-          background-size: 200% auto;
-          background-clip: text;
-          color: transparent;
-          animation: empty 3s linear infinite;
-        }
-        @keyframes glow {
-          0%, 100% {
-            text-shadow: 0 0 4px rgba(255, 255, 255, 0.2), 0 0 8px rgba(34, 197, 94, 0.1);
-          }
-          50% {
-            text-shadow: 0 0 8px rgba(255, 255, 255, 0.4), 0 0 16px rgba(34, 197, 94 0.3);
-          }
-        }
-        .animate-glow {
-          animation: glow 3s ease-in-out infinite;
-        }
-      `}</style>
     </section>
   );
 }

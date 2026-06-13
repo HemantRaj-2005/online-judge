@@ -1,5 +1,8 @@
-import { useState, useEffect } from 'react';
-import { submissionService, type Submission } from '@/services/submissionService';
+import { useState, useEffect } from "react";
+import {
+  submissionService,
+  type Submission,
+} from "@/services/submissionService";
 import {
   Table,
   TableBody,
@@ -7,19 +10,22 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table"
-import { Badge } from "@/components/ui/badge"
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
-import { Skeleton } from "@/components/ui/skeleton"
-import { Alert, AlertDescription } from "@/components/ui/alert"
-import { useNavigate } from 'react-router-dom';
+} from "@/components/ui/table";
+import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { useNavigate } from "react-router-dom";
+import { FileCode2 } from "lucide-react";
 
 interface SubmissionsOnDashboardProps {
   username?: string;
-  limit?: number; // Optional limit to show only recent submissions
+  limit?: number;
 }
 
-export default function SubmissionsOnDashboard({ username, limit }: SubmissionsOnDashboardProps) {
+export default function SubmissionsOnDashboard({
+  username,
+  limit,
+}: SubmissionsOnDashboardProps) {
   const [submissions, setSubmissions] = useState<Submission[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -31,20 +37,21 @@ export default function SubmissionsOnDashboard({ username, limit }: SubmissionsO
         setLoading(true);
         if (!username) {
           setSubmissions([]);
-          setError('User not found');
+          setError("User not found");
           setLoading(false);
           return;
         }
-        // This endpoint would need to be created in your backend
-        // It should return all submissions for the user with problem titles
-        const response = await submissionService.getUserSubmissions(username) as Submission[];
-        // Apply limit if provided
-        const limitedSubmissions = limit ? response.slice(0, limit) : response;
+        const response = (await submissionService.getUserSubmissions(
+          username
+        )) as Submission[];
+        const limitedSubmissions = limit
+          ? response.slice(0, limit)
+          : response;
         setSubmissions(limitedSubmissions);
         setError(null);
       } catch (err) {
-        setError('Failed to fetch submission history');
-        console.error('Error fetching submissions:', err);
+        setError("Failed to fetch submission history");
+        console.error("Error fetching submissions:", err);
       } finally {
         setLoading(false);
       }
@@ -55,24 +62,17 @@ export default function SubmissionsOnDashboard({ username, limit }: SubmissionsO
 
   if (loading) {
     return (
-      <Card className="mt-8">
-        <CardHeader>
-          <CardTitle>Recent Submissions</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            {[...Array(3)].map((_, i) => (
-              <Skeleton key={i} className="h-12 w-full" />
-            ))}
-          </div>
-        </CardContent>
-      </Card>
+      <div className="space-y-3">
+        {[...Array(3)].map((_, i) => (
+          <Skeleton key={i} className="h-10 w-full rounded-xl" />
+        ))}
+      </div>
     );
   }
 
   if (error) {
     return (
-      <Alert variant="destructive" className="mt-8">
+      <Alert variant="destructive" className="rounded-xl">
         <AlertDescription>{error}</AlertDescription>
       </Alert>
     );
@@ -80,111 +80,149 @@ export default function SubmissionsOnDashboard({ username, limit }: SubmissionsO
 
   if (submissions.length === 0) {
     return (
-      <Card className="mt-8">
-        <CardHeader>
-          <CardTitle>Recent Submissions</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p className="text-muted-foreground">No submissions yet</p>
-        </CardContent>
-      </Card>
+      <div className="text-center py-10">
+        <FileCode2 className="w-10 h-10 text-muted-foreground/30 mx-auto mb-3" />
+        <p className="text-sm text-muted-foreground">No submissions yet</p>
+        <p className="text-xs text-muted-foreground/60 mt-1">
+          Start solving problems to see your history here.
+        </p>
+      </div>
     );
   }
 
   return (
-    <Card className="mt-8">
-      <CardHeader>
-        <CardTitle>{limit ? 'Recent Submissions' : 'Submission History'}</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>ID</TableHead>
-              <TableHead>Problem</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead>Language</TableHead>
-              <TableHead>Time</TableHead>
-              <TableHead>Memory</TableHead>
-              <TableHead>Submitted At</TableHead>
+    <div className="overflow-x-auto rounded-xl">
+      <Table>
+        <TableHeader>
+          <TableRow className="border-white/[0.04] hover:bg-transparent">
+            <TableHead className="text-xs font-medium text-muted-foreground">
+              Problem
+            </TableHead>
+            <TableHead className="text-xs font-medium text-muted-foreground">
+              Status
+            </TableHead>
+            <TableHead className="text-xs font-medium text-muted-foreground">
+              Lang
+            </TableHead>
+            <TableHead className="text-xs font-medium text-muted-foreground">
+              Time
+            </TableHead>
+            <TableHead className="text-xs font-medium text-muted-foreground">
+              Memory
+            </TableHead>
+            <TableHead className="text-xs font-medium text-muted-foreground">
+              Date
+            </TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {submissions.map((submission) => (
+            <TableRow
+              key={submission.id}
+              onClick={() => navigate(`/submissions/${submission.id}`)}
+              className="cursor-pointer border-white/[0.04] hover:bg-white/[0.02] transition-colors"
+            >
+              <TableCell className="font-medium text-sm">
+                {submission.problem_title || submission.problem}
+              </TableCell>
+              <TableCell>
+                <StatusBadge status={submission.status} />
+              </TableCell>
+              <TableCell>
+                <Badge
+                  variant="outline"
+                  className="text-[10px] font-mono border-white/[0.08] rounded-md"
+                >
+                  {formatLanguage(submission.language)}
+                </Badge>
+              </TableCell>
+              <TableCell className="text-xs text-muted-foreground">
+                {submission.time_taken
+                  ? `${submission.time_taken}ms`
+                  : "—"}
+              </TableCell>
+              <TableCell className="text-xs text-muted-foreground">
+                {submission.memory_used
+                  ? `${submission.memory_used}MB`
+                  : "—"}
+              </TableCell>
+              <TableCell className="text-xs text-muted-foreground">
+                {new Date(submission.submitted_at).toLocaleDateString()}
+              </TableCell>
             </TableRow>
-          </TableHeader>
-          <TableBody>
-            {submissions.map((submission) => (
-              <TableRow 
-                key={submission.id} 
-                onClick={() => navigate(`/submissions/${submission.id}`)} 
-                className="cursor-pointer hover:bg-muted"
-              >
-                <TableCell className="font-medium">{submission.id}</TableCell>
-                <TableCell>
-                  {submission.problem_title || submission.problem}
-                </TableCell>
-                <TableCell>
-                  <Badge variant={getStatusVariant(submission.status)}>
-                    {formatStatus(submission.status)}
-                  </Badge>
-                </TableCell>
-                <TableCell>
-                  <Badge variant="outline">
-                    {formatLanguage(submission.language)}
-                  </Badge>
-                </TableCell>
-                <TableCell>
-                  {submission.time_taken ? `${submission.time_taken} ms` : 'N/A'}
-                </TableCell>
-                <TableCell>
-                  {submission.memory_used ? `${submission.memory_used} MB` : 'N/A'}
-                </TableCell>
-                <TableCell>
-                  {new Date(submission.submitted_at).toLocaleString()}
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </CardContent>
-    </Card>
+          ))}
+        </TableBody>
+      </Table>
+    </div>
   );
 }
 
-// Helper function to format status for display
-function formatStatus(status: string): string {
-  return status
-    .split('_')
-    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-    .join(' ');
+function StatusBadge({ status }: { status: string }) {
+  const config = getStatusConfig(status);
+  return (
+    <span
+      className={`inline-flex items-center gap-1.5 text-[11px] font-medium px-2 py-0.5 rounded-md ${config.classes}`}
+    >
+      <span className={`w-1.5 h-1.5 rounded-full ${config.dot}`} />
+      {formatStatus(status)}
+    </span>
+  );
 }
 
-// Helper function to format language for display
-function formatLanguage(language: string): string {
-  switch (language) {
-    case 'python':
-      return 'Python';
-    case 'java':
-      return 'Java';
-    case 'cpp':
-      return 'C++';
+function getStatusConfig(status: string) {
+  switch (status) {
+    case "accepted":
+      return {
+        classes: "bg-emerald-500/10 text-emerald-400",
+        dot: "bg-emerald-400",
+      };
+    case "wrong_answer":
+      return {
+        classes: "bg-red-500/10 text-red-400",
+        dot: "bg-red-400",
+      };
+    case "time_limit_exceeded":
+      return {
+        classes: "bg-amber-500/10 text-amber-400",
+        dot: "bg-amber-400",
+      };
+    case "compilation_error":
+    case "runtime_error":
+    case "memory_limit_exceeded":
+      return {
+        classes: "bg-rose-500/10 text-rose-400",
+        dot: "bg-rose-400",
+      };
+    case "pending":
+    case "running":
+      return {
+        classes: "bg-blue-500/10 text-blue-400",
+        dot: "bg-blue-400 animate-pulse",
+      };
     default:
-      return language;
+      return {
+        classes: "bg-white/[0.04] text-muted-foreground",
+        dot: "bg-muted-foreground",
+      };
   }
 }
 
-// Helper function to get badge variant based on status
-function getStatusVariant(status: string) {
-  switch (status) {
-    case 'accepted':
-      return 'default';
-    case 'wrong_answer':
-    case 'compilation_error':
-    case 'runtime_error':
-    case 'time_limit_exceeded':
-    case 'memory_limit_exceeded':
-      return 'destructive';
-    case 'pending':
-    case 'running':
-      return 'secondary';
+function formatStatus(status: string): string {
+  return status
+    .split("_")
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(" ");
+}
+
+function formatLanguage(language: string): string {
+  switch (language) {
+    case "python":
+      return "PY";
+    case "java":
+      return "JAVA";
+    case "cpp":
+      return "C++";
     default:
-      return 'outline';
+      return language.toUpperCase();
   }
 }
