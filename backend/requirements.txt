@@ -8,7 +8,7 @@ django-cors-headers
 celery
 docker
 redis
-google-generativeai
+google-genai
 python-dotenv
 gunicorn
 whitenoise

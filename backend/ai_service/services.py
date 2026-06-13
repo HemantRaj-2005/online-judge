@@ -1,4 +1,4 @@
-import google.generativeai as genai
+from google import genai
 from typing import Dict, Any
 import json
 
@@ -9,11 +9,11 @@ load_dotenv()
 
 class AIAnalysisService:
     def __init__(self):
-        api_key = os.getenv("GOOGLE_GENAI_API_KEY")
+        api_key = os.getenv("GEMINI_API_KEY")
         if not api_key:
-            raise ValueError("GOOGLE_GENAI_API_KEY environment variable is not configured on the server. Please add it to your server configuration/environment variables.")
-        genai.configure(api_key=api_key)
-        self.model = genai.GenerativeModel("models/gemini-2.0-flash")
+            raise ValueError("GEMINI_API_KEY environment variable is not configured on the server. Please add it to your server configuration/environment variables.")
+        self.client = genai.Client(api_key=api_key)
+        self.model_name = "gemini-2.0-flash"
 
     def _clean_and_parse_response(self, output: str) -> Dict[str, Any]:
         """Helper method to clean and parse AI response."""
@@ -54,7 +54,7 @@ class AIAnalysisService:
         Respond with only the JSON object, no markdown or additional text.
         """
         try:
-            response = self.model.generate_content(prompt)
+            response = self.client.models.generate_content(model=self.model_name, contents=prompt)
             output = self._clean_and_parse_response(response.text)
             return output
         except Exception as e:
@@ -81,7 +81,7 @@ class AIAnalysisService:
         Respond with only the JSON object, no markdown or additional text.
         """
         try:
-            response = self.model.generate_content(prompt)
+            response = self.client.models.generate_content(model=self.model_name, contents=prompt)
             output = self._clean_and_parse_response(response.text)
             return output
         except Exception as e:
@@ -132,7 +132,7 @@ class AIAnalysisService:
         Respond with ONLY the raw JSON object, no markdown block formatting, no ```json formatting, and no additional text.
         """
         try:
-            response = self.model.generate_content(prompt)
+            response = self.client.models.generate_content(model=self.model_name, contents=prompt)
             output = self._clean_and_parse_response(response.text)
             return output
         except Exception as e:
@@ -166,7 +166,7 @@ class AIAnalysisService:
         Respond with ONLY the raw JSON object, no markdown or additional text.
         """
         try:
-            response = self.model.generate_content(prompt)
+            response = self.client.models.generate_content(model=self.model_name, contents=prompt)
             return self._clean_and_parse_response(response.text)
         except Exception as e:
             return {
@@ -196,7 +196,7 @@ class AIAnalysisService:
         Respond with ONLY the raw JSON object, no markdown or additional text.
         """
         try:
-            response = self.model.generate_content(prompt)
+            response = self.client.models.generate_content(model=self.model_name, contents=prompt)
             return self._clean_and_parse_response(response.text)
         except Exception as e:
             return {
@@ -232,7 +232,7 @@ class AIAnalysisService:
         {code}
         """
         try:
-            response = self.model.generate_content(prompt)
+            response = self.client.models.generate_content(model=self.model_name, contents=prompt)
             return self._clean_and_parse_response(response.text)
         except Exception as e:
             return {

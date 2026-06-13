@@ -28,7 +28,7 @@ def analyze_submission(request, problem_id):
             'error': f'AI Service Unavailable: {str(e)}',
             'time_complexity': 'N/A',
             'space_complexity': 'N/A',
-            'explanation': 'AI Complexity Analysis is currently unavailable. Please check the GOOGLE_GENAI_API_KEY environment variable configuration on the server.',
+            'explanation': 'AI Complexity Analysis is currently unavailable. Please check the GEMINI_API_KEY environment variable configuration on the server.',
             'optimization': 'N/A',
             'errors': [str(e)]
         }, status=status.HTTP_503_SERVICE_UNAVAILABLE)
@@ -76,8 +76,8 @@ def explain_problem(request, problem_id):
     except Exception as e:
         return Response({
             'error': f'AI Service Unavailable: {str(e)}',
-            'problem_summary': 'AI Explanation is currently unavailable. Please check the GOOGLE_GENAI_API_KEY environment variable configuration on the server.',
-            'approach': 'Please ask the administrator to configure the GOOGLE_GENAI_API_KEY on the backend server environment variables.',
+            'problem_summary': 'AI Explanation is currently unavailable. Please check the GEMINI_API_KEY environment variable configuration on the server.',
+            'approach': 'Please ask the administrator to configure the GEMINI_API_KEY on the backend server environment variables.',
             'algorithms': [],
             'example': None
         }, status=status.HTTP_503_SERVICE_UNAVAILABLE)
@@ -110,8 +110,8 @@ def get_hint(request):
     except Exception as e:
         return Response({
             'error': f'AI Service Unavailable: {str(e)}',
-            'hint': 'AI Hints are currently unavailable. Please check the GOOGLE_GENAI_API_KEY environment variable configuration on the server.',
-            'approach': ['Please ask the administrator to configure the GOOGLE_GENAI_API_KEY on the backend server environment variables.'],
+            'hint': 'AI Hints are currently unavailable. Please check the GEMINI_API_KEY environment variable configuration on the server.',
+            'approach': ['Please ask the administrator to configure the GEMINI_API_KEY on the backend server environment variables.'],
             'derivation': [],
             'complexity': {'time': 'N/A', 'space': 'N/A'}
         }, status=status.HTTP_503_SERVICE_UNAVAILABLE)
