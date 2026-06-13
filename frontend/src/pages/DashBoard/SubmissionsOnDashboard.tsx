@@ -37,7 +37,7 @@ export default function SubmissionsOnDashboard({ username, limit }: SubmissionsO
         }
         // This endpoint would need to be created in your backend
         // It should return all submissions for the user with problem titles
-        const response = await submissionService.getUserSubmissions(username);
+        const response = await submissionService.getUserSubmissions(username) as Submission[];
         // Apply limit if provided
         const limitedSubmissions = limit ? response.slice(0, limit) : response;
         setSubmissions(limitedSubmissions);
@@ -174,14 +174,13 @@ function formatLanguage(language: string): string {
 function getStatusVariant(status: string) {
   switch (status) {
     case 'accepted':
-      return 'success';
+      return 'default';
     case 'wrong_answer':
     case 'compilation_error':
     case 'runtime_error':
-      return 'destructive';
     case 'time_limit_exceeded':
     case 'memory_limit_exceeded':
-      return 'warning';
+      return 'destructive';
     case 'pending':
     case 'running':
       return 'secondary';

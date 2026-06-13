@@ -1,5 +1,5 @@
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel'
-import React, { useRef } from "react"
+import { useRef } from "react"
 import { motion, useInView } from "framer-motion"
 import { Code } from "lucide-react"
 

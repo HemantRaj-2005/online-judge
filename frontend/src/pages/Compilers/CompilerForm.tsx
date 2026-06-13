@@ -133,7 +133,7 @@ export const BasicCompiler = ({
 
     return (
       <Alert
-        variant={accepted ? "success" : "error"}
+        variant={accepted ? "default" : "destructive"}
         className="mt-4 p-5 rounded-lg"
       >
         <div className="flex items-center gap-2 mb-4">

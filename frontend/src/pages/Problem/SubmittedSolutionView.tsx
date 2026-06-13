@@ -12,7 +12,6 @@ import {
 import { aiService } from "@/services/aiServices";
 import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
-import { Textarea } from "@/components/ui/textarea";
 
 export default function SubmittedSolutionView() {
   const { submissionId } = useParams<{ submissionId: string }>();
@@ -26,7 +25,6 @@ export default function SubmittedSolutionView() {
   const [aiError, setAiError] = useState<string | null>(null);
   const { user } = useAppSelector((state) => state.auth);
 
-  const username = user?.username || "Guest";
   const accessToken = user?.accessToken || "";
 
   useEffect(() => {

@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { submissionService, type Submission } from '@/services/submissionService';
-import { useAppSelector } from '@/redux/hook';
 import {
   Table,
   TableBody,
@@ -36,7 +35,7 @@ export default function SubmissionHistory({ problemSlug, username }: SubmissionH
           setLoading(false);
           return;
         }
-        const response = await submissionService.getUserSubmissionsByUsername(problemSlug, username);
+        const response = await submissionService.getUserSubmissionsByUsername(problemSlug, username) as Submission[];
         setSubmissions(response);
         setError(null);
       } catch (err) {
@@ -163,14 +162,13 @@ function formatLanguage(language: string): string {
 function getStatusVariant(status: string) {
   switch (status) {
     case 'accepted':
-      return 'success';
+      return 'default';
     case 'wrong_answer':
     case 'compilation_error':
     case 'runtime_error':
-      return 'destructive';
     case 'time_limit_exceeded':
     case 'memory_limit_exceeded':
-      return 'warning';
+      return 'destructive';
     case 'pending':
     case 'running':
       return 'secondary';

@@ -154,14 +154,14 @@ class AIAnalysisService:
         Title: {title}
         Description:
         {description}
-
+ 
         Provide a structured response in raw JSON format with the following keys EXACTLY:
         - sample: list of objects with "input" (string), "output" (string), "explanation" (string)
         - edge: list of objects with "input" (string), "output" (string), "explanation" (string)
         - corner: list of objects with "input" (string), "output" (string), "explanation" (string)
         - stress: list of objects with "input" (string), "output" (string), "explanation" (string)
         - random: list of objects with "input" (string), "output" (string), "explanation" (string)
-
+ 
         For each category, generate 1 to 3 relevant test cases.
         Respond with ONLY the raw JSON object, no markdown or additional text.
         """
@@ -176,4 +176,44 @@ class AIAnalysisService:
                 "stress": [],
                 "random": [],
                 "error": str(e)
+            }
+
+    def analyze_code(self, code: str, language: str) -> Dict[str, Any]:
+        """Analyze the given code and return structural code quality, complexity and optimizations suggestions."""
+        prompt = f"""
+        Analyze this code thoroughly and return ONLY pure JSON with this structure:
+        {{
+          "language": "{language}",
+          "timeComplexity": "Big O notation (e.g., O(N) or O(N log N)) with brief explanation",
+          "spaceComplexity": "Big O notation with brief explanation",
+          "syntaxErrors": "Detailed explanation of any syntax errors, or 'None detected' if there are no syntax errors",
+          "codeQuality": {{
+            "maintainability": "Rate it (e.g., Good/Moderate/Poor) and explain why",
+            "readability": "Rate it and explain why",
+            "style": "Comment on code style / structure compliance"
+          }},
+          "optimizations": [
+            "Optimization suggestion 1",
+            "Optimization suggestion 2"
+          ]
+        }}
+
+        Code:
+        {code}
+        """
+        try:
+            response = self.model.generate_content(prompt)
+            return self._clean_and_parse_response(response.text)
+        except Exception as e:
+            return {
+                "language": language,
+                "timeComplexity": "N/A",
+                "spaceComplexity": "N/A",
+                "syntaxErrors": f"Error during analysis: {str(e)}",
+                "codeQuality": {
+                    "maintainability": "N/A",
+                    "readability": "N/A",
+                    "style": "N/A"
+                },
+                "optimizations": []
             }

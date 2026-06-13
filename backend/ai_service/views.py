@@ -93,3 +93,17 @@ def get_hint(request):
 
     return Response(result)
 
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def analyze_code_view(request):
+    """Analyze custom code snippet input directly by the user"""
+    code = request.data.get('code')
+    language = request.data.get('language', 'python')
+    if not code:
+        return Response({'error': 'Code is required'}, status=status.HTTP_400_BAD_REQUEST)
+
+    service = AIAnalysisService()
+    result = service.analyze_code(code, language)
+    return Response(result)
+

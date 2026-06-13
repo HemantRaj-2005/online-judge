@@ -104,7 +104,7 @@ export default function EachProblemPage() {
       };
 
       // Handle response.data or response directly
-      const data = response.data || response;
+      const data = (response as any).data || response;
       console.log("Processed data:", JSON.stringify(data, null, 2));
 
       const formattedResponse = formatResponseAsMarkdown(data);
@@ -336,13 +336,4 @@ export default function EachProblemPage() {
   );
 }
 
-function formatDifficulty(difficulty: string) {
-  const map: Record<string, string> = {
-    veryeasy: "Very Easy",
-    easy: "Easy",
-    medium: "Medium",
-    hard: "Hard",
-    veryhard: "Very Hard",
-  };
-  return map[difficulty] || difficulty;
-}
+

@@ -28,4 +28,11 @@ export const aiService = {
       { problem_id, code, language, problem_description: problemDescription },
       token
     ),
+
+  analyzeCode: (code: string, language: string, token?: string) =>
+    api.post(
+      "/api/ai/analyze-code/",
+      { code, language },
+      token
+    ),
 };
