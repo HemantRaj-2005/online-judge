@@ -10,8 +10,6 @@ export default function AuthorProtectedRoute({children} : { children: React.Reac
     useEffect(() => {
         if(!user){
             navigate("/sign-in");
-        }else if(!user.isVerified){
-            navigate("/resend-verification");
         } else if(!user.isAuthor){
             navigate("/")
         }

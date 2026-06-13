@@ -13,10 +13,11 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 from pathlib import Path
 from datetime import timedelta
 import os
-
+from dotenv import load_dotenv
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+load_dotenv(os.path.join(BASE_DIR, '.env'))
 
 # Media files (test cases, etc.)
 MEDIA_URL = '/media/'
@@ -31,10 +32,10 @@ FILE_UPLOAD_DIRECTORY_PERMISSIONS = 0o755
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-7^60*rzu9jq0h6aplt86ad2)g8+rkzo@^f!@c^r&d*$b3=3)ds'
+SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-7^60*rzu9jq0h6aplt86ad2)g8+rkzo@^f!@c^r&d*$b3=3)ds')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.getenv('DEBUG', 'True').lower() == 'true'
 
 ALLOWED_HOSTS = ['13.51.109.195', 'localhost', '127.0.0.1',"tapascode.me", "www.tapascode.me"]
 CSRF_TRUSTED_ORIGINS = ["https://tapascode.me", "https://www.tapascode.me"]
@@ -68,7 +69,6 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'users.middleware.VerificationMiddleware',
 ]
 
 ROOT_URLCONF = 'backend.urls'
@@ -96,8 +96,15 @@ WSGI_APPLICATION = 'backend.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': os.getenv('DB_NAME', 'online_judge'),
+        'USER': os.getenv('DB_USER', 'postgres'),
+        'PASSWORD': os.getenv('DB_PASSWORD', 'postgres'),
+        'HOST': os.getenv('DB_HOST', 'localhost'),
+        'PORT': os.getenv('DB_PORT', '5432'),
+        'OPTIONS': {
+            'sslmode': os.getenv('DB_SSLMODE', 'require') if os.getenv('DB_HOST') else 'prefer',
+        }
     }
 }
 

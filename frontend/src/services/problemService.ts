@@ -82,4 +82,20 @@ export const problemService = {
         });
         return handleResponse<Problem>(response);
     },
+
+    // Generate AI testcases
+    async generateTestCases(title: string, description: string, token?: string): Promise<{
+        sample: {input: string, output: string, explanation: string}[],
+        edge: {input: string, output: string, explanation: string}[],
+        corner: {input: string, output: string, explanation: string}[],
+        stress: {input: string, output: string, explanation: string}[],
+        random: {input: string, output: string, explanation: string}[]
+    }> {
+        const response = await fetch(`${API_URL}/api/problems/generate-testcases/`, {
+            method: 'POST',
+            headers: getHeaders(token),
+            body: JSON.stringify({ title, description }),
+        });
+        return handleResponse(response);
+    },
 };

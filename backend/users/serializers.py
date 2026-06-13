@@ -36,8 +36,8 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
             is_author=validated_data.get('is_author', False)
         )
         user.set_password(validated_data['password'])
-        user.is_verified = False
-        user.is_active = True  # User is inactive until verified
+        user.is_verified = True
+        user.is_active = True
         user.save()
         return user
 

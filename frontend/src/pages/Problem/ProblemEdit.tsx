@@ -21,6 +21,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
 import ReactMarkdown from "react-markdown";
+import { Copy, Sparkles, Check, Loader2 } from "lucide-react";
 
 const difficulties = [
   { value: 'veryeasy', label: 'Very Easy' },
@@ -45,6 +46,34 @@ export default function ProblemEdit() {
   });
   const [allTopics, setAllTopics] = useState<Topic[]>([]);
   const [loading, setLoading] = useState(false);
+  const [genLoading, setGenLoading] = useState(false);
+  const [generatedCases, setGeneratedCases] = useState<any>(null);
+  const [copiedId, setCopiedId] = useState<string | null>(null);
+
+  const handleGenerateTestCases = async () => {
+    if (!form.title.trim() || !form.description.trim()) {
+      toast.error("Title and Description are required to generate test cases.");
+      return;
+    }
+    setGenLoading(true);
+    setGeneratedCases(null);
+    try {
+      const res = await problemService.generateTestCases(form.title, form.description, user?.accessToken);
+      setGeneratedCases(res);
+      toast.success("AI Test cases generated successfully!");
+    } catch (err: any) {
+      toast.error(err.message || "Failed to generate test cases");
+    } finally {
+      setGenLoading(false);
+    }
+  };
+
+  const copyToClipboard = (text: string, id: string) => {
+    navigator.clipboard.writeText(text);
+    setCopiedId(id);
+    toast.success("Copied to clipboard!");
+    setTimeout(() => setCopiedId(null), 2000);
+  };
 
   useEffect(() => {
     topicService.getAllTopics(user?.accessToken || "").then(setAllTopics).catch(() => setAllTopics([]));
@@ -247,6 +276,110 @@ export default function ProblemEdit() {
               <div className="text-sm text-muted-foreground mt-2">
                 Supports Markdown with LaTeX math expressions (e.g., $E=mc^2$)
               </div>
+            </div>
+
+            {/* AI Test Case Generator */}
+            <div className="border rounded-md p-4 bg-gray-50/50 dark:bg-gray-900/50 space-y-4">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div className="space-y-1">
+                  <h4 className="text-lg font-semibold flex items-center gap-2">
+                    <Sparkles className="h-5 w-5 text-green-500 animate-pulse" />
+                    AI Test Case Generator
+                  </h4>
+                  <p className="text-sm text-muted-foreground">
+                    Automatically generate sample, edge, corner, stress, and randomized test cases for this problem statement.
+                  </p>
+                </div>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={handleGenerateTestCases}
+                  disabled={genLoading}
+                  className="gap-2 shrink-0 self-start sm:self-center"
+                >
+                  {genLoading ? (
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      Generating...
+                    </>
+                  ) : (
+                    <>
+                      <Sparkles className="h-4 w-4 text-green-500" />
+                      Generate Test Cases
+                    </>
+                  )}
+                </Button>
+              </div>
+
+              {generatedCases && (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                  {Object.entries(generatedCases).map(([category, cases]: [string, any]) => {
+                    if (category === "error" || !Array.isArray(cases) || cases.length === 0) return null;
+                    return (
+                      <Card key={category} className="shadow-sm border border-gray-200 dark:border-gray-800">
+                        <CardHeader className="p-3 bg-gray-100/50 dark:bg-gray-950/50 border-b">
+                          <CardTitle className="text-sm font-semibold capitalize flex items-center justify-between">
+                            <span>{category} Cases</span>
+                            <span className="text-xs bg-green-100 dark:bg-green-950 text-green-700 dark:text-green-300 px-2 py-0.5 rounded-full">
+                              {cases.length} Generated
+                            </span>
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent className="p-3 space-y-3 max-h-[250px] overflow-y-auto">
+                          {cases.map((c: any, index: number) => {
+                            const caseId = `${category}-${index}`;
+                            return (
+                              <div key={index} className="space-y-2 border-b last:border-0 pb-2 last:pb-0">
+                                {c.explanation && (
+                                  <div className="text-xs text-muted-foreground italic">
+                                    Why: {c.explanation}
+                                  </div>
+                                )}
+                                <div className="grid grid-cols-2 gap-2 text-xs">
+                                  <div className="space-y-1">
+                                    <span className="text-muted-foreground font-medium block">Input:</span>
+                                    <div className="relative group">
+                                      <pre className="bg-gray-100 dark:bg-gray-950 p-2 rounded text-[11px] font-mono whitespace-pre-wrap select-all max-h-[80px] overflow-y-auto">
+                                        {c.input}
+                                      </pre>
+                                      <Button
+                                        type="button"
+                                        size="icon"
+                                        variant="ghost"
+                                        onClick={() => copyToClipboard(c.input, `${caseId}-in`)}
+                                        className="absolute top-1 right-1 h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity"
+                                      >
+                                        {copiedId === `${caseId}-in` ? <Check className="h-3 w-3 text-green-500" /> : <Copy className="h-3 w-3" />}
+                                      </Button>
+                                    </div>
+                                  </div>
+                                  <div className="space-y-1">
+                                    <span className="text-muted-foreground font-medium block">Output:</span>
+                                    <div className="relative group">
+                                      <pre className="bg-gray-100 dark:bg-gray-950 p-2 rounded text-[11px] font-mono whitespace-pre-wrap select-all max-h-[80px] overflow-y-auto">
+                                        {c.output}
+                                      </pre>
+                                      <Button
+                                        type="button"
+                                        size="icon"
+                                        variant="ghost"
+                                        onClick={() => copyToClipboard(c.output, `${caseId}-out`)}
+                                        className="absolute top-1 right-1 h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity"
+                                      >
+                                        {copiedId === `${caseId}-out` ? <Check className="h-3 w-3 text-green-500" /> : <Copy className="h-3 w-3" />}
+                                      </Button>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </CardContent>
+                      </Card>
+                    );
+                  })}
+                </div>
+              )}
             </div>
 
             {/* Form Actions */}

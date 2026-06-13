@@ -12,8 +12,9 @@ async function fetcher<T>(endpoint: string, options: RequestOptions = {}): Promi
         ...options.headers
     });
 
-    if (options.token) {
-        headers.append('Authorization', `Bearer ${options.token}`);
+    const token = options.token || localStorage.getItem('authToken');
+    if (token) {
+        headers.append('Authorization', `Bearer ${token}`);
     }
 
     let response = await fetch(`${API_URL}${endpoint}`, {

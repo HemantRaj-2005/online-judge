@@ -78,20 +78,102 @@ class AIAnalysisService:
     def provide_hint(self, problem_statement: str, user_code: str, language: str) -> Dict[str, Any]:
         """Provide hints for the given problem and user code."""
         prompt = f"""
-        Provide hints for this code:
-        Language: {language}
-        Problem: {problem_statement}
-        Code: {user_code}
-
-        Provide response as pure JSON with these keys:
-        - positive_feedback: What's done correctly
-        - missing_elements: What's missing
-        - next_steps: Suggested deatiled next steps
-        - pitfalls: Common mistakes to avoid
+        Provide progressive hints for this programming problem and user's draft code.
         
-        Respond with only the JSON object, no markdown or additional text.
+        Problem Description:
+        {problem_statement}
+        
+        User's Draft Code (Language: {language}):
+        {user_code}
+
+        Return a JSON object matching this structure EXACTLY. Never reveal the complete solution or full code.
+        
+        Expected JSON format:
+        {{
+          "hint": "Observation or main hint to guide the user towards the solution.",
+          "approach": [
+            "Step 1 approach insight",
+            "Step 2 approach insight"
+          ],
+          "derivation": [
+            {{
+              "step": 1,
+              "content": "Explanation of the first step of derivation."
+            }},
+            {{
+              "step": 2,
+              "content": "Explanation of the second step of derivation."
+            }}
+          ],
+          "complexity": {{
+            "time": "Expected Time Complexity (e.g. O(n))",
+            "space": "Expected Space Complexity (e.g. O(n))"
+          }}
+        }}
+        
+        Respond with ONLY the raw JSON object, no markdown block formatting, no ```json formatting, and no additional text.
         """
         response = self.model.generate_content(prompt)
         output = self._clean_and_parse_response(response.text)
-        # print(output)
         return output
+
+    def generate_error_report(self, raw_logs: str, language: str, is_compile: bool) -> Dict[str, Any]:
+        """Analyze compiler or runtime logs and return a user-friendly structured error report."""
+        error_type = "Compilation Error" if is_compile else "Runtime Error"
+        prompt = f"""
+        Analyze this {error_type} message from code execution on an online judge:
+        Language: {language}
+        Raw Logs:
+        {raw_logs}
+
+        Provide a structured response in raw JSON format with the following keys:
+        - type: The error type ("Compilation Error" or "Runtime Error")
+        - language: "{language}" (or specific sub-variant if compilation error)
+        - message: A clean, human-readable summary of what the error means
+        - line: The line number where the error occurred (as an integer, or null if not found)
+        - suggestion: An actionable, helpful tip or checklist to fix this specific issue
+
+        Respond with ONLY the raw JSON object, no markdown or additional text.
+        """
+        try:
+            response = self.model.generate_content(prompt)
+            return self._clean_and_parse_response(response.text)
+        except Exception as e:
+            return {
+                "type": error_type,
+                "language": language,
+                "message": raw_logs,
+                "line": None,
+                "suggestion": "Review your code syntax and logic."
+            }
+
+    def generate_test_cases(self, title: str, description: str) -> Dict[str, Any]:
+        """Generate test cases for a given problem statement using Gemini."""
+        prompt = f"""
+        Generate test cases for this programming problem:
+        Title: {title}
+        Description:
+        {description}
+
+        Provide a structured response in raw JSON format with the following keys EXACTLY:
+        - sample: list of objects with "input" (string), "output" (string), "explanation" (string)
+        - edge: list of objects with "input" (string), "output" (string), "explanation" (string)
+        - corner: list of objects with "input" (string), "output" (string), "explanation" (string)
+        - stress: list of objects with "input" (string), "output" (string), "explanation" (string)
+        - random: list of objects with "input" (string), "output" (string), "explanation" (string)
+
+        For each category, generate 1 to 3 relevant test cases.
+        Respond with ONLY the raw JSON object, no markdown or additional text.
+        """
+        try:
+            response = self.model.generate_content(prompt)
+            return self._clean_and_parse_response(response.text)
+        except Exception as e:
+            return {
+                "sample": [],
+                "edge": [],
+                "corner": [],
+                "stress": [],
+                "random": [],
+                "error": str(e)
+            }

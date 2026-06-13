@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { toast, Toaster } from "sonner";
+import { useAppDispatch } from "@/redux/hook";
+import { setUser } from "@/redux/user/authSlice";
 import { authService } from "@/services/auth";
 import { motion, useScroll, useTransform } from "framer-motion";
 import {
@@ -41,6 +43,7 @@ export default function SignUp() {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const dispatch = useAppDispatch();
   const { scrollY } = useScroll();
   const parallaxY1 = useTransform(scrollY, [0, 500], [0, -50]);
   const parallaxY2 = useTransform(scrollY, [0, 500], [0, 50]);
@@ -75,11 +78,23 @@ export default function SignUp() {
 
     setLoading(true);
     try {
-      const response = await authService.register(formData);
+      const res = await authService.register(formData);
+      localStorage.setItem('authToken', res.access_token);
+      localStorage.setItem('refresh_token', res.refresh_token);
+      
+      dispatch(
+        setUser({
+          username: res.username,
+          email: res.email,
+          isVerified: res.is_verified,
+          isAuthor: res.is_author,
+          accessToken: res.access_token,
+        })
+      );
       toast.success("Registration Successful", {
-        description: response.message || "Check your email for verification.",
+        description: "Welcome! You have been logged in.",
       });
-      setTimeout(() => navigate("/sign-in"), 2000);
+      setTimeout(() => navigate("/"), 1500);
     } catch (err: any) {
       let errorText = "Failed to register. Try again.";
 

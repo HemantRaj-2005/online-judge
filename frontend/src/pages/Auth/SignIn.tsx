@@ -72,24 +72,9 @@ export default function SignIn() {
         })
       );
 
-      if (!res.is_verified) {
-        toast.warning("Email not verified", {
-          description: "Redirecting to verification page...",
-        });
-        navigate("/resend-verification", { state: { email: res.email } });
-      } else {
-        toast.success("Login successful", { description: "Welcome back!" });
-        navigate("/");
-      }
+      toast.success("Login successful", { description: "Welcome back!" });
+      navigate("/");
     } catch (err: any) {
-      if (err.isVerified === false) {
-        toast.warning("Email not verified", {
-          description: "Redirecting to verification page...",
-        });
-        navigate("/resend-verification", { state: { email: err.email } });
-        return;
-      }
-      
       toast.error("Login Failed", {
         description: err.message || "Invalid credentials",
       });

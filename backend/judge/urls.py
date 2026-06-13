@@ -9,7 +9,10 @@ urlpatterns = [
     path('problems/<slug:slug>/submit/', views.SubmitToProblemView.as_view(), name='problem-submit'),
     path('problems/<slug:slug>/edit/', views.ProblemUpdateView.as_view(), name='problem-edit'),
     path('problems/create/', views.ProblemCreateView.as_view(), name='problem-create'),
+    path('problems/generate-testcases/', views.generate_testcases_view, name='generate-testcases'),
     path('submissions/<int:pk>/', views.SubmissionDetailView.as_view(), name='submission-detail'),
     path('topics/', views.TopicListView.as_view(), name='topic-list'),
     path('users/<str:username>/submissions/', views.UserSubmissionsView.as_view(), name='user-submissions'),
+    path('judge/run/', views.JudgeRunView.as_view(), name='judge-run'),
+    path('judge/submit/', views.JudgeSubmitView.as_view(), name='judge-submit'),
 ]

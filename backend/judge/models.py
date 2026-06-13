@@ -44,7 +44,18 @@ class Problem(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.slug:
-            self.slug = slugify(self.title)
+            base_slug = slugify(self.title)
+        else:
+            base_slug = slugify(self.slug)
+            
+        slug = base_slug
+        counter = 1
+        # Loop until a unique slug is found (excluding current object)
+        while Problem.objects.filter(slug=slug).exclude(pk=self.pk).exists():
+            slug = f"{base_slug}-{counter}"
+            counter += 1
+            
+        self.slug = slug
         super().save(*args, **kwargs)
 
     def __str__(self):

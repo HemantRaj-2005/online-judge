@@ -25,10 +25,18 @@ export const authService = {
         username: string;
         email: string;
         password: string;
-        institute?: string;
+        institution?: string;
         bio?: string;
     }) => {
-        return api.post('/api/users/register/', userData);
+        return api.post<{
+            message: string;
+            is_verified: boolean;
+            is_author: boolean;
+            email: string;
+            access_token: string;
+            refresh_token: string;
+            username: string;
+        }>('/api/users/register/', userData);
     },
 
     verifyEmail: async (uidb64: string, token: string) => {
@@ -58,11 +66,13 @@ export const refreshAccessToken = async () => {
     const data = await response.json();
     localStorage.setItem('authToken', data.access);
 
-    // Update Redux state with new access token
     const currentUser = store.getState().auth.user;
     if (currentUser) {
         store.dispatch(setUser({
-            ...currentUser,
+            username: data.username || currentUser.username,
+            email: data.email || currentUser.email,
+            isVerified: data.is_verified !== undefined ? data.is_verified : currentUser.isVerified,
+            isAuthor: data.is_author !== undefined ? data.is_author : currentUser.isAuthor,
             accessToken: data.access,
         }));
     }

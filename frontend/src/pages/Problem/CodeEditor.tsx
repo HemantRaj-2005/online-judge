@@ -87,14 +87,17 @@ export default function CodeEditor({
   const [submissionStatus, setSubmissionStatus] = useState<string | null>(null);
 
   // AI state
+  interface AIHintResponse {
+    hint: string;
+    approach: string[];
+    derivation: { step: number; content: string }[];
+    complexity: { time: string; space: string };
+  }
+
   const [aiLoading, setAiLoading] = useState(false);
   const [aiError, setAiError] = useState<string | null>(null);
-  const [aiResponse, setAiResponse] = useState<{
-    positive_feedback?: string[];
-    missing_elements?: string[];
-    next_steps?: string[];
-    pitfalls?: string[];
-  } | null>(null);
+  const [aiResponse, setAiResponse] = useState<AIHintResponse | null>(null);
+  const [activeHintLevel, setActiveHintLevel] = useState<number>(1);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   // Save settings when they change
@@ -122,33 +125,17 @@ export default function CodeEditor({
         code,
         language,
         token
-      );
+      ) as any;
       console.log("Raw AI Response:", response);
 
-      // Normalize the response (ensure all fields are arrays)
-      const normalizedResponse = {
-        positive_feedback: Array.isArray(response.positive_feedback)
-          ? response.positive_feedback
-          : response.positive_feedback
-          ? [response.positive_feedback]
-          : [],
-        missing_elements: Array.isArray(response.missing_elements)
-          ? response.missing_elements
-          : response.missing_elements
-          ? [response.missing_elements]
-          : [],
-        next_steps: Array.isArray(response.next_steps)
-          ? response.next_steps
-          : response.next_steps
-          ? [response.next_steps]
-          : [],
-        pitfalls: Array.isArray(response.pitfalls)
-          ? response.pitfalls
-          : response.pitfalls
-          ? [response.pitfalls]
-          : [],
+      const normalizedResponse: AIHintResponse = {
+        hint: response.hint || "Try checking your code logic.",
+        approach: Array.isArray(response.approach) ? response.approach : [],
+        derivation: Array.isArray(response.derivation) ? response.derivation : [],
+        complexity: response.complexity || { time: "N/A", space: "N/A" }
       };
       setAiResponse(normalizedResponse);
+      setActiveHintLevel(1);
       setIsDialogOpen(true);
     } catch (err) {
       setAiError("Failed to get hint. Please try again.");
@@ -334,7 +321,7 @@ export default function CodeEditor({
                 </DialogDescription>
               </DialogHeader>
               {/* // Replace the dialog content section with this fixed version: */}
-              <div className="space-y-4 max-h-[60vh] overflow-y-auto pr-4">
+              <div className="space-y-4 max-h-[60vh] overflow-y-auto pr-2">
                 {aiLoading && (
                   <div className="flex items-center gap-2 text-muted-foreground">
                     <Loader2 className="h-4 w-4 animate-spin" />
@@ -347,65 +334,94 @@ export default function CodeEditor({
                   </Alert>
                 )}
                 {aiResponse && (
-                  <div className="space-y-4">
-                    {aiResponse.positive_feedback.length > 0 && (
-                      <div className="space-y-2">
-                        <h4 className="font-medium text-green-600 dark:text-green-400">
-                          What's Good:
-                        </h4>
-                        <ul className="list-disc pl-5 space-y-1 text-sm">
-                          {aiResponse.positive_feedback.map((item, index) => (
-                            <li key={index}>{item}</li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
-                    {aiResponse.missing_elements.length > 0 && (
-                      <div className="space-y-2">
-                        <h4 className="font-medium text-yellow-600 dark:text-yellow-400">
-                          What's Missing:
-                        </h4>
-                        <ul className="list-disc pl-5 space-y-1 text-sm">
-                          {aiResponse.missing_elements.map((item, index) => (
-                            <li key={index}>{item}</li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
-                    {aiResponse.next_steps.length > 0 && (
-                      <div className="space-y-2">
-                        <h4 className="font-medium text-blue-600 dark:text-blue-400">
-                          Next Steps:
-                        </h4>
-                        <ul className="list-disc pl-5 space-y-1 text-sm">
-                          {aiResponse.next_steps.map((item, index) => (
-                            <li key={index}>{item}</li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
-                    {aiResponse.pitfalls.length > 0 && (
-                      <div className="space-y-2">
-                        <h4 className="font-medium text-red-600 dark:text-red-400">
-                          Watch Out For:
-                        </h4>
-                        <ul className="list-disc pl-5 space-y-1 text-sm">
-                          {aiResponse.pitfalls.map((item, index) => (
-                            <li key={index}>{item}</li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
-                    {!aiResponse.positive_feedback.length &&
-                      !aiResponse.missing_elements.length &&
-                      !aiResponse.next_steps.length &&
-                      !aiResponse.pitfalls.length && (
-                        <Alert variant="destructive">
-                          <AlertDescription>
-                            No feedback available from AI response.
-                          </AlertDescription>
-                        </Alert>
+                  <div className="space-y-6">
+                    {/* Level Tabs Selection */}
+                    <div className="flex border-b border-gray-200 dark:border-gray-800">
+                      {[1, 2, 3, 4].map((level) => (
+                        <button
+                          key={level}
+                          className={`flex-1 py-2 text-center text-sm font-medium border-b-2 transition-colors ${
+                            activeHintLevel === level
+                              ? "border-green-500 text-green-600 dark:text-green-400"
+                              : "border-transparent text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
+                          }`}
+                          onClick={() => setActiveHintLevel(level)}
+                        >
+                          Level {level}
+                          <span className="block text-xs font-normal text-gray-400">
+                            {level === 1 && "Observation"}
+                            {level === 2 && "Approach"}
+                            {level === 3 && "Derivation"}
+                            {level === 4 && "Complexity"}
+                          </span>
+                        </button>
+                      ))}
+                    </div>
+
+                    {/* Progressive Hint Content */}
+                    <div className="mt-4 space-y-4 min-h-[150px]">
+                      {activeHintLevel >= 1 && (
+                        <div className="p-4 bg-gray-50 dark:bg-gray-900 rounded-lg border">
+                          <h4 className="font-semibold text-gray-800 dark:text-gray-200 mb-2">Level 1: Observation</h4>
+                          <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
+                            {aiResponse.hint}
+                          </p>
+                        </div>
                       )}
+
+                      {activeHintLevel >= 2 && (
+                        <div className="p-4 bg-gray-50 dark:bg-gray-900 rounded-lg border transition-opacity">
+                          <h4 className="font-semibold text-gray-800 dark:text-gray-200 mb-2">Level 2: Strategic Approach</h4>
+                          {aiResponse.approach && aiResponse.approach.length > 0 ? (
+                            <ul className="list-disc pl-5 space-y-1 text-sm text-gray-600 dark:text-gray-400">
+                              {aiResponse.approach.map((item, idx) => (
+                                <li key={idx}>{item}</li>
+                              ))}
+                            </ul>
+                          ) : (
+                            <p className="text-sm text-muted-foreground">No approach details provided.</p>
+                          )}
+                        </div>
+                      )}
+
+                      {activeHintLevel >= 3 && (
+                        <div className="p-4 bg-gray-50 dark:bg-gray-900 rounded-lg border transition-opacity">
+                          <h4 className="font-semibold text-gray-800 dark:text-gray-200 mb-2">Level 3: Step-by-Step Derivation</h4>
+                          {aiResponse.derivation && aiResponse.derivation.length > 0 ? (
+                            <div className="space-y-3">
+                              {aiResponse.derivation.map((item, idx) => (
+                                <div key={idx} className="flex items-start gap-2 text-sm text-gray-600 dark:text-gray-400">
+                                  <span className="font-medium text-green-600 dark:text-green-400 min-w-[50px]">Step {item.step || idx + 1}:</span>
+                                  <span className="flex-1">{item.content}</span>
+                                </div>
+                              ))}
+                            </div>
+                          ) : (
+                            <p className="text-sm text-muted-foreground">No derivation steps provided.</p>
+                          )}
+                        </div>
+                      )}
+
+                      {activeHintLevel >= 4 && (
+                        <div className="p-4 bg-gray-50 dark:bg-gray-900 rounded-lg border transition-opacity">
+                          <h4 className="font-semibold text-gray-800 dark:text-gray-200 mb-2">Level 4: Complexity Analysis</h4>
+                          <div className="grid grid-cols-2 gap-4 text-sm">
+                            <div className="p-3 bg-white dark:bg-black rounded border">
+                              <span className="text-xs text-muted-foreground block">Time Complexity</span>
+                              <span className="font-mono font-bold text-green-600 dark:text-green-400 text-base">{aiResponse.complexity?.time || "O(?)"}</span>
+                            </div>
+                            <div className="p-3 bg-white dark:bg-black rounded border">
+                              <span className="text-xs text-muted-foreground block">Space Complexity</span>
+                              <span className="font-mono font-bold text-green-600 dark:text-green-400 text-base">{aiResponse.complexity?.space || "O(?)"}</span>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="text-xs text-muted-foreground italic border-t pt-3">
+                      Disclaimer: AI-generated hints may occasionally be inaccurate or incomplete. Always verify the suggested approach before using it in your final solution.
+                    </div>
                   </div>
                 )}
               </div>

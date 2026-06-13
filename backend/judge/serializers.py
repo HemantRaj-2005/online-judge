@@ -57,7 +57,7 @@ class TestCaseSerializer(serializers.ModelSerializer):
     class Meta:
         model = TestCase
         fields = [
-            'id', 'problem', 'input_file', 'output_file',
+            'id', 'problem', 'name', 'input_text', 'output_text',
             'is_sample', 'is_hidden', 'explanation'
         ]
         

@@ -12,6 +12,7 @@ from django.utils.encoding import force_bytes, force_str
 from .utils import send_verification_email
 from django.contrib.auth import logout
 from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework_simplejwt.views import TokenRefreshView
 # Create your views here.
 
 
@@ -24,11 +25,15 @@ class RegisterAPIView(APIView):
         serializer = UserRegistrationSerializer(data=request.data)
         if serializer.is_valid():
             user = serializer.save()
-            send_verification_email(user,request)
+            refresh = RefreshToken.for_user(user)
             return Response({
-                "message": "Check email for verification link.",
-                "user_id": user.id,
-                "email": user.email
+                "message": "Registration successful.",
+                "is_verified": user.is_verified,
+                "is_author": user.is_author,
+                "email": user.email,
+                "username": user.username,
+                "access_token": str(refresh.access_token),
+                "refresh_token": str(refresh),
             }, status=201)
         return Response(serializer.errors, status=400)
     
@@ -117,4 +122,31 @@ class ResendVerificationView(APIView):
             send_verification_email(user, request)
             return Response({"message":"Verification Email Send"})
         return Response({"message": "User already verified"}, status=400)
+
+
+class CustomTokenRefreshView(TokenRefreshView):
+    def post(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        try:
+            serializer.is_valid(raise_exception=True)
+        except Exception as e:
+            return Response({"detail": str(e)}, status=400)
+            
+        refresh_token_str = request.data.get('refresh')
+        try:
+            refresh_token = RefreshToken(refresh_token_str)
+            user_id = refresh_token['user_id']
+            user = CustomUser.objects.get(id=user_id)
+            user_data = {
+                "username": user.username,
+                "email": user.email,
+                "is_author": user.is_author,
+                "is_verified": user.is_verified,
+            }
+        except Exception:
+            user_data = {}
+
+        res_data = serializer.validated_data
+        res_data.update(user_data)
+        return Response(res_data, status=200)
     

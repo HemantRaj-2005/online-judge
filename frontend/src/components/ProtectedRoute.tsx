@@ -10,8 +10,6 @@ export default function ProtectedRoute({children} : { children: React.ReactNode}
     useEffect(() => {
         if(!user){
             navigate("/sign-in");
-        }else if(!user.isVerified){
-            navigate("/resend-verification");
         }
     }, [user,navigate]);
 

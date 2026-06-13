@@ -6,10 +6,14 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, IsAdminUser, BasePermission, AllowAny
 from .models import Problem, Submission
 from .serializers import ProblemSerializer, SubmissionCreateSerializer, SubmissionSerializer
-from .simple_executor import SimpleExecutor
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
 from django.contrib.auth import get_user_model
+import tempfile
+import json
+from pathlib import Path
+from .runner import SubmissionRunner
+from .execution_provider import SubprocessExecutionProvider
 
 
 
@@ -102,9 +106,8 @@ class SubmitToProblemView(generics.CreateAPIView):
 
     def _execute_submission(self, submission_id):
         # Synchronous execution for reliability in dev/debug
-        submission = Submission.objects.get(id=submission_id)
-        executor = SimpleExecutor()
-        executor.execute_submission(submission)
+        runner = SubmissionRunner()
+        runner.run_submission_sync(submission_id)
 
 class SubmissionDetailView(generics.RetrieveAPIView):
     permission_classes = [AllowAny]
@@ -160,3 +163,121 @@ class UserSubmissionsView(generics.ListAPIView):
         queryset = self.get_queryset()
         serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data)
+
+
+from rest_framework.decorators import api_view, permission_classes
+from ai_service.services import AIAnalysisService
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def generate_testcases_view(request):
+    title = request.data.get('title')
+    description = request.data.get('description')
+    if not title or not description:
+        return Response({"error": "Title and description are required."}, status=status.HTTP_400_BAD_REQUEST)
+    
+    service = AIAnalysisService()
+    testcases = service.generate_test_cases(title, description)
+    return Response(testcases, status=200)
+
+
+class JudgeRunView(APIView):
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        code = request.data.get('code')
+        language = request.data.get('language')
+        input_text = request.data.get('input_text', '')
+
+        if not code or not language:
+            return Response(
+                {"error": "Code and language are required."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        provider = SubprocessExecutionProvider()
+        with tempfile.TemporaryDirectory() as temp_dir:
+            temp_path = Path(temp_dir)
+            comp_res = provider.compile(code, language, temp_path)
+            if not comp_res["success"]:
+                return Response({
+                    "status": "CE",
+                    "stdout": "",
+                    "stderr": comp_res.get("error_message", ""),
+                    "time_taken": 0,
+                    "memory_used": 0
+                }, status=status.HTTP_200_OK)
+
+            run_cmd = comp_res["run_cmd"]
+            # Default limits for custom run: 2000ms, 256MB, 1MB output
+            exec_res = provider.execute(
+                run_cmd=run_cmd,
+                input_text=input_text,
+                time_limit_ms=2000,
+                memory_limit_mb=256,
+                output_limit_bytes=1024 * 1024,
+                temp_dir=temp_path
+            )
+
+            return Response({
+                "status": exec_res["status"],
+                "stdout": exec_res.get("stdout", ""),
+                "stderr": exec_res.get("stderr", ""),
+                "time_taken": exec_res.get("time_taken", 0),
+                "memory_used": exec_res.get("memory_used", 0)
+            }, status=status.HTTP_200_OK)
+
+
+class JudgeSubmitView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        user = request.user
+        slug = request.data.get('problem_slug')
+        code = request.data.get('code')
+        language = request.data.get('language')
+
+        if not slug or not code or not language:
+            return Response(
+                {"error": "problem_slug, code, and language are required."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        try:
+            problem = Problem.objects.get(slug=slug)
+        except Problem.DoesNotExist:
+            return Response(
+                {"error": "Problem not found."},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        # Create the submission in pending state
+        submission = Submission.objects.create(
+            user=user,
+            problem=problem,
+            code=code,
+            language=language,
+            status='pending'
+        )
+
+        # Trigger execution (synchronous or async depending on query param or setting)
+        # We default to running in background thread to avoid HTTP timeout, but let user request sync
+        run_async = request.query_params.get('async', 'true').lower() == 'true'
+        runner = SubmissionRunner()
+        if run_async:
+            runner.run_submission_async(submission.id)
+            return Response({
+                "submission_id": submission.id,
+                "status": "pending",
+                "message": "Submission received and is executing in the background."
+            }, status=status.HTTP_201_CREATED)
+        else:
+            runner.run_submission_sync(submission.id)
+            submission.refresh_from_db()
+            return Response({
+                "submission_id": submission.id,
+                "status": submission.status,
+                "output": submission.output,
+                "time_taken": submission.time_taken,
+                "memory_used": submission.memory_used
+            }, status=status.HTTP_201_CREATED)
