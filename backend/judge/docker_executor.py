@@ -243,7 +243,7 @@ class DockerExecutor:
 
     def _get_compile_command(self, language, file_name):
         if language == 'cpp':
-            return f"g++ /code/{file_name} -o /code/submission"
+            return f"g++ -O0 -std=c++17 /code/{file_name} -o /code/submission"
         elif language == 'java':
             return f"javac /code/{file_name}"
         return None

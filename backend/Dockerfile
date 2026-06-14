@@ -18,6 +18,9 @@ RUN apt-get update && apt-get install -y \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
+# Precompile stdc++.h to speed up C++ compilations and reduce memory usage on Render
+RUN find /usr/include/c++/ -name "stdc++.h" -exec g++ -O0 -std=c++17 -x c++-header {} \;
+
 # Upgrade pip
 RUN pip install --upgrade pip
 

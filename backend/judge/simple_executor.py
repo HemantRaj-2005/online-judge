@@ -58,10 +58,10 @@ class SimpleExecutor:
                 
                 output_file = temp_dir / 'submission'
                 compile_result = subprocess.run(
-                    ['g++', str(file_path), '-o', str(output_file)],
+                    ['g++', '-O0', '-std=c++17', str(file_path), '-o', str(output_file)],
                     capture_output=True,
                     text=True,
-                    timeout=10
+                    timeout=15
                 )
                 
                 if compile_result.returncode != 0:

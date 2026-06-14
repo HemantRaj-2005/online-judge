@@ -14,7 +14,7 @@ except ImportError:
     resource = None
 
 # --- Compilation functions ---
-def compile_code_with_timeout(language, code, user_input, temp_dir, timeout=5):
+def compile_code_with_timeout(language, code, user_input, temp_dir, timeout=15):
     """Compile and run code with timeout and (Linux/Mac) resource limits."""
     # Check binary availability
     if language == 'cpp':
@@ -48,7 +48,7 @@ def compile_code_with_timeout(language, code, user_input, temp_dir, timeout=5):
     except Exception as e:
         raise Exception(str(e))
 
-def compile_cpp(code, user_input, temp_dir, timeout=5):
+def compile_cpp(code, user_input, temp_dir, timeout=15):
     src_path = os.path.join(temp_dir, 'main.cpp')
     exe_path = os.path.join(temp_dir, 'main')
 
@@ -58,7 +58,7 @@ def compile_cpp(code, user_input, temp_dir, timeout=5):
     # Compile
     try:
         subprocess.run(
-            ['g++', src_path, '-o', exe_path],
+            ['g++', '-O0', '-std=c++17', src_path, '-o', exe_path],
             cwd=temp_dir,
             stderr=subprocess.PIPE,
             stdout=subprocess.PIPE,
@@ -92,7 +92,7 @@ def compile_cpp(code, user_input, temp_dir, timeout=5):
         error_msg = e.stderr.decode('utf-8') if e.stderr else str(e)
         raise Exception(error_msg)
 
-def compile_java(code, user_input, temp_dir, timeout=5):
+def compile_java(code, user_input, temp_dir, timeout=15):
     class_name = "Main"
     src_path = os.path.join(temp_dir, f"{class_name}.java")
 
@@ -142,7 +142,7 @@ def compile_java(code, user_input, temp_dir, timeout=5):
         error_msg = e.stderr.decode('utf-8') if e.stderr else str(e)
         raise Exception(error_msg)
 
-def compile_python(code, user_input, temp_dir, timeout=5):
+def compile_python(code, user_input, temp_dir, timeout=15):
     src_path = os.path.join(temp_dir, 'main.py')
 
     with open(src_path, 'w') as f:

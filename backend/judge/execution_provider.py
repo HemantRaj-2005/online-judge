@@ -31,7 +31,7 @@ class SubprocessExecutionProvider(ExecutionProvider):
             },
             'cpp': {
                 'file_name': 'submission.cpp',
-                'compile_cmd': lambda path, f: ['g++', '-O2', '-std=c++20', str(path / f), '-o', str(path / 'submission')],
+                'compile_cmd': lambda path, f: ['g++', '-O0', '-std=c++17', str(path / f), '-o', str(path / 'submission')],
                 'run_cmd': lambda path, f: [str(path / 'submission')],
             },
             'java': {
